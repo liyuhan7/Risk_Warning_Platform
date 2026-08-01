@@ -159,6 +159,9 @@ public class ReportServiceImpl implements ReportService {
             if (risk.getStatus() != null) {
                 riskVO.setStatus(risk.getStatus().name());
             }
+            if (riskVO.getProcessingStatus() == null || riskVO.getProcessingStatus().isEmpty()) {
+                riskVO.setProcessingStatus("成功");
+            }
             riskVOList.add(riskVO);
         }
         return riskVOList;

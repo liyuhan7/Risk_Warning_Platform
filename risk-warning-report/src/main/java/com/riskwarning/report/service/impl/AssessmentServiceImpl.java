@@ -75,10 +75,11 @@ public class AssessmentServiceImpl implements AssessmentService {
                 highRiskCount += riskLevelEnum == RiskLevelEnum.HIGH_RISK ? 1 : 0;
                 ir.setRiskTriggered(true);
                 ir.setRiskStatus(IndicatorRiskStatus.EVALUATED);
+                String indicatorName = ir.getIndicatorName();
                 Risk risk = Risk.builder()
                         .projectId(projectId)
                         .assessmentId(assessmentId)
-                        .name("Risk from Indicator " + ir.getIndicatorEsId())
+                        .name("指标风险-" + (indicatorName != null && !indicatorName.isEmpty() ? indicatorName : "未命名指标"))
                         .dimension(ir.getDimension())
                         .description("")
                         .riskLevel(riskLevelEnum)
@@ -86,6 +87,7 @@ public class AssessmentServiceImpl implements AssessmentService {
                         .impact(0.0)
                         .detectability(0.0)
                         .status(RiskStatusEnum.TO_BE_DISPOSED)
+                        .processingStatus("成功")
                         .responsibleParty("")
                         .affectedObjects(new String[]{})
                         .impactScope("")

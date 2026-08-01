@@ -32,6 +32,8 @@ public class RiskVO {
 
     private String status;
 
+    private String processingStatus;
+
     private String responsibleParty;
 
     private String[] affectedObjects;

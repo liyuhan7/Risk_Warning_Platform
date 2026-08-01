@@ -39,6 +39,8 @@ public class Risk {
 
     private RiskStatusEnum status;
 
+    private String processingStatus;
+
     private String responsibleParty;
 
     private String[] affectedObjects;

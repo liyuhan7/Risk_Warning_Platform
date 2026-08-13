@@ -3,4 +3,4 @@ spring:
     active: common
   application:
     name: risk-warning-processing
-
+  

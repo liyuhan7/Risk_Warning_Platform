@@ -19,7 +19,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/test/vectorization")
+@RequestMapping("/test/vectorization")
 @RequiredArgsConstructor
 public class VectorizationTestController {
     

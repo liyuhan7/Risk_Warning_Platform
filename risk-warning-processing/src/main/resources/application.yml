@@ -1,6 +1,12 @@
 server:
   port: 8084
 
+#初始化表后改为never
+spring:
+  batch:
+    jdbc:
+      initialize-schema: always
+
 # BERT 分类服务配置
 bert:
   service:

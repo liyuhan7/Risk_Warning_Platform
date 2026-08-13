@@ -74,6 +74,7 @@ public class BehaviorProcessingService {
     @Autowired
     private AssessmentRepository assessmentRepository;
 
+
     @Autowired
     @Qualifier(value = "BehaviorProcessTaskThreadPool")
     private ThreadPoolTaskExecutor behaviorThreadPoolExecutor;
@@ -173,16 +174,29 @@ public class BehaviorProcessingService {
         updateAssessmentStatus(assessmentId, AssessmentStatusEnum.ASSESSING);
         log.info("[Process Project START] projectId={}, assessmentId={} (传入)", projectId, assessmentId);
 
-        // 1. 从 ES 获取该项目的所有 behaviors
-        List<Behavior> behaviors = fetchRandomBehaviors(5, projectId);
-        int totalBehaviorCount = behaviors.size();
+        // 清理旧的指标计算结果，防止重复数据导致 NonUniqueResultException
+        log.info("[Cleanup] 正在清理 assessmentId={} 的旧指标结果...", assessmentId);
+        indicatorResultRepository.deleteByAssessmentId(assessmentId);
+        log.info("[Cleanup] 清理完成");
 
-        if (behaviors.isEmpty()) {
+        // 1. 从 ES 获取该项目的所有 behaviors
+        List<Behavior> allBehaviors = fetchBehaviors(projectId); 
+        if (allBehaviors == null || allBehaviors.isEmpty()) {
             throw new IllegalArgumentException("No behaviors found for projectId: " + projectId);
+        }
+        int totalBehaviorCount = allBehaviors.size();
+
+        log.info("[Processing Behaviors] 开始进行指标计算分发，projectId={}, behaviorCount={}", projectId, totalBehaviorCount);
+        
+        // 增加 2 秒延迟，确保 ES 索引刷新完成
+        try {
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
 
         log.info("[使用传入的 Assessment] assessmentId={}, projectId={}, behaviorCount={}",
-                assessmentId, projectId, behaviors.size());
+                assessmentId, projectId, allBehaviors.size());
 
         // 2. 使用线程安全的 Map 收集计算结果
         Map<String, List<RelatedIndicator>> indicatorResultsMap = new ConcurrentHashMap<>();
@@ -191,8 +205,7 @@ public class BehaviorProcessingService {
         // 3. 使用 CountDownLatch 等待所有行为处理完成
         CountDownLatch latch = new CountDownLatch(totalBehaviorCount);
         
-        // 4. 批量大小：每处理100个行为就批量更新一次
-        int batchSize = 100;
+        // 4. 统计处理数量
         AtomicInteger processedCount = new AtomicInteger(0);
 
         log.info("[Processing Start] 开始处理 {} 个行为，使用线程池大小：{}", 
@@ -204,8 +217,8 @@ public class BehaviorProcessingService {
                 behaviorThreadPoolExecutor.getActiveCount(),
                 behaviorThreadPoolExecutor.getThreadPoolExecutor().getQueue().size());
 
-        for (int i = 0; i < behaviors.size(); i++) {
-            final Behavior behavior = behaviors.get(i);
+        for (int i = 0; i < allBehaviors.size(); i++) {
+            final Behavior behavior = allBehaviors.get(i);
             final int behaviorIndex = i;
             
             behaviorThreadPoolExecutor.execute(() -> {
@@ -266,15 +279,9 @@ public class BehaviorProcessingService {
                                 behaviorThreadPoolExecutor.getActiveCount());
                     }
                     
-                    if (currentCount % batchSize == 0) {
-                        log.info("[Batch Processing] 已处理 {}/{} 个行为，开始批量更新指标结果", 
-                                currentCount, totalBehaviorCount);
-                        batchSaveIndicatorResults(indicatorResultsMap, indicatorMetadataMap, projectId, assessmentId);
-                        // 清空已处理的结果，避免重复处理
-                        indicatorResultsMap.clear();
-                        log.info("[Batch Processing] 批量更新完成，已清空结果Map", 
-                                currentCount, totalBehaviorCount);
-                    }
+                    // 移除此处的破坏性多线程阶段保存逻辑
+                    // 所有的结果将安全地累积到线程安全的 indicatorResultsMap 中，并在所有计算（比如620条）都完成后的主线程 [Final Batch Processing] 中一次性集中落库。
+                    // 这将彻底杜绝 JPA NonUniqueResultException 并保证平均分计算完全准确。
                     
                     log.info("[Behavior Processing] 完成处理第 {} 个行为，behaviorId={}", 
                             behaviorIndex + 1, behavior.getId());
@@ -791,9 +798,8 @@ public class BehaviorProcessingService {
 
     /**
      * 从 ES 中获取指定 projectId 的所有 behaviors
-     * 修改：处理所有行为，不再随机选择
      */
-    private List<Behavior> fetchRandomBehaviors(int count, Long projectId) {
+    private List<Behavior> fetchBehaviors(Long projectId) {
         try {
             // 修改：使用 scroll API 或更大的 size 来获取所有行为
             // 这里先设置一个较大的值，实际项目中可能需要使用 scroll API
@@ -852,6 +858,11 @@ public class BehaviorProcessingService {
             log.info("[Fetching Indicator Candidates] behaviorId={}, candidateSize={}, queryText='{}'",
                     behavior.getId(), candidateSize, text);
 
+            if (behavior.getDescriptionVector() == null || behavior.getDescriptionVector().isEmpty()) {
+                log.warn("[Fetch Indicator Candidates Skipped] No vector found for behaviorId={}", behavior.getId());
+                return Collections.emptyList();
+            }
+
             SearchResponse<Indicator> resp = esClient.search(s -> s
                             .index(ElasticSearchConfig.INDICATOR_INDEX)
                             .size(candidateSize)
@@ -876,7 +887,7 @@ public class BehaviorProcessingService {
             }
             return out;
         } catch (Exception ex) {
-            log.error("[Fetch Indicator Candidates Failed] error={}", ex.getMessage());
+            log.error("[Fetch Indicator Candidates Failed] behaviorId={}, error", behavior.getId(), ex);
             return Collections.emptyList();
         }
     }
@@ -884,6 +895,11 @@ public class BehaviorProcessingService {
     // 新增：从 ES 拉取候选法规
     public List<Scored<Regulation>> fetchTopRegulations(Behavior behavior, int candidateSize) {
         try {
+
+            if (behavior.getDescriptionVector() == null || behavior.getDescriptionVector().isEmpty()) {
+                log.warn("[Fetch Regulation Candidates Skipped] No vector found for behaviorId={}", behavior.getId());
+                return Collections.emptyList();
+            }
 
             SearchResponse<Regulation> resp = esClient.search(s -> s
                             .index(ElasticSearchConfig.REGULATION_INDEX)
@@ -908,7 +924,7 @@ public class BehaviorProcessingService {
             }
             return out;
         } catch (Exception ex) {
-            log.error("[Fetch Regulation Candidates Failed] error={}", ex.getMessage());
+            log.error("[Fetch Regulation Candidates Failed] behaviorId={}, error", behavior.getId(), ex);
             return Collections.emptyList();
         }
     }

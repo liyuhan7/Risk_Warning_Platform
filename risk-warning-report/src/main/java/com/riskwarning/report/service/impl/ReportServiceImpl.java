@@ -142,7 +142,28 @@ public class ReportServiceImpl implements ReportService {
             indicatorDistributionVO.getDimensionDistributions().put(RiskDimensionEnum.fromValue(indicatorResult.getDimension()), dimensionVO);
         }
 
+        // 修改聚合逻辑：由求和改为平均值
+        // 总体平均分已经在 AssessmentServiceImpl 处理过，这里确保分布图中的“总分”也变更为平均分
+        for (ScoreRatioDistributionItemVO item : indicatorDistributionVO.getScoreDistributions()) {
+            if (item.getTotalCount() > 0) {
+                item.setTotalScore(item.getTotalScore() / item.getTotalCount());
+            }
+        }
+        
+        for (IndicatorDistributionVO dimVO : indicatorDistributionVO.getDimensionDistributions().values()) {
+            if (dimVO.getTotalCount() > 0) {
+                dimVO.setTotalScore(dimVO.getTotalScore() / dimVO.getTotalCount());
+            }
+            // 同样处理维度的得分分布
+            for (ScoreRatioDistributionItemVO item : dimVO.getScoreDistributions()) {
+                if (item.getTotalCount() > 0) {
+                    item.setTotalScore(item.getTotalScore() / item.getTotalCount());
+                }
+            }
+        }
+
         return indicatorDistributionVO;
+
     }
 
     @Override

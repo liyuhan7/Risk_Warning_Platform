@@ -92,7 +92,7 @@ public class ExecuteQueueTask {
                             // todo: 创建Assessment实体
                             Assessment assessment = Assessment.builder()
                                     .projectId(uploadConfirmDto.getProjectId())
-                                    .assessmentDate(null)
+                                    .assessmentDate(LocalDateTime.now())
                                     .overallScore(null)
                                     .overallRiskLevel(null)
                                     .details(null)

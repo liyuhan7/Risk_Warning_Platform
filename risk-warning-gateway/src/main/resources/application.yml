@@ -53,3 +53,6 @@ spring:
 
 server:
   port: 8088
+
+#让所有微服务遵循统一的转发规则： /api/{service-name}/{resource-path}
+#修改Controller映射

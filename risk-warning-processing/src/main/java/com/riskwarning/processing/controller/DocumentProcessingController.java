@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/document")
+@RequestMapping("/document")
 @RequiredArgsConstructor
 public class DocumentProcessingController {
 

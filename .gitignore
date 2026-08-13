@@ -143,3 +143,5 @@ yarn-error.log*
 # Elasticsearch data (if running locally)
 elasticsearch-*/
 storage/
+
+risk-warning-bert/classify-service/checkpoints/

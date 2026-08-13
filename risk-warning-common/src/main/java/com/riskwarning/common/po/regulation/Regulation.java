@@ -1,5 +1,6 @@
 package com.riskwarning.common.po.regulation;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,6 +37,7 @@ public class Regulation {
 
     private Double quantitativeIndicator;
 
+    @JsonProperty("full_text_vector")
     private List<Float> fullTextVector;
 
     private LocalDateTime createdAt;

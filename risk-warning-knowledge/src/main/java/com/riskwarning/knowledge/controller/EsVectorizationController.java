@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/vectorization")
+@RequestMapping("/vectorization")
 @RequiredArgsConstructor
 public class EsVectorizationController {
     

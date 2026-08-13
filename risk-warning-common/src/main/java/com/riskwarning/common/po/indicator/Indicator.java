@@ -1,5 +1,6 @@
 package com.riskwarning.common.po.indicator;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ public class Indicator {
     private CalculationRule calculationRule;
     private RiskRule riskRule;
     private LocalDateTime createAt;
+    @JsonProperty("name_vector")
     private List<Float> nameVector;
 
 

@@ -9,8 +9,8 @@ import java.util.Map;
 
 @FeignClient(
     name = "knowledge-service",
-    url = "${knowledge.service.url:http://localhost:8081}",
-    path = "/api/test/vectorization"
+    url = "${knowledge.service.url:http://localhost:8089}",
+    path = "/test/vectorization"
 )
 public interface VectorizationClient {
 

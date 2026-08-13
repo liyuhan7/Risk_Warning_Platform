@@ -22,4 +22,5 @@ vectorization:
 # Elasticsearch配置
 spring:
   elasticsearch:
-    uris: http://172.29.7.168:30920
+    # uris: http://172.29.7.168:30920 先使用本地ES测试
+    uris: http://localhost:9200

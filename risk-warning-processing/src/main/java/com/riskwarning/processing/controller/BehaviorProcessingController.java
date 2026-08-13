@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/behavior")
+@RequestMapping("/behavior")
 @RequiredArgsConstructor
 public class BehaviorProcessingController {
 

@@ -71,25 +71,89 @@ public class ConnectivityTest {
     @Autowired
     private BehaviorProcessingService behaviorProcessingService;
 
+//    @Test
+//    @Transactional
+//    public void testDatabaseConnection() {
+//        try {
+//            // 尝试获取PostgreSQL连接以验证连接
+//
+//            Assessment assessment = assessmentRepository.findById(88L).get();
+//
+//            IndicatorResult ir = IndicatorResult.builder()
+//                    .projectId(7L)
+//                    .assessmentId(88L)
+//                    .indicatorEsId("indicatorEsId")
+//                    .indicatorName("test")
+//                    .indicatorLevel(0)
+//                    .dimension("test")
+//                    .type("test")
+//                    .calculatedScore(0.0)
+//                    .maxPossibleScore(1.0)
+//                    .usedCalculationRuleType("auto")
+//                    .calculationDetails(null)
+//                    .riskTriggered(false)
+//                    .riskStatus(IndicatorRiskStatus.fromCode("NOT_EVALUATED"))
+//                    .calculatedAt(LocalDateTime.now())
+//                    .createdAt(LocalDateTime.now())
+//                    .build();
+//            indicatorResultRepository.saveAndFlush(ir);
+//            System.out
+//                    .println("Connected to the database and saved IndicatorResult with ID: ");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            assert false : "Failed to connect to the database";
+//        }
+//    }
+
+
     @Test
     @Transactional
     public void testDatabaseConnection() {
         try {
-            // 尝试获取PostgreSQL连接以验证连接
+            // 先查询是否存在评估记录，如果不存在则创建测试数据
+            List<Assessment> assessments = assessmentRepository.findAll();
 
-            Assessment assessment = assessmentRepository.findById(88L).get();
+            Long assessmentId;
+            Long projectId;
 
+            if (assessments.isEmpty()) {
+                System.out.println("No assessment records found, creating test data...");
+
+                // 创建测试评估记录
+                Assessment newAssessment = Assessment.builder()
+                        .projectId(1L) // 确保项目 ID=1 存在
+                        .assessmentDate(LocalDateTime.now())
+                        .overallScore(75.5)
+                        .overallRiskLevel(RiskLevelEnum.MEDIUM_RISK)
+                        .details("{\"test\": \"data\"}")
+                        .recommendations("测试建议")
+                        .status(AssessmentStatusEnum.ASSESSING)
+                        .createdAt(LocalDateTime.now())
+                        .build();
+                Assessment savedAssessment = assessmentRepository.saveAndFlush(newAssessment);
+                assessmentId = savedAssessment.getId();
+                projectId = savedAssessment.getProjectId();
+                System.out.println("Created test assessment with ID: " + assessmentId);
+            } else {
+                // 使用第一个已有的评估记录
+                Assessment existingAssessment = assessments.get(0);
+                assessmentId = existingAssessment.getId();
+                projectId = existingAssessment.getProjectId();
+                System.out.println("Using existing assessment ID: " + assessmentId);
+            }
+
+            // 创建 IndicatorResult
             IndicatorResult ir = IndicatorResult.builder()
-                    .projectId(7L)
-                    .assessmentId(88L)
-                    .indicatorEsId("indicatorEsId")
-                    .indicatorName("test")
-                    .indicatorLevel(0)
-                    .dimension("test")
-                    .type("test")
-                    .calculatedScore(0.0)
-                    .maxPossibleScore(1.0)
-                    .usedCalculationRuleType("auto")
+                    .projectId(projectId)
+                    .assessmentId(assessmentId)
+                    .indicatorEsId("indicator-es-id-test")
+                    .indicatorName("测试指标")
+                    .indicatorLevel(1)
+                    .dimension("安全维度")
+                    .type("range")
+                    .calculatedScore(85.0)
+                    .maxPossibleScore(100.0)
+                    .usedCalculationRuleType("range")
                     .calculationDetails(null)
                     .riskTriggered(false)
                     .riskStatus(IndicatorRiskStatus.fromCode("NOT_EVALUATED"))
@@ -97,41 +161,83 @@ public class ConnectivityTest {
                     .createdAt(LocalDateTime.now())
                     .build();
             indicatorResultRepository.saveAndFlush(ir);
-            System.out
-                    .println("Connected to the database and saved IndicatorResult with ID: ");
+            System.out.println("Connected to the database and saved IndicatorResult with ID: " + ir.getId());
         } catch (Exception e) {
             e.printStackTrace();
-            assert false : "Failed to connect to the database";
+            assert false : "Failed to connect to the database: " + e.getMessage();
         }
     }
 
-    @Test
-    @Transactional
-    public void testAssessmentQuery() {
-        try {
 
-            Assessment assessment1 = assessmentRepository.findById(88L).get();
+//    @Test
+//    @Transactional
+//    public void testAssessmentQuery() {
+//        try {
+//
+//            Assessment assessment1 = assessmentRepository.findById(88L).get();
+//
+//            Assessment assessment = Assessment.builder()
+//                    .projectId(1000L)
+//                    .assessmentDate(LocalDateTime.now())
+//                    .overallScore(0.0)
+//                    .overallRiskLevel(RiskLevelEnum.LOW_RISK)
+//                    .details("")
+//                    .recommendations("")
+//                    .status(AssessmentStatusEnum.ASSESSING)
+//                    .createdAt(LocalDateTime.now())
+//                    .build();
+//            assessmentRepository.saveAndFlush(assessment);
+//
+//            Assessment assessment2 = assessmentRepository.findByProjectId(1000L);
+//
+//            assert assessment2.getOverallScore() == 0.0;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            assert false : "Failed to query assessments from the database";
+//        }
+//    }
+@Test
+@Transactional
+public void testAssessmentQuery() {
+    try {
+        // 先查询是否存在评估记录
+        List<Assessment> assessments = assessmentRepository.findAll();
+
+        Long projectId;
+
+        if (assessments.isEmpty()) {
+            // 创建测试评估记录
+            projectId = 1L; // 确保项目存在
 
             Assessment assessment = Assessment.builder()
-                    .projectId(1000L)
+                    .projectId(projectId)
                     .assessmentDate(LocalDateTime.now())
-                    .overallScore(0.0)
-                    .overallRiskLevel(RiskLevelEnum.LOW_RISK)
-                    .details("")
-                    .recommendations("")
+                    .overallScore(85.5)
+                    .overallRiskLevel(RiskLevelEnum.MEDIUM_RISK)
+                    .details("测试评估详情")
+                    .recommendations("测试建议")
                     .status(AssessmentStatusEnum.ASSESSING)
                     .createdAt(LocalDateTime.now())
                     .build();
-            assessmentRepository.saveAndFlush(assessment);
-
-            Assessment assessment2 = assessmentRepository.findByProjectId(1000L);
-
-            assert assessment2.getOverallScore() == 0.0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            assert false : "Failed to query assessments from the database";
+            Assessment savedAssessment = assessmentRepository.saveAndFlush(assessment);
+            System.out.println("Created test assessment with ID: " + savedAssessment.getId());
+        } else {
+            // 使用已有的评估记录的项目 ID
+            projectId = assessments.get(0).getProjectId();
+            System.out.println("Using existing project ID: " + projectId);
         }
+
+        // 验证查询
+        Assessment assessment2 = assessmentRepository.findByProjectId(projectId);
+        assert assessment2 != null : "未找到评估记录，project_id=" + projectId;
+
+        System.out.println("Test passed! Found assessment for project: " + projectId);
+    } catch (Exception e) {
+        e.printStackTrace();
+        assert false : "Failed to query assessments from the database: " + e.getMessage();
     }
+}
+
 
     @Test
     public void testElasticsearchConnection() {

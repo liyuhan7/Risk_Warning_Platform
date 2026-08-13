@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/report")
+@RequestMapping("/")
 public class ReportController {
 
 
@@ -19,18 +19,18 @@ public class ReportController {
     private AssessmentRepository assessmentRepository;
 
 
-    @GetMapping("/report/indicatorResult/{assessmentId}")
+    @GetMapping("/indicatorResult/{assessmentId}")
     public Result reportIndicatorResult(@PathVariable Long assessmentId) {
         Assessment assessment=assessmentRepository.findById(assessmentId).orElse(null);
         return Result.success(reportService.assembleIndicatorResult(assessment));
     }
 
-    @GetMapping("/report/risk")
+    @GetMapping("/risk")
     public Result reportRisk(@RequestParam Long assessmentId) {
         return Result.success(reportService.assembleRisk(assessmentId));
     }
 
-    @GetMapping("/report/general/{assessmentId}")
+    @GetMapping("/general/{assessmentId}")
     public Result reportGeneral(@PathVariable Long assessmentId) {
         Assessment assessment=assessmentRepository.findById(assessmentId).orElse(null);
         return Result.success(reportService.assembleGeneral(assessment));

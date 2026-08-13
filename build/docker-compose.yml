@@ -25,7 +25,6 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-      # todo: partition sets 3, multi developers need to specify partitions to produce and consume from topics
       KAFKA_CREATE_TOPICS: "test:1:1,behavior_processing_tasks:3:1,indicator_calculation_tasks:3:1,risk_assessment_tasks:3:1,questionnaire_reminder_tasks:3:1,assessment_completed_events:3:1,notification_tasks:3:1"
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
     volumes:
@@ -47,6 +46,32 @@ services:
     depends_on:
       - kafka
       - zookeeper
+
+  # 添加本地postgres和redis进行测试
+  postgres:
+    image: postgres:13
+    container_name: postgres-risk-warning
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=risk_warning_platform
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - kafka-net
+
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis-risk-warning
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass 123456
+    volumes:
+      - redis-data:/data
+    networks:
+      - kafka-net
 
   # BERT向量化服务
   # bert-service:
@@ -183,9 +208,61 @@ services:
 
 
 
+  etcd:
+    container_name: milvus-etcd
+    image: quay.io/coreos/etcd:v3.5.5
+    environment:
+      - ETCD_AUTO_COMPACTION_MODE=revision
+      - ETCD_AUTO_COMPACTION_RETENTION=1000
+      - ETCD_QUOTA_BACKEND_BYTES=4294967296
+    volumes:
+      - etcd-data:/etcd
+    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls=http://0.0.0.0:2379 --data-dir /etcd
+    networks:
+      - kafka-net
+
+  minio:
+    container_name: milvus-minio
+    image: minio/minio:latest
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    volumes:
+      - minio-data:/docker_volume/minio
+    command: minio server /docker_volume/minio
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - kafka-net
+
+  standalone:
+    container_name: milvus-standalone
+    image: milvusdb/milvus:v2.3.5
+    command: ["milvus", "run", "standalone"]
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+    volumes:
+      - milvus-data:/var/lib/milvus
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    depends_on:
+      - "etcd"
+      - "minio"
+    networks:
+      - kafka-net
+
 volumes:
   bert-model-cache:
     driver: local
+  postgres-data:
+    external: true
+  redis-data:
+    external: true
   etcd-data:
     driver: local
   minio-data:
@@ -196,3 +273,5 @@ volumes:
 networks:
   kafka-net:
     driver: bridge
+
+

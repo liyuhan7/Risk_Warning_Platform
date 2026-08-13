@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/classify")
+@RequestMapping("/classify")
 @RequiredArgsConstructor
 public class ClassifierController {
 

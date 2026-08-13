@@ -31,6 +31,7 @@ CREATE TYPE indicator_risk_status_enum AS ENUM ('未评估', '已评估');
 CREATE TABLE IF NOT EXISTS public.t_user (
     id BIGSERIAL PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL, -- 添加缺失的密码字段
     full_name TEXT,
     avatar_url TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -191,7 +192,7 @@ COMMENT ON COLUMN public.t_indicator_result.indicator_name IS '指标名称（�
 COMMENT ON COLUMN public.t_indicator_result.calculated_score IS '计算得到的分数';
 COMMENT ON COLUMN public.t_indicator_result.used_calculation_rule_type IS '使用的计算规则类型：binary, range';
 COMMENT ON COLUMN public.t_indicator_result.calculation_details IS '计算详情，包含具体规则和中间过程';
-COMMENT ON COLUMN public.t_indicator_result.matched_behaviors IS '匹配到的行为数据ES ID列表';
+COMMENT ON COLUMN public.t_indicator_result.matched_behaviors_ids IS '匹配到的行为数据ES ID列表';
 COMMENT ON COLUMN public.t_indicator_result.risk_triggered IS '是否触发了风险规则';
 
 -- 8. 事件表 (t_event)
@@ -272,7 +273,26 @@ ALTER TABLE public.t_indicator_result
 ADD CONSTRAINT chk_max_possible_score_positive 
 CHECK (max_possible_score > 0);
 
--- 确保计算得分不超过最大可能得分
+-- 确保最大可能得分不超过最大可能得分
 ALTER TABLE public.t_indicator_result 
 ADD CONSTRAINT chk_calculated_score_within_max 
 CHECK (calculated_score <= max_possible_score);
+
+-- 9. 项目文件表 (t_project_file)
+-- 存储合规项目中上传证明文件的记录。
+CREATE TABLE IF NOT EXISTS public.t_project_file (
+    id BIGSERIAL PRIMARY KEY,
+    project_id BIGINT REFERENCES public.t_project(id) ON DELETE CASCADE,
+    user_id BIGINT REFERENCES public.t_user(id) ON DELETE SET NULL,
+    file_paths TEXT, -- 存储JSON序列化后的文件路径列表
+    create_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+COMMENT ON TABLE public.t_project_file IS '项目上传文件记录表';
+COMMENT ON COLUMN public.t_project_file.project_id IS '关联的项目ID';
+COMMENT ON COLUMN public.t_project_file.user_id IS '上传者ID';
+COMMENT ON COLUMN public.t_project_file.file_paths IS '存储文件存储路径的JSON列表';
+
+-- 项目文件表索引
+CREATE INDEX IF NOT EXISTS idx_project_file_project_id 
+ON public.t_project_file(project_id);

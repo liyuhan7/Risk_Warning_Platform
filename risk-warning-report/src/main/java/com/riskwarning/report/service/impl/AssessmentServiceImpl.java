@@ -103,29 +103,35 @@ public class AssessmentServiceImpl implements AssessmentService {
         indicatorResultRepository.saveAll(indicatorResults);
 
         try {
-            BulkResponse response = elasticsearchClient.bulk(b -> {
-                for (Risk risk : risks) {
-                    b.operations(op -> op
-                            .index(idx -> idx
-                                    .index(ElasticSearchConfig.RISK_INDEX)
-                                    .document(risk)
-                            )
-                    );
+            if (!risks.isEmpty()) {
+                BulkResponse response = elasticsearchClient.bulk(b -> {
+                    for (Risk risk : risks) {
+                        b.operations(op -> op
+                                .index(idx -> idx
+                                        .index(ElasticSearchConfig.RISK_INDEX)
+                                        .document(risk)
+                                )
+                        );
+                    }
+                    return b;
+                });
+                if (response.errors()) {
+                    log.error("Bulk insert encountered errors: {}", response.items().toString());
+                    throw new Exception("Bulk insert to Elasticsearch failed");
                 }
-                return b;
-            });
-            if (response.errors()) {
-                log.error("Bulk insert encountered errors: {}", response.items().toString());
-                throw new Exception("Bulk insert to Elasticsearch failed");
+            } else {
+                log.info("No risks triggered for assessmentId={}, skipping ES bulk index", assessmentId);
             }
         } catch (Exception e) {
             log.error("Failed to index risk documents to Elasticsearch: {}", e.getMessage());
             throw new RuntimeException(e);
         }
 
-        assessment.setOverallScore(totalScore);
+        double finalAvgScore = indicatorResults.isEmpty() ? 0.0 : totalScore / indicatorResults.size();
+        assessment.setOverallScore(finalAvgScore);
 //            // TODO: 总风险等级依靠owRiskCount, mediumRiskCoun, highRiskCount来设置
         assessment.setOverallRiskLevel(RiskLevelEnum.getByRiskCount(lowRiskCount, mediumRiskCount, highRiskCount));
+
         assessment.setStatus(AssessmentStatusEnum.ASSESSED);
         assessment.setDetails(JSON.toJSONString(new AssessmentGeneralDetails(
                 reportService.assembleGeneral(assessment, risks),

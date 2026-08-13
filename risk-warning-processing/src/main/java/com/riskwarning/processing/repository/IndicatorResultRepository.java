@@ -68,4 +68,11 @@ public interface IndicatorResultRepository extends JpaRepository<IndicatorResult
             @Param("oldCalculatedAt") LocalDateTime oldCalculatedAt
     );
 
+    /**
+     * 删除指定 assessmentId 的所有记录，用于重新计算前清理
+     */
+    @Modifying
+    @Transactional
+    void deleteByAssessmentId(Long assessmentId);
+
 }

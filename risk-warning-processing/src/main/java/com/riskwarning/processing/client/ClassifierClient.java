@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 @FeignClient(
-    name = "classifier-service",
+    name = "bert-service",
     url = "${bert.service.url:http://localhost:8090}",
-    path = "/api/classify"
+    path = "/classify"
 )
 public interface ClassifierClient {
 
     @PostMapping("/batch")
     Map<String, Object> classifyBatch(@RequestBody Map<String, Object> request);
-}
 
+}

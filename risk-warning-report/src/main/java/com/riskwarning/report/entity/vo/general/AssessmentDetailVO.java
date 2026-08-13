@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class AssessmentDetailVO {
+public class
+
+AssessmentDetailVO {
 
     private Long projectId;
 

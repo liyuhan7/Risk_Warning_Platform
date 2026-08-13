@@ -70,12 +70,55 @@ public class ElasticsearchRepository {
             throw new RuntimeException("获取文档总数失败: " + e.getMessage(), e);
         }
     }
+
+    public long getDocumentCountWithField(String indexName, String fieldName) {
+        try {
+            CountRequest countRequest = new CountRequest.Builder()
+                    .index(indexName)
+                    .query(q -> q.exists(e -> e.field(fieldName)))
+                    .build();
+
+            return elasticsearchClient.count(countRequest).count();
+        } catch (Exception e) {
+            throw new RuntimeException("获取ES字段覆盖数量失败: " + e.getMessage(), e);
+        }
+    }
+
+    public <T> List<DocumentWithId<T>> searchDocumentsMissingField(
+            String indexName,
+            String textFieldName,
+            String missingFieldName,
+            int size,
+            Class<T> clazz) {
+        try {
+            SearchRequest searchRequest = new SearchRequest.Builder()
+                    .index(indexName)
+                    .size(size)
+                    .source(s -> s.filter(f -> f.includes(textFieldName)))
+                    .query(q -> q.bool(b -> b
+                            .must(m -> m.exists(e -> e.field(textFieldName)))
+                            .mustNot(m -> m.exists(e -> e.field(missingFieldName)))))
+                    .build();
+
+            SearchResponse<T> response = elasticsearchClient.search(searchRequest, clazz);
+            List<DocumentWithId<T>> documents = new ArrayList<>();
+            for (Hit<T> hit : response.hits().hits()) {
+                DocumentWithId<T> document = new DocumentWithId<>();
+                document.setId(hit.id());
+                document.setSource(hit.source());
+                documents.add(document);
+            }
+            return documents;
+        } catch (Exception e) {
+            throw new RuntimeException("查询缺失字段的ES文档失败: " + e.getMessage(), e);
+        }
+    }
     
 
-    public void batchUpdateVectorFields(String indexName, 
-                                       List<VectorUpdate> updates) {
+    public BulkUpdateResult batchUpdateVectorFields(String indexName,
+                                                    List<VectorUpdate> updates) {
         if (updates == null || updates.isEmpty()) {
-            return;
+            return new BulkUpdateResult(0, 0);
         }
         
         try {
@@ -144,8 +187,8 @@ public class ElasticsearchRepository {
                     successCount++;
                 }
             }
-            
-            
+
+            return new BulkUpdateResult(successCount, failedCount);
         } catch (Exception e) {
             log.error("批量更新向量字段失败: index={}", indexName, e);
             throw new RuntimeException("批量更新向量字段失败: " + e.getMessage(), e);
@@ -194,6 +237,24 @@ public class ElasticsearchRepository {
         private String documentId;
         private String vectorFieldName;
         private List<Float> vector;
+    }
+
+    public static class BulkUpdateResult {
+        private final long successCount;
+        private final long failedCount;
+
+        public BulkUpdateResult(long successCount, long failedCount) {
+            this.successCount = successCount;
+            this.failedCount = failedCount;
+        }
+
+        public long getSuccessCount() {
+            return successCount;
+        }
+
+        public long getFailedCount() {
+            return failedCount;
+        }
     }
 }
 

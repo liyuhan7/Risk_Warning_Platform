@@ -96,22 +96,22 @@ public class EsVectorizationUtil {
                 return result;
             }
             
-            // 2. 分页处理
-            int processedCount = 0;
-            int from = 0;
-            int pageSize = BATCH_SIZE;
-            
-            while (from < totalCount) {
-                double progress = totalCount > 0 ? (double) processedCount / totalCount * 100 : 0;
-                log.info("处理进度: {}/{} ({:.2f}%)", 
-                        processedCount, totalCount, progress);
-                
-                // 2.1 查询当前页文档
-                String[] sourceFields = {textFieldName};
+            long coveredCount = esRepository.getDocumentCountWithField(indexName, vectorFieldName);
+            result.setSuccessCount(coveredCount);
+            result.setFailedCount(totalCount - coveredCount);
+
+            // 每次只取仍缺少向量的首批文档。已更新文档会退出结果集，避免
+            // from/size 分页期间 refresh 导致文档重排、重复处理和漏处理。
+            while (coveredCount < totalCount) {
+                double progress = totalCount > 0 ? (double) coveredCount / totalCount * 100 : 0;
+                log.info("处理进度: {}/{} ({}%)",
+                        coveredCount, totalCount, String.format("%.2f", progress));
+
                 @SuppressWarnings("unchecked")
                 List<ElasticsearchRepository.DocumentWithId<Map<String, Object>>> documents = 
-                        (List<ElasticsearchRepository.DocumentWithId<Map<String, Object>>>) 
-                        (List<?>) esRepository.searchDocuments(indexName, from, pageSize, sourceFields, Map.class);
+                        (List<ElasticsearchRepository.DocumentWithId<Map<String, Object>>>)
+                        (List<?>) esRepository.searchDocumentsMissingField(
+                                indexName, textFieldName, vectorFieldName, BATCH_SIZE, Map.class);
                 
                 if (documents.isEmpty()) {
                     break;
@@ -130,8 +130,8 @@ public class EsVectorizationUtil {
                 }
                 
                 if (documentTexts.isEmpty()) {
-                    from += pageSize;
-                    continue;
+                    result.setError("存在缺少可向量化文本的文档");
+                    break;
                 }
                 
                 // 2.3 批量向量化
@@ -143,9 +143,13 @@ public class EsVectorizationUtil {
                 try {
                     vectors = vectorizationUtil.batchVectorize(texts);
                 } catch (Exception e) {
-                    result.setFailedCount(result.getFailedCount() + documentTexts.size());
-                    from += pageSize;
-                    continue;
+                    result.setError("批量向量化失败: " + e.getMessage());
+                    break;
+                }
+
+                if (vectors.size() != documentTexts.size()) {
+                    result.setError("向量化返回数量与请求文本数量不一致");
+                    break;
                 }
                 
                 // 2.4 准备更新数据
@@ -184,20 +188,29 @@ public class EsVectorizationUtil {
                 }
                 
                 if (updates.isEmpty()) {
-                    from += pageSize;
-                    continue;
+                    result.setError("当前批次未生成有效向量");
+                    break;
                 }
                 
                 // 2.5 批量更新ES
                 try {
-                    esRepository.batchUpdateVectorFields(indexName, updates);
-                    result.setSuccessCount(result.getSuccessCount() + updates.size());
+                    ElasticsearchRepository.BulkUpdateResult bulkResult =
+                            esRepository.batchUpdateVectorFields(indexName, updates);
+                    if (bulkResult.getFailedCount() > 0) {
+                        result.setError("ES批量更新失败: " + bulkResult.getFailedCount() + " 条");
+                        break;
+                    }
                 } catch (Exception e) {
-                    result.setFailedCount(result.getFailedCount() + updates.size());
+                    result.setError("ES批量更新失败: " + e.getMessage());
+                    break;
                 }
-                
-                processedCount += documents.size();
-                from += pageSize;
+
+                long newCoveredCount = esRepository.getDocumentCountWithField(indexName, vectorFieldName);
+                if (newCoveredCount <= coveredCount) {
+                    result.setError("向量字段覆盖数量没有增长，已停止处理");
+                    break;
+                }
+                coveredCount = newCoveredCount;
                 
                 // 避免请求过快，稍微延迟
                 try {
@@ -207,7 +220,14 @@ public class EsVectorizationUtil {
                     break;
                 }
             }
-            
+
+            coveredCount = esRepository.getDocumentCountWithField(indexName, vectorFieldName);
+            result.setSuccessCount(coveredCount);
+            result.setFailedCount(totalCount - coveredCount);
+            if (result.getFailedCount() > 0 && result.getError() == null) {
+                result.setError("仍有 " + result.getFailedCount() + " 条文档缺少向量");
+            }
+
             result.setEndTime(System.currentTimeMillis());
             long duration = result.getEndTime() - result.getStartTime();
             

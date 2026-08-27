@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -17,6 +18,13 @@ public class ContentExtractor {
     
     // 最大片段长度（字符数）
     private static final int MAX_SEGMENT_LENGTH = 500;
+
+    /**
+     * 中文字符检测。
+     * 必须使用 find 而非 matches：matches 要求整串匹配且点号默认不匹配换行，
+     * 会导致含换行的多行片段被误判为不含中文而整体丢弃。
+     */
+    private static final Pattern CHINESE_CHAR = Pattern.compile("[\\u4e00-\\u9fa5]");
 
     /**
      * 从扫描文档中提取文本片段
@@ -130,7 +138,7 @@ public class ContentExtractor {
         }
         
         // 必须包含至少一个中文字符
-        if (!text.matches(".*[\\u4e00-\\u9fa5].*")) {
+        if (!CHINESE_CHAR.matcher(text).find()) {
             return false;
         }
         

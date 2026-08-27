@@ -191,8 +191,9 @@ public class FileScanner {
             for (XWPFParagraph paragraph : wordDocument.getParagraphs()) {
                 String text = paragraph.getText();
                 if (text != null && !text.trim().isEmpty()) {
-                    fullText.append(text).append("\n");
-                    currentPageText.append(text).append("\n");
+                    // 段落间使用双换行，与 ContentExtractor 的分段约定保持一致
+                    fullText.append(text).append("\n\n");
+                    currentPageText.append(text).append("\n\n");
                     
                     // 简单的分页逻辑：每5000字符一页（可根据实际情况调整）
                     if (currentPageText.length() > 5000) {
@@ -239,7 +240,9 @@ public class FileScanner {
             for (XWPFParagraph paragraph : document.getParagraphs()) {
                 String text = paragraph.getText();
                 if (text != null && !text.trim().isEmpty()) {
-                    currentPageText.append(text).append("\n");
+                    // 段落间使用双换行，与 ContentExtractor 按 \n\n+ 分段的约定保持一致，
+                    // 确保每个段落独立成为一条行为数据
+                    currentPageText.append(text).append("\n\n");
                     
                     // 每5000字符一页
                     if (currentPageText.length() > 5000) {

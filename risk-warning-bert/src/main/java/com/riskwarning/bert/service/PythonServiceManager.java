@@ -11,6 +11,7 @@ import javax.annotation.PreDestroy;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,10 @@ public class PythonServiceManager {
                 throw new RuntimeException("Python脚本不存在: " + scriptFile.getAbsolutePath());
             }
 
-            ProcessBuilder pb = new ProcessBuilder(pythonPath, scriptFile.getAbsolutePath());
+            // pythonPath 支持 "py -3.9" 等带参数形式，按空白拆分为命令与参数
+            List<String> command = new ArrayList<>(Arrays.asList(pythonPath.trim().split("\\s+")));
+            command.add(scriptFile.getAbsolutePath());
+            ProcessBuilder pb = new ProcessBuilder(command);
             pb.directory(scriptFile.getParentFile());
             pb.redirectErrorStream(true);
             

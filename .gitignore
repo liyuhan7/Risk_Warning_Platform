@@ -144,5 +144,10 @@ yarn-error.log*
 elasticsearch-*/
 storage/
 
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
 risk-warning-bert/classify-service/checkpoints/
 AGENTS.md

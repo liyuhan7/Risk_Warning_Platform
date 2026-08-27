@@ -39,6 +39,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,6 +63,9 @@ public class BehaviorProcessingService {
     private static final String REGULATION_VECTOR_FIELD = "full_text_vector";
 
     private static final Integer CANDIDATE_FETCH_SIZE = 200;
+
+    // 行为取数空结果重试间隔（毫秒），避免行为刚写入未刷新导致的偶发空结果
+    private static final long BEHAVIOR_FETCH_RETRY_INTERVAL_MS = 1000L;
 
 
     // 新增：注入 ElasticsearchClient 与索引名配置
@@ -188,13 +192,6 @@ public class BehaviorProcessingService {
 
         log.info("[Processing Behaviors] 开始进行指标计算分发，projectId={}, behaviorCount={}", projectId, totalBehaviorCount);
         
-        // 增加 2 秒延迟，确保 ES 索引刷新完成
-        try {
-            TimeUnit.SECONDS.sleep(2);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
         log.info("[使用传入的 Assessment] assessmentId={}, projectId={}, behaviorCount={}",
                 assessmentId, projectId, allBehaviors.size());
 
@@ -798,53 +795,82 @@ public class BehaviorProcessingService {
 
     /**
      * 从 ES 中获取指定 projectId 的所有 behaviors
+     * 加固：查询前显式刷新索引，空结果时带间隔重试，避免行为刚写入尚未可见导致的偶发空结果
      */
     private List<Behavior> fetchBehaviors(Long projectId) {
+        // 查询前先触发一次索引刷新，确保刚写入的行为立即可见（刷新失败不阻断查询）
         try {
-            // 修改：使用 scroll API 或更大的 size 来获取所有行为
-            // 这里先设置一个较大的值，实际项目中可能需要使用 scroll API
-            int fetchSize = 10000;
-
-            SearchResponse<Behavior> resp = esClient.search(s -> s
-                            .index(ElasticSearchConfig.BEHAVIOR_INDEX)
-                            .size(fetchSize)
-                            .query(q -> q.bool(ma -> ma.must(m1 ->m1.term(t->t.field("project_id").value(projectId))))),
-                    Behavior.class
-            );
-
-            List<Behavior> allBehaviors = new ArrayList<>();
-            if (resp != null && resp.hits() != null && resp.hits().hits() != null) {
-                for (Hit<Behavior> hit : resp.hits().hits()) {
-                    Behavior behavior = hit.source();
-                    if (behavior != null) {
-                        allBehaviors.add(behavior);
-                    }
-                }
-            }
-
-            // 修改：处理所有行为，不再随机选择
-            List<Behavior> selectedBehaviors = new ArrayList<>();
-            if (!allBehaviors.isEmpty()) {
-                // 注释掉随机排序逻辑
-                // Collections.shuffle(allBehaviors, new Random(System.currentTimeMillis()));
-                // int selectCount = Math.min(count, allBehaviors.size());
-
-                // 处理所有行为
-                for (Behavior behavior : allBehaviors) {
-                    behavior.setProjectId(projectId);
-                    selectedBehaviors.add(behavior);
-                }
-            }
-
-            log.info("[Fetch Behaviors] projectId={}, totalCount={}, selectedCount={}", 
-                    projectId, allBehaviors.size(), selectedBehaviors.size());
-
-            return selectedBehaviors;
-
+            esClient.indices().refresh(r -> r.index(ElasticSearchConfig.BEHAVIOR_INDEX));
         } catch (Exception e) {
-            log.error("[Fetch Behaviors Failed] error={}", e.getMessage());
-            return Collections.emptyList();
+            log.warn("[Fetch Behaviors] 索引刷新失败(忽略): {}", e.getMessage());
         }
+
+        int maxAttempts = 5;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                List<Behavior> result = doFetchBehaviors(projectId);
+                if (!result.isEmpty()) {
+                    return result;
+                }
+                if (attempt < maxAttempts) {
+                    log.info("[Fetch Behaviors] projectId={} 第 {} 次查询为空，{}ms 后重试",
+                            projectId, attempt, BEHAVIOR_FETCH_RETRY_INTERVAL_MS);
+                    Thread.sleep(BEHAVIOR_FETCH_RETRY_INTERVAL_MS);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.warn("[Fetch Behaviors] 取数重试被中断: {}", e.getMessage());
+                return Collections.emptyList();
+            } catch (Exception e) {
+                log.error("[Fetch Behaviors Failed] error={}", e.getMessage());
+                if (attempt == maxAttempts) {
+                    return Collections.emptyList();
+                }
+                try {
+                    Thread.sleep(BEHAVIOR_FETCH_RETRY_INTERVAL_MS);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return Collections.emptyList();
+                }
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    private List<Behavior> doFetchBehaviors(Long projectId) throws IOException {
+        // 使用较大的 size 获取所有行为（大项目可改用 scroll API）
+        int fetchSize = 10000;
+
+        SearchResponse<Behavior> resp = esClient.search(s -> s
+                        .index(ElasticSearchConfig.BEHAVIOR_INDEX)
+                        .size(fetchSize)
+                        .query(q -> q.bool(ma -> ma.must(m1 -> m1.term(t -> t.field("project_id").value(projectId))))),
+                Behavior.class
+        );
+
+        List<Behavior> allBehaviors = new ArrayList<>();
+        if (resp != null && resp.hits() != null && resp.hits().hits() != null) {
+            for (Hit<Behavior> hit : resp.hits().hits()) {
+                Behavior behavior = hit.source();
+                if (behavior != null) {
+                    allBehaviors.add(behavior);
+                }
+            }
+        }
+
+        // 处理所有行为，不再随机选择
+        List<Behavior> selectedBehaviors = new ArrayList<>();
+        if (!allBehaviors.isEmpty()) {
+            for (Behavior behavior : allBehaviors) {
+                behavior.setProjectId(projectId);
+                selectedBehaviors.add(behavior);
+            }
+        }
+
+        log.info("[Fetch Behaviors] projectId={}, totalCount={}, selectedCount={}",
+                projectId, allBehaviors.size(), selectedBehaviors.size());
+
+        return selectedBehaviors;
     }
 
 

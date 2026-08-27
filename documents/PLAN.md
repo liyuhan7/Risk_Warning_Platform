@@ -141,8 +141,8 @@ Kafka Topic 暂不变化；若消息需新增字段，必须保持旧消费者�
 
 ### 8. 开发任务拆分
 
-- [ ] `P0-01`（C，B 协助）冻结测试 PDF、Project、Assessment 和三类案例：明确不合规、明确合规、证据不足。
-- [ ] `P0-02`（B）记录旧链的 Behavior、Indicator/Regulation 召回、IndicatorResult、Risk 和错误案例。
+- [x] `P0-01`（C，B 协助）冻结测试 PDF、Project、Assessment 和三类案例：明确不合规、明确合规、证据不足。→ `documents/plan0/baseline/test-cases.md`
+- [x] `P0-02`（B）记录旧链的 Behavior、Indicator/Regulation 召回、IndicatorResult、Risk 和错误案例。→ `documents/plan0/baseline/p0-02-baseline.md`
 - [ ] `P0-03`（B）核对 `projectId / assessmentId / sourceDocumentId` 的传递与查询边界，形成隔离改造清单。
 - [ ] `P0-04`（B）统计 Indicator 总数、Binary、Range、无 CalculationRule、有/无 RiskRule 和不可执行规则样本。
 - [ ] `P0-05`（A、B）定义并评审五个核心 Schema、枚举、校验规则和版本字段。

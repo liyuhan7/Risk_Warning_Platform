@@ -33,3 +33,5 @@ llm:
     max-attempts: 3
     initial-backoff-millis: 500
     backoff-multiplier: 2.0
+    # 触发重试的 HTTP 状态码；403/400/401 等语义错误不重试，一次终止
+    retryable-status-codes: 408, 429, 500, 502, 503, 504

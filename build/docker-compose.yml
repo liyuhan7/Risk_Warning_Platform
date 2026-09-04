@@ -73,6 +73,25 @@ services:
     networks:
       - kafka-net
 
+  # 注册中心与配置中心（standalone + 内嵌 Derby 存储）
+  nacos:
+    image: nacos/nacos-server:v2.4.2
+    container_name: nacos
+    ports:
+      # 只绑定回环地址，避免向局域网暴露无鉴权服务；9848 为客户端 gRPC 端口（8848+1000）
+      - "127.0.0.1:8848:8848"
+      - "127.0.0.1:9848:9848"
+    environment:
+      - MODE=standalone
+      - NACOS_AUTH_ENABLE=false
+      - JVM_XMS=256m
+      - JVM_XMX=512m
+      - JVM_XMN=128m
+    volumes:
+      - nacos-data:/home/nacos/data
+    networks:
+      - kafka-net
+
   # BERT向量化服务
   # bert-service:
   #   build:
@@ -258,6 +277,8 @@ services:
 
 volumes:
   bert-model-cache:
+    driver: local
+  nacos-data:
     driver: local
   postgres-data:
     external: true

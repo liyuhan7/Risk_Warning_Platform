@@ -1,0 +1,71 @@
+spring:
+  # 数据库配置 (Postgres in Docker)
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5432/risk_warning_platform
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 2
+      idle-timeout: 30000
+      max-lifetime: 600000
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  # Elasticsearch 配置 (ES in Docker，本地无认证)
+  elasticsearch:
+    uris: http://127.0.0.1:9200
+    connection-timeout: 1s
+    socket-timeout: 30s
+
+  # Kafka 配置 (Kafka in Docker)
+  kafka:
+    bootstrap-servers: 127.0.0.1:9092
+    consumer:
+      group-id: test-consumer
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.riskwarning.common.message
+        spring.json.value.default.type: com.riskwarning.common.message.Message
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+
+  # Redis 配置 (Redis in Docker，密码见 build/docker-compose.yml)
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 0
+    timeout: 10000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+    username: default
+    password: 123456
+
+logging:
+  file:
+    name: ${spring.application.name}/out/app.log
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

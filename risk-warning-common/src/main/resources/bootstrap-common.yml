@@ -2,14 +2,11 @@ spring:
   cloud:
     nacos:
       config:
-        server-addr: 8.154.16.225:8848
+        server-addr: 127.0.0.1:8848
         file-extension: yml
         group: DEFAULT_GROUP
-        namespace: c5bde2da-1a8b-4fef-97a6-ea4b927ef3d0 #lyh下的配置
         shared-configs:
           - data-id: common-dev.yaml
       discovery:
         enabled: true
-#        namespace: 58bc8df9-455d-411b-9828-c48b402de048
-        namespace: c5bde2da-1a8b-4fef-97a6-ea4b927ef3d0
-        server-addr: 8.154.16.225:8848
+        server-addr: 127.0.0.1:8848

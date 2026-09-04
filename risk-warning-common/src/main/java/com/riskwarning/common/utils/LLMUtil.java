@@ -124,7 +124,7 @@ public class LLMUtil {
      * 预定义的风险维度列表
      */
     private static final List<String> dimensions = Arrays.asList(
-            "企业关联方风险", "产品合规风险", "劳务合规风险", "企业信用风险", "国际化经营风险", "供应链风险"
+            "企业关联方风险", "产品合规风险", "劳务合规风险", "企业信用风险", "企业国际合作风险", "供应链风险"
     );
 
     /**

@@ -12,7 +12,7 @@ public enum RiskDimensionEnum {
 
     ENTERPRISE_CREDIT_RISK("企业信用风险", 3),
 
-    ENTERPRISE_INTERNATIONAL_COOPERATION_RISK("国际化经营风险", 4),
+    ENTERPRISE_INTERNATIONAL_COOPERATION_RISK("企业国际合作风险", 4),
 
     SUPPLY_CHAIN_RISK("供应链风险", 5);
 
@@ -40,10 +40,6 @@ public enum RiskDimensionEnum {
             if (dim.description.equals(dimension)) {
                 return dim;
             }
-        }
-        if (ENTERPRISE_INTERNATIONAL_COOPERATION_RISK.description.equals("国际化经营风险")
-                && "企业国际合作风险".equals(dimension)) {
-            return ENTERPRISE_INTERNATIONAL_COOPERATION_RISK;
         }
         throw new IllegalArgumentException(dimension);
     }

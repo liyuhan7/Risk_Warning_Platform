@@ -28,7 +28,8 @@ public class ESSearchTest {
     @Test
     public void fetchTopIndicators() {
 
-        Behavior behavior = fetchBehaviorById("3352e650-41cd-441c-a66a-ef98f575978a");
+        // 取任意一条存量行为做候选指标检索验证（不依赖特定 id 是否仍在库中）
+        Behavior behavior = fetchAnyBehavior();
 
         try {
             String text = (behavior.getDescription() == null ? "" : behavior.getDescription())
@@ -40,7 +41,8 @@ public class ESSearchTest {
                             .index(ElasticSearchConfig.INDICATOR_INDEX)
                             .size(5)
                             .knn(k -> k
-                                    .field("name_vector")
+                                    // 向量字段名与映射一致（camelCase）
+                                    .field("nameVector")
                                     .queryVector(
                                             behavior.getDescriptionVector()
                                     )
@@ -64,24 +66,19 @@ public class ESSearchTest {
         log.info("Fetching top indicators from Elasticsearch");
     }
 
-    private Behavior fetchBehaviorById(String behaviorId) {
+    private Behavior fetchAnyBehavior() {
         try{
             SearchResponse<Behavior> response = esClient.search(s -> s
                             .index(ElasticSearchConfig.BEHAVIOR_INDEX)
-                            .query(q -> q
-                                    .term(t -> t
-                                            .field("id")
-                                            .value(v -> v.stringValue(behaviorId))
-                                    )
-                            )
-                    , Behavior.class);
+                            .size(1),
+                    Behavior.class);
 
             if (response.hits().hits().isEmpty()) {
-                throw new Exception("Behavior not found: " + behaviorId);
+                throw new Exception("t_behavior is empty, no behavior to test with");
             }
             return response.hits().hits().get(0).source();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch Behavior by ID: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to fetch any Behavior: " + e.getMessage(), e);
         }
     }
 }

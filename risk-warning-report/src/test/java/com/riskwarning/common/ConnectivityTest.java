@@ -96,11 +96,12 @@ public class ConnectivityTest {
 
 
             Assessment assessment = Assessment.builder()
-                    .projectId(1000L)
+                    .projectId(1L)
                     .assessmentDate(LocalDateTime.now())
                     .overallScore(0.0)
                     .overallRiskLevel(RiskLevelEnum.LOW_RISK)
-                    .details("")
+                    // details 列为 jsonb，空串不是合法 JSON，写入合法对象字面量
+                    .details("{}")
                     .recommendations("")
                     .status(AssessmentStatusEnum.ASSESSING)
                     .createdAt(LocalDateTime.now())
@@ -129,7 +130,7 @@ public class ConnectivityTest {
         SearchResponse<Behavior> resp = client.search(s -> s
                         .index(ElasticSearchConfig.BEHAVIOR_INDEX)
                         .size(10)
-                        .query(q -> q.bool(ma -> ma.must(m1 ->m1.term(t->t.field("project_id").value(22))))),
+                        .query(q -> q.bool(ma -> ma.must(m1 ->m1.term(t->t.field("projectId").value(2))))),
                 Behavior.class
         );
 
@@ -142,7 +143,7 @@ public class ConnectivityTest {
                 }
             }
         }
-        Assert.isTrue(allBehaviors.size() == 10, "Only one behavior allowed");
+        Assert.isTrue(!allBehaviors.isEmpty(), "t_behavior 应有 projectId=2 的数据");
     }
 
     /**

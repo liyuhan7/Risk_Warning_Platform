@@ -41,10 +41,10 @@ class EsVectorizationUtilTest {
     @Test
     void vectorizeIndicatorsProcessesMissingDocumentsUntilCoverageIsComplete() {
         when(esRepository.getDocumentCount("t_indicator")).thenReturn(3L);
-        when(esRepository.getDocumentCountWithField("t_indicator", "name_vector"))
+        when(esRepository.getDocumentCountWithField("t_indicator", "nameVector"))
                 .thenReturn(1L, 3L);
         when(esRepository.searchDocumentsMissingField(
-                eq("t_indicator"), eq("name"), eq("name_vector"), eq(50), eq(Map.class)))
+                eq("t_indicator"), eq("name"), eq("nameVector"), eq(50), eq(Map.class)))
                 .thenReturn(Arrays.asList(document("a", "指标 A"), document("b", "指标 B")))
                 .thenReturn(Collections.emptyList());
         when(vectorizationUtil.batchVectorize(Arrays.asList("指标 A", "指标 B")))
@@ -63,10 +63,10 @@ class EsVectorizationUtilTest {
     @Test
     void vectorizeIndicatorsReportsIncompleteCoverageWhenBulkUpdateFails() {
         when(esRepository.getDocumentCount("t_indicator")).thenReturn(2L);
-        when(esRepository.getDocumentCountWithField("t_indicator", "name_vector"))
+        when(esRepository.getDocumentCountWithField("t_indicator", "nameVector"))
                 .thenReturn(0L, 1L);
         when(esRepository.searchDocumentsMissingField(
-                eq("t_indicator"), eq("name"), eq("name_vector"), eq(50), eq(Map.class)))
+                eq("t_indicator"), eq("name"), eq("nameVector"), eq(50), eq(Map.class)))
                 .thenReturn(Arrays.asList(document("a", "指标 A"), document("b", "指标 B")));
         when(vectorizationUtil.batchVectorize(Arrays.asList("指标 A", "指标 B")))
                 .thenReturn(Arrays.asList(vector(), vector()));

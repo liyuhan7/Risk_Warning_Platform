@@ -93,21 +93,24 @@ public class ConnectivityTest {
 
             Assessment assessment1 = assessmentRepository.findById(88L);
 
+            // 外键约束：project_id 须为已存在的 t_project.id
             Assessment assessment = Assessment.builder()
-                    .projectId(1000L)
+                    .projectId(1L)
                     .assessmentDate(LocalDateTime.now())
                     .overallScore(0.0)
                     .overallRiskLevel(RiskLevelEnum.LOW_RISK)
-                    .details("")
+                    // details 列为 jsonb，空串不是合法 JSON，写入合法对象字面量
+                    .details("{}")
                     .recommendations("")
                     .status(AssessmentStatusEnum.ASSESSING)
                     .createdAt(LocalDateTime.now())
                     .build();
-            assessmentRepository.saveAndFlush(assessment);
+            Assessment saved = assessmentRepository.saveAndFlush(assessment);
 
-            Assessment assessment2 = assessmentRepository.findByProjectId(1000L);
-
-            assert assessment2.getOverallScore() == 0.0;
+            // projectId=1 存在历史行，findByProjectId 不唯一，改按主键回读
+            Assessment reloaded = assessmentRepository.findById(saved.getId());
+            assert reloaded != null && reloaded.getOverallScore() == 0.0;
+            assert "LOW_RISK".equals(String.valueOf(reloaded.getOverallRiskLevel()));
         } catch (Exception e) {
             e.printStackTrace();
             assert false : "Failed to query assessments from the database";

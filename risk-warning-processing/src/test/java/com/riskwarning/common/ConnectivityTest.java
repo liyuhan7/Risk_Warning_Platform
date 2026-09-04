@@ -205,31 +205,32 @@ public void testAssessmentQuery() {
 
         Long projectId;
 
+        // 验证查询：projectId 在存量数据中不唯一，按主键回读
+        Long verifyId;
         if (assessments.isEmpty()) {
-            // 创建测试评估记录
             projectId = 1L; // 确保项目存在
-
-            Assessment assessment = Assessment.builder()
+            Assessment savedAssessment = assessmentRepository.saveAndFlush(Assessment.builder()
                     .projectId(projectId)
                     .assessmentDate(LocalDateTime.now())
                     .overallScore(85.5)
                     .overallRiskLevel(RiskLevelEnum.MEDIUM_RISK)
-                    .details("测试评估详情")
+                    // details 列为 jsonb，非 JSON 文本会被数据库拒绝，写入合法对象字面量
+                    .details("{\"test\": \"data\"}")
                     .recommendations("测试建议")
                     .status(AssessmentStatusEnum.ASSESSING)
                     .createdAt(LocalDateTime.now())
-                    .build();
-            Assessment savedAssessment = assessmentRepository.saveAndFlush(assessment);
-            System.out.println("Created test assessment with ID: " + savedAssessment.getId());
+                    .build());
+            verifyId = savedAssessment.getId();
+            System.out.println("Created test assessment with ID: " + verifyId);
         } else {
-            // 使用已有的评估记录的项目 ID
-            projectId = assessments.get(0).getProjectId();
+            // 使用已有的评估记录
+            Assessment existing = assessments.get(0);
+            projectId = existing.getProjectId();
+            verifyId = existing.getId();
             System.out.println("Using existing project ID: " + projectId);
         }
-
-        // 验证查询
-        Assessment assessment2 = assessmentRepository.findByProjectId(projectId);
-        assert assessment2 != null : "未找到评估记录，project_id=" + projectId;
+        Assessment reloaded = assessmentRepository.findById(verifyId).orElse(null);
+        assert reloaded != null : "未找到评估记录 id=" + verifyId;
 
         System.out.println("Test passed! Found assessment for project: " + projectId);
     } catch (Exception e) {

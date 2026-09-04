@@ -14,12 +14,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class RiskLevelEnumTest {
 
     /**
-     * 三个计数器全为 0 表示没有任何指标触发风险，属最好情况。
+     * 三个计数器全为 0 表示没有任何指标触发风险，属最好情况，返回 NO_RISK（P0-11 决议 2.4）。
      * 修复前分母为 0 得到 NaN，经 getByScoreRatio 落入 else 分支被判为高风险。
      */
     @Test
-    void shouldReturnLowRiskWhenNoIndicatorTriggersRisk() {
-        assertEquals(RiskLevelEnum.LOW_RISK, RiskLevelEnum.getByRiskCount(0, 0, 0));
+    void shouldReturnNoRiskWhenNoIndicatorTriggersRisk() {
+        assertEquals(RiskLevelEnum.NO_RISK, RiskLevelEnum.getByRiskCount(0, 0, 0));
     }
 
     /**

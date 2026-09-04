@@ -1,0 +1,276 @@
+[
+  {
+    "id": "S01-normal",
+    "category": "正常",
+    "expectPass": true,
+    "actualPass": true,
+    "matched": true,
+    "rawResponse": "{\"applicable\": \"APPLICABLE\", \"requirement\": \"一级供应商须提供有效环境许可证明，企业每年至少开展一次合规审查。\", \"enterpriseFact\": \"已完成 12 家一级供应商年度审查，其中 3 家未提供有效环境许可证明。\", \"complianceStatus\": \"NON_COMPLIANT\", \"gapType\": \"DOCUMENTATION_GAP\", \"gapValue\": 3.0, \"gapUnit\": \"家\", \"confidence\": 0.83, \"reasoning\": \"法规要求一级供应商全部持有有效环境许可证明，证据显示 3 家缺失且整改未完成。\", \"indicatorId\": \"ZGtGpJcBk1sQ2mXvL4Rt\", \"regulationIds\": [\"R7xKmZcBk1sQ2mXvA9Ye\"], \"evidenceIds\": [\"9f2a7c41d8b3e05614a7c9de2f83b110\"]}",
+    "validation": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "hadExtraText": false
+    }
+  },
+  {
+    "id": "S02-missing-field",
+    "category": "缺字段",
+    "expectPass": false,
+    "actualPass": false,
+    "matched": true,
+    "rawResponse": "{\"applicable\": \"APPLICABLE\", \"requirement\": \"一级供应商须提供有效环境许可证明，企业每年至少开展一次合规审查。\", \"enterpriseFact\": \"已完成 12 家一级供应商年度审查，其中 3 家未提供有效环境许可证明。\", \"gapType\": \"DOCUMENTATION_GAP\", \"gapValue\": 3.0, \"gapUnit\": \"家\", \"confidence\": 0.83, \"reasoning\": \"法规要求一级供应商全部持有有效环境许可证明，证据显示 3 家缺失且整改未完成。\", \"indicatorId\": \"ZGtGpJcBk1sQ2mXvL4Rt\", \"regulationIds\": [\"R7xKmZcBk1sQ2mXvA9Ye\"], \"evidenceIds\": [\"9f2a7c41d8b3e05614a7c9de2f83b110\"]}",
+    "validation": {
+      "passed": false,
+      "errors": [
+        {
+          "code": "MISSING_FIELD",
+          "field": "complianceStatus",
+          "detail": "必填字段缺失"
+        }
+      ],
+      "warnings": [],
+      "hadExtraText": false
+    }
+  },
+  {
+    "id": "S03-bad-enum",
+    "category": "错枚举",
+    "expectPass": false,
+    "actualPass": false,
+    "matched": true,
+    "rawResponse": "{\"applicable\": \"APPLICABLE\", \"requirement\": \"一级供应商须提供有效环境许可证明，企业每年至少开展一次合规审查。\", \"enterpriseFact\": \"已完成 12 家一级供应商年度审查，其中 3 家未提供有效环境许可证明。\", \"complianceStatus\": \"PARTIALLY_COMPLIANT\", \"gapType\": \"DOCUMENTATION_GAP\", \"gapValue\": 3.0, \"gapUnit\": \"家\", \"confidence\": 0.83, \"reasoning\": \"法规要求一级供应商全部持有有效环境许可证明，证据显示 3 家缺失且整改未完成。\", \"indicatorId\": \"ZGtGpJcBk1sQ2mXvL4Rt\", \"regulationIds\": [\"R7xKmZcBk1sQ2mXvA9Ye\"], \"evidenceIds\": [\"9f2a7c41d8b3e05614a7c9de2f83b110\"]}",
+    "validation": {
+      "passed": false,
+      "errors": [
+        {
+          "code": "BAD_ENUM",
+          "field": "complianceStatus",
+          "detail": "取值 'PARTIALLY_COMPLIANT' 不在允许集合 ['COMPLIANT', 'INSUFFICIENT_EVIDENCE', 'NEEDS_REVIEW', 'NON_COMPLIANT'] 内"
+        }
+      ],
+      "warnings": [],
+      "hadExtraText": false
+    }
+  },
+  {
+    "id": "S04-extra-text",
+    "category": "额外文本",
+    "expectPass": false,
+    "actualPass": false,
+    "matched": true,
+    "rawResponse": "好的，分析如下：\n```json\n{\"applicable\": \"APPLICABLE\", \"requirement\": \"一级供应商须提供有效环境许可证明，企业每年至少开展一次合规审查。\", \"enterpriseFact\": \"已完成 12 家一级供应商年度审查，其中 3 家未提供有效环境许可证明。\", \"complianceStatus\": \"NON_COMPLIANT\", \"gapType\": \"DOCUMENTATION_GAP\", \"gapValue\": 3.0, \"gapUnit\": \"家\", \"confidence\": 0.83, \"reasoning\": \"法规要求一级供应商全部持有有效环境许可证明，证据显示 3 家缺失且整改未完成。\", \"indicatorId\": \"ZGtGpJcBk1sQ2mXvL4Rt\", \"regulationIds\": [\"R7xKmZcBk1sQ2mXvA9Ye\"], \"evidenceIds\": [\"9f2a7c41d8b3e05614a7c9de2f83b110\"]}\n```\n希望对你有帮助。",
+    "validation": {
+      "passed": false,
+      "errors": [
+        {
+          "code": "EXTRA_TEXT_AROUND_JSON",
+          "field": null,
+          "detail": "JSON 之外存在多余文本或代码块围栏"
+        }
+      ],
+      "warnings": [],
+      "hadExtraText": true
+    }
+  },
+  {
+    "id": "S05-invalid-json",
+    "category": "无效 JSON",
+    "expectPass": false,
+    "actualPass": false,
+    "matched": true,
+    "rawResponse": "{\"applicable\": \"APPLICABLE\", \"confidence\": 0.8,",
+    "validation": {
+      "passed": false,
+      "errors": [
+        {
+          "code": "INVALID_JSON",
+          "field": null,
+          "detail": "无法从响应中解析出 JSON 对象"
+        }
+      ],
+      "warnings": [],
+      "hadExtraText": false
+    }
+  },
+  {
+    "id": "S06-timeout",
+    "category": "超时",
+    "expectPass": false,
+    "actualPass": false,
+    "matched": true,
+    "rawResponse": null,
+    "validation": {
+      "passed": false,
+      "errors": [
+        {
+          "code": "TIMEOUT",
+          "field": null,
+          "detail": "传输层失败"
+        }
+      ],
+      "warnings": [],
+      "hadExtraText": false
+    }
+  },
+  {
+    "id": "S07-empty-string-enum",
+    "category": "空串枚举",
+    "expectPass": false,
+    "actualPass": false,
+    "matched": true,
+    "rawResponse": "{\"applicable\": \"APPLICABLE\", \"requirement\": \"一级供应商须提供有效环境许可证明，企业每年至少开展一次合规审查。\", \"enterpriseFact\": \"已完成 12 家一级供应商年度审查，其中 3 家未提供有效环境许可证明。\", \"complianceStatus\": \"\", \"gapType\": \"DOCUMENTATION_GAP\", \"gapValue\": 3.0, \"gapUnit\": \"家\", \"confidence\": 0.83, \"reasoning\": \"法规要求一级供应商全部持有有效环境许可证明，证据显示 3 家缺失且整改未完成。\", \"indicatorId\": \"ZGtGpJcBk1sQ2mXvL4Rt\", \"regulationIds\": [\"R7xKmZcBk1sQ2mXvA9Ye\"], \"evidenceIds\": [\"9f2a7c41d8b3e05614a7c9de2f83b110\"]}",
+    "validation": {
+      "passed": false,
+      "errors": [
+        {
+          "code": "EMPTY_STRING_IN_ENUM",
+          "field": "complianceStatus",
+          "detail": "枚举字段为空串，语义未知须用显式枚举值"
+        }
+      ],
+      "warnings": [],
+      "hadExtraText": false
+    }
+  },
+  {
+    "id": "S08-hallucinated-regulation",
+    "category": "幻觉引用",
+    "expectPass": false,
+    "actualPass": false,
+    "matched": true,
+    "rawResponse": "{\"applicable\": \"APPLICABLE\", \"requirement\": \"一级供应商须提供有效环境许可证明，企业每年至少开展一次合规审查。\", \"enterpriseFact\": \"已完成 12 家一级供应商年度审查，其中 3 家未提供有效环境许可证明。\", \"complianceStatus\": \"NON_COMPLIANT\", \"gapType\": \"DOCUMENTATION_GAP\", \"gapValue\": 3.0, \"gapUnit\": \"家\", \"confidence\": 0.83, \"reasoning\": \"法规要求一级供应商全部持有有效环境许可证明，证据显示 3 家缺失且整改未完成。\", \"indicatorId\": \"ZGtGpJcBk1sQ2mXvL4Rt\", \"regulationIds\": [\"R0000000000000000000\"], \"evidenceIds\": [\"9f2a7c41d8b3e05614a7c9de2f83b110\"]}",
+    "validation": {
+      "passed": false,
+      "errors": [
+        {
+          "code": "UNKNOWN_REFERENCE",
+          "field": "regulationIds",
+          "detail": "引用了候选外的法规 ID ['R0000000000000000000']（8.4 规则 2，属未经检索的记忆输出）"
+        }
+      ],
+      "warnings": [],
+      "hadExtraText": false
+    }
+  },
+  {
+    "id": "S09-hallucinated-evidence",
+    "category": "幻觉引用",
+    "expectPass": false,
+    "actualPass": false,
+    "matched": true,
+    "rawResponse": "{\"applicable\": \"APPLICABLE\", \"requirement\": \"一级供应商须提供有效环境许可证明，企业每年至少开展一次合规审查。\", \"enterpriseFact\": \"已完成 12 家一级供应商年度审查，其中 3 家未提供有效环境许可证明。\", \"complianceStatus\": \"NON_COMPLIANT\", \"gapType\": \"DOCUMENTATION_GAP\", \"gapValue\": 3.0, \"gapUnit\": \"家\", \"confidence\": 0.83, \"reasoning\": \"法规要求一级供应商全部持有有效环境许可证明，证据显示 3 家缺失且整改未完成。\", \"indicatorId\": \"ZGtGpJcBk1sQ2mXvL4Rt\", \"regulationIds\": [\"R7xKmZcBk1sQ2mXvA9Ye\"], \"evidenceIds\": [\"0000000000000000000000000000dead\"]}",
+    "validation": {
+      "passed": false,
+      "errors": [
+        {
+          "code": "UNKNOWN_REFERENCE",
+          "field": "evidenceIds",
+          "detail": "引用了给定集合外的证据 ID ['0000000000000000000000000000dead']（8.4 规则 1，属幻觉引用）"
+        }
+      ],
+      "warnings": [],
+      "hadExtraText": false
+    }
+  },
+  {
+    "id": "S10-cross-rule-not-applicable",
+    "category": "交叉规则",
+    "expectPass": false,
+    "actualPass": false,
+    "matched": true,
+    "rawResponse": "{\"applicable\": \"NOT_APPLICABLE\", \"requirement\": \"一级供应商须提供有效环境许可证明，企业每年至少开展一次合规审查。\", \"enterpriseFact\": \"已完成 12 家一级供应商年度审查，其中 3 家未提供有效环境许可证明。\", \"complianceStatus\": \"NON_COMPLIANT\", \"gapType\": \"DOCUMENTATION_GAP\", \"gapValue\": 3.0, \"gapUnit\": \"家\", \"confidence\": 0.83, \"reasoning\": \"法规要求一级供应商全部持有有效环境许可证明，证据显示 3 家缺失且整改未完成。\", \"indicatorId\": \"ZGtGpJcBk1sQ2mXvL4Rt\", \"regulationIds\": [\"R7xKmZcBk1sQ2mXvA9Ye\"], \"evidenceIds\": [\"9f2a7c41d8b3e05614a7c9de2f83b110\"]}",
+    "validation": {
+      "passed": false,
+      "errors": [
+        {
+          "code": "CROSS_RULE_VIOLATION",
+          "field": "complianceStatus",
+          "detail": "applicable=NOT_APPLICABLE 时不得为 NON_COMPLIANT（8.4 规则 3）"
+        }
+      ],
+      "warnings": [],
+      "hadExtraText": false
+    }
+  },
+  {
+    "id": "S11-missing-gap-type",
+    "category": "交叉规则",
+    "expectPass": false,
+    "actualPass": false,
+    "matched": true,
+    "rawResponse": "{\"applicable\": \"APPLICABLE\", \"requirement\": \"一级供应商须提供有效环境许可证明，企业每年至少开展一次合规审查。\", \"enterpriseFact\": \"已完成 12 家一级供应商年度审查，其中 3 家未提供有效环境许可证明。\", \"complianceStatus\": \"NON_COMPLIANT\", \"gapType\": null, \"gapValue\": 3.0, \"gapUnit\": \"家\", \"confidence\": 0.83, \"reasoning\": \"法规要求一级供应商全部持有有效环境许可证明，证据显示 3 家缺失且整改未完成。\", \"indicatorId\": \"ZGtGpJcBk1sQ2mXvL4Rt\", \"regulationIds\": [\"R7xKmZcBk1sQ2mXvA9Ye\"], \"evidenceIds\": [\"9f2a7c41d8b3e05614a7c9de2f83b110\"]}",
+    "validation": {
+      "passed": false,
+      "errors": [
+        {
+          "code": "CROSS_RULE_VIOLATION",
+          "field": "gapType",
+          "detail": "complianceStatus=NON_COMPLIANT 时 gapType 必填（8.4 规则 5）"
+        }
+      ],
+      "warnings": [],
+      "hadExtraText": false
+    }
+  },
+  {
+    "id": "S12-unitless-gap",
+    "category": "交叉规则",
+    "expectPass": false,
+    "actualPass": false,
+    "matched": true,
+    "rawResponse": "{\"applicable\": \"APPLICABLE\", \"requirement\": \"一级供应商须提供有效环境许可证明，企业每年至少开展一次合规审查。\", \"enterpriseFact\": \"已完成 12 家一级供应商年度审查，其中 3 家未提供有效环境许可证明。\", \"complianceStatus\": \"NON_COMPLIANT\", \"gapType\": \"DOCUMENTATION_GAP\", \"gapValue\": 3.0, \"gapUnit\": null, \"confidence\": 0.83, \"reasoning\": \"法规要求一级供应商全部持有有效环境许可证明，证据显示 3 家缺失且整改未完成。\", \"indicatorId\": \"ZGtGpJcBk1sQ2mXvL4Rt\", \"regulationIds\": [\"R7xKmZcBk1sQ2mXvA9Ye\"], \"evidenceIds\": [\"9f2a7c41d8b3e05614a7c9de2f83b110\"]}",
+    "validation": {
+      "passed": false,
+      "errors": [
+        {
+          "code": "CROSS_RULE_VIOLATION",
+          "field": "gapUnit",
+          "detail": "gapValue 非空时 gapUnit 必填（8.4 规则 6）"
+        }
+      ],
+      "warnings": [],
+      "hadExtraText": false
+    }
+  },
+  {
+    "id": "S13-confidence-out-of-range",
+    "category": "取值越界",
+    "expectPass": false,
+    "actualPass": false,
+    "matched": true,
+    "rawResponse": "{\"applicable\": \"APPLICABLE\", \"requirement\": \"一级供应商须提供有效环境许可证明，企业每年至少开展一次合规审查。\", \"enterpriseFact\": \"已完成 12 家一级供应商年度审查，其中 3 家未提供有效环境许可证明。\", \"complianceStatus\": \"NON_COMPLIANT\", \"gapType\": \"DOCUMENTATION_GAP\", \"gapValue\": 3.0, \"gapUnit\": \"家\", \"confidence\": 1.4, \"reasoning\": \"法规要求一级供应商全部持有有效环境许可证明，证据显示 3 家缺失且整改未完成。\", \"indicatorId\": \"ZGtGpJcBk1sQ2mXvL4Rt\", \"regulationIds\": [\"R7xKmZcBk1sQ2mXvA9Ye\"], \"evidenceIds\": [\"9f2a7c41d8b3e05614a7c9de2f83b110\"]}",
+    "validation": {
+      "passed": false,
+      "errors": [
+        {
+          "code": "OUT_OF_RANGE",
+          "field": "confidence",
+          "detail": "取值 1.4 超出 [0.0, 1.0]"
+        }
+      ],
+      "warnings": [],
+      "hadExtraText": false
+    }
+  },
+  {
+    "id": "S14-unknown-applicable-mismatch",
+    "category": "交叉规则",
+    "expectPass": false,
+    "actualPass": false,
+    "matched": true,
+    "rawResponse": "{\"applicable\": \"UNKNOWN\", \"requirement\": \"一级供应商须提供有效环境许可证明，企业每年至少开展一次合规审查。\", \"enterpriseFact\": \"已完成 12 家一级供应商年度审查，其中 3 家未提供有效环境许可证明。\", \"complianceStatus\": \"COMPLIANT\", \"gapType\": \"DOCUMENTATION_GAP\", \"gapValue\": 3.0, \"gapUnit\": \"家\", \"confidence\": 0.83, \"reasoning\": \"法规要求一级供应商全部持有有效环境许可证明，证据显示 3 家缺失且整改未完成。\", \"indicatorId\": \"ZGtGpJcBk1sQ2mXvL4Rt\", \"regulationIds\": [\"R7xKmZcBk1sQ2mXvA9Ye\"], \"evidenceIds\": [\"9f2a7c41d8b3e05614a7c9de2f83b110\"]}",
+    "validation": {
+      "passed": false,
+      "errors": [
+        {
+          "code": "CROSS_RULE_VIOLATION",
+          "field": "complianceStatus",
+          "detail": "applicable=UNKNOWN 时只能为 INSUFFICIENT_EVIDENCE 或 NEEDS_REVIEW（8.4 规则 4）"
+        }
+      ],
+      "warnings": [],
+      "hadExtraText": false
+    }
+  }
+]

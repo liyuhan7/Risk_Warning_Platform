@@ -143,15 +143,15 @@ Kafka Topic 暂不变化；若消息需新增字段，必须保持旧消费者�
 
 - [x] `P0-01`（C，B 协助）冻结测试 PDF、Project、Assessment 和三类案例：明确不合规、明确合规、证据不足。→ `documents/plan0/baseline/test-cases.md`
 - [x] `P0-02`（B）记录旧链的 Behavior、Indicator/Regulation 召回、IndicatorResult、Risk 和错误案例。→ `documents/plan0/baseline/p0-02-baseline.md`
-- [ ] `P0-03`（B）核对 `projectId / assessmentId / sourceDocumentId` 的传递与查询边界，形成隔离改造清单。
-- [ ] `P0-04`（B）统计 Indicator 总数、Binary、Range、无 CalculationRule、有/无 RiskRule 和不可执行规则样本。
-- [ ] `P0-05`（A、B）定义并评审五个核心 Schema、枚举、校验规则和版本字段。
-- [ ] `P0-06`（A）完成固定 Prompt 的结构化 JSON 最小验证，保存成功与失败样本。
-- [ ] `P0-07`（B）引入 Provider 配置边界，吊销并替换硬编码凭据；仓库和日志不得再出现有效密钥。
-- [ ] `P0-08`（B）为零风险聚合等已确认的确定性 Bug 添加失败测试并修复。
-- [ ] `P0-09`（A、B）核对 Java 字段、文档 Mapping 和运行时 ES Mapping，冻结向量字段、维度和版本策略。
-- [ ] `P0-10`（C）完成旧结果截图、Evidence/AnalysisResult 前端类型和风险详情 Mock。
-- [ ] `P0-11`（全员）召开接口评审，记录已冻结项、未决项、负责人和最晚决策日期。
+- [x] `P0-03`（B）核对 `projectId / assessmentId / sourceDocumentId` 的传递与查询边界，形成隔离改造清单。→ `documents/plan0/baseline/p0-03-isolation.md`
+- [x] `P0-04`（B）统计 Indicator 总数、Binary、Range、无 CalculationRule、有/无 RiskRule 和不可执行规则样本。→ `documents/plan0/baseline/p0-04-rule-stats.md`
+- [x] `P0-05`（A、B）定义并评审五个核心 Schema、枚举、校验规则和版本字段。→ 定义已完成 `documents/plan0/baseline/p0-05-core-schemas.md`、`documents/plan0/baseline/p0-05-schema-examples.json`；评审待 `P0-11`
+- [ ] `P0-06`（A）完成固定 Prompt 的结构化 JSON 最小验证，保存成功与失败样本。→ Prompt、校验器与 14 条构造样本已完成 `documents/plan0/baseline/p0-06-prompt-validation.md`；`P0-07` 已完成配置边界，脚本改用 `LLM_BASE_URL` / `LLM_MODEL` / `LLM_API_KEY`，**连续 10 次真实调用待用户更换平台并提供新凭据后执行**
+- [x] `P0-07`（B）引入 Provider 配置边界，吊销并替换硬编码凭据；仓库和日志不得再出现有效密钥。→ `documents/plan0/baseline/p0-07-provider-boundary.md`。Provider 边界按 OpenAI 兼容协议建立，明文凭据已移除（全仓 `grep` 0 命中），顺带关闭 D-31、D-32。**旧 Key 的供应商侧吊销与 git 历史清除须用户执行**
+- [x] `P0-08`（B）为零风险聚合等已确认的确定性 Bug 添加失败测试并修复。→ `documents/plan0/baseline/p0-08-deterministic-bugfix.md`。修复 D-09（零风险聚合除零判为高风险），`RiskLevelEnumTest` 5 个用例先失败后通过。其余已确认缺陷均因待决策或依赖计划 1—3 而不属本阶段范围，理由已逐条记录
+- [x] `P0-09`（A、B）核对 Java 字段、文档 Mapping 和运行时 ES Mapping，冻结向量字段、维度和版本策略。→ `documents/plan0/baseline/p0-09-field-contract.md`。四索引三方对账完成，冻结向量字段名（`description_vector` / `name_vector` / `full_text_vector`）、768 维与 `index: true` + `similarity: cosine` 检索参数及版本策略。修正 D-01 根因（命名分裂源于数据文件而非配置项，SNAKE_CASE 不可单独移除），补强 D-26（文档 mapping 缺检索参数，重建即丧失 kNN 能力），新增 F-09 / F-10 / F-11。**字段改名与 Mapping 重写属破坏性变更，移交 `P0-11` 决策**
+- [~] `P0-10`（C）完成旧结果截图、Evidence/AnalysisResult 前端类型和风险详情 Mock。→ **按用户决定跳过**（2026-08-27）。理由：前端仓库 `D:\大创\Risk_Warning_Platform_Fr` 后续将按「前端专项开发计划」大幅改造，此时产出的 Mock 类型与风险详情原型会被推翻，属重复劳动。影响：本阶段不产出前端契约样例，计划 4 前端联调前须补做 Evidence/AnalysisResult 前端类型；`P0-11` 接口评审仍按后端 DTO 冻结契约，不因缺少前端 Mock 而放宽。前端仓库现存未提交改动 `src/api/report.ts` 须保留（PLAN.md:838）
+- [x] `P0-11`（全员）召开接口评审，记录已冻结项、未决项、负责人和最晚决策日期。→ `documents/plan0/baseline/p0-11-review-record.md`。15 项决策完成，关闭 `defect-backlog.md` 全部 9 条待决策及 D-24，追认 `p0-03-isolation.md` 与 `p0-05-core-schemas.md` 为已冻结。核心决议：ES 统一 camelCase 一次性切换、风险等级统一比例语义、`RiskRule` 改三档 `thresholds`、新增 `NO_RISK` 并改 `EnumType.STRING`、删除 `BatchTest`、收窄 gateway 扫描范围。实测补齐 F-12：Milvus 确有 `industry` 存量且被 `VectorSearchService.java:128` 精确匹配过滤使用，改名须同步 Milvus。**全部破坏性变更均未执行，须先完成 ES snapshot 备份，再按记录第五节的窗口顺序单独实施**
 
 ### 9. 依赖关系
 

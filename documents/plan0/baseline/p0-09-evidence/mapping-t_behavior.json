@@ -1,0 +1,51 @@
+﻿{
+    "t_behavior":  {
+                       "mappings":  {
+                                        "properties":  {
+                                                           "behavior_date":  {
+                                                                                 "type":  "date"
+                                                                             },
+                                                           "created_at":  {
+                                                                              "type":  "date"
+                                                                          },
+                                                           "description":  {
+                                                                               "type":  "text",
+                                                                               "analyzer":  "standard"
+                                                                           },
+                                                           "description_vector":  {
+                                                                                      "type":  "dense_vector",
+                                                                                      "dims":  768,
+                                                                                      "index":  true,
+                                                                                      "similarity":  "cosine"
+                                                                                  },
+                                                           "dimension":  {
+                                                                             "type":  "keyword"
+                                                                         },
+                                                           "id":  {
+                                                                      "type":  "keyword"
+                                                                  },
+                                                           "project_id":  {
+                                                                              "type":  "long"
+                                                                          },
+                                                           "quantitative_data":  {
+                                                                                     "type":  "double"
+                                                                                 },
+                                                           "status":  {
+                                                                          "type":  "keyword"
+                                                                      },
+                                                           "tags":  {
+                                                                        "type":  "keyword"
+                                                                    },
+                                                           "type":  {
+                                                                        "type":  "keyword"
+                                                                    },
+                                                           "vector":  {
+                                                                          "type":  "dense_vector",
+                                                                          "dims":  768,
+                                                                          "index":  true,
+                                                                          "similarity":  "cosine"
+                                                                      }
+                                                       }
+                                    }
+                   }
+}

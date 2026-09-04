@@ -25,6 +25,7 @@ import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -68,10 +69,10 @@ public class ExecuteQueueTask {
                     transactionTemplate.execute(status -> {
                         try {
                             Map<Object, Object> uploadFileMap = redisUtil.hmget(String.format(RedisKey.REDIS_KEY_FILE_UPLOAD_INFO, uploadConfirmDto.getProjectId()));
-                            ProjectFile projectFile = ProjectFile.builder()
-                                    .projectId(uploadConfirmDto.getProjectId())
-                                    .filePaths(new ArrayList<>())
-                                    .build();
+                            // 一文件一行：每个上传文件独立建档，id 即 sourceDocumentId
+                            List<Long> savedFileIds = new ArrayList<>();
+                            List<String> savedFilePaths = new ArrayList<>();
+                            Long firstUserId = null;
                             for(Object value : uploadFileMap.values()) {
                                 UploadFileDto uploadFileDto = (UploadFileDto) value;
                                 // todo: 文件需要保存到远程存储，这里只是本地合并，后续需要改造
@@ -83,10 +84,17 @@ public class ExecuteQueueTask {
                                         true
                                 );
 
-                                projectFile.setUserId(uploadFileDto.getUserId());
-                                projectFile.getFilePaths().add(targetFilePath);
+                                if (firstUserId == null) {
+                                    firstUserId = uploadFileDto.getUserId();
+                                }
+                                ProjectFile projectFile = fileRepository.save(ProjectFile.builder()
+                                        .projectId(uploadConfirmDto.getProjectId())
+                                        .userId(uploadFileDto.getUserId())
+                                        .filePath(targetFilePath)
+                                        .build());
+                                savedFileIds.add(projectFile.getId());
+                                savedFilePaths.add(targetFilePath);
                             }
-                            fileRepository.save(projectFile);
 
 
                             // todo: 创建Assessment实体
@@ -110,7 +118,7 @@ public class ExecuteQueueTask {
                                     uploadConfirmDto.getProjectId(),
                                     assessment.getId(),
                                     DataSourceTypeEnum.FILE_UPLOAD,
-                                    projectFile.getFilePaths()
+                                    savedFilePaths
                             );
                             kafkaUtils.sendMessage(behaviorProcessingTaskMessage);
                             return true;

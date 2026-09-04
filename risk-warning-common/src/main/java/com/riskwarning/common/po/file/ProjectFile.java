@@ -1,6 +1,5 @@
 package com.riskwarning.common.po.file;
 
-import com.riskwarning.common.utils.StringListJsonConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,8 +7,11 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
+/**
+ * 上传文件记录，一文件一行（P0-11 决议 3.1）。
+ * id 即 sourceDocumentId 锚点，指向唯一物理文件。
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -26,10 +28,8 @@ public class ProjectFile {
 
     private Long userId;
 
+    private String filePath;
 
-    @Convert(converter = StringListJsonConverter.class)
-    private List<String> filePaths;
-
-    @Column(name = "create_at", insertable = false, updatable = false)
-    private LocalDateTime createAt;
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
 }

@@ -1,6 +1,5 @@
 package com.riskwarning.common.po.behavior;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +16,6 @@ public class Behavior {
 
     private String id;
 
-    @JsonProperty("project_id")
     private Long projectId;
 
     private String description;
@@ -34,7 +32,6 @@ public class Behavior {
 
     private LocalDateTime behaviorDate;
 
-    @JsonProperty("description_vector")
     private List<Float> descriptionVector;
 
     private LocalDateTime createdAt;

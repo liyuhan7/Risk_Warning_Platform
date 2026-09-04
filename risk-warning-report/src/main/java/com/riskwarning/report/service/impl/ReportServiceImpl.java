@@ -279,12 +279,12 @@ public class ReportServiceImpl implements ReportService {
                             .size(1000)  // 假设一个项目不会超过1000个behaviors，如需要可以改成scroll
                             .query(q -> q
                                     .bool(b -> b
-                                            .must(m1 -> m1.term(t -> t.field("assessment_id").value(assessmentId)))
+                                            .must(m1 -> m1.term(t -> t.field("assessmentId").value(assessmentId)))
                                     )
                             )
                             .sort(sort -> sort
                                     .field(f -> f
-                                            .field("create_at")
+                                            .field("createdAt")
                                             .order(SortOrder.Desc)
                                     )
                             ),

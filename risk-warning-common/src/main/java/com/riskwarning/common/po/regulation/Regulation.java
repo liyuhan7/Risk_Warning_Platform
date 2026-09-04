@@ -1,6 +1,5 @@
 package com.riskwarning.common.po.regulation;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +22,8 @@ public class Regulation {
 
     private String dimension;
 
-    private List<String> industry;
+    /** P0-11 决议 3.2：语义为合规领域，ES 字段已改名 complianceDomain */
+    private List<String> complianceDomain;
 
     private List<String> tags;
 
@@ -37,7 +37,6 @@ public class Regulation {
 
     private Double quantitativeIndicator;
 
-    @JsonProperty("full_text_vector")
     private List<Float> fullTextVector;
 
     private LocalDateTime createdAt;

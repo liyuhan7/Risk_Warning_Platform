@@ -26,7 +26,7 @@ public class EsVectorizationUtil {
         return vectorizeIndex(
                 "t_indicator",
                 "name",
-                "name_vector",
+                "nameVector",
                 doc -> {
                     Map<String, Object> source = doc.getSource();
                     if (source != null) {
@@ -37,29 +37,29 @@ public class EsVectorizationUtil {
                 }
         );
     }
-    
-    
+
+
     public VectorizationResult vectorizeRegulations() {
         return vectorizeIndex(
                 "t_regulation",
-                "full_text",
-                "full_text_vector",
+                "fullText",
+                "fullTextVector",
                 doc -> {
                     Map<String, Object> source = doc.getSource();
                     if (source != null) {
-                        Object fullTextObj = source.get("full_text");
+                        Object fullTextObj = source.get("fullText");
                         return fullTextObj != null ? fullTextObj.toString() : null;
                     }
                     return null;
                 }
         );
     }
-    
+
     public VectorizationResult vectorizeBehaviors() {
         return vectorizeIndex(
                 "t_behavior",
                 "description",
-                "description_vector",
+                "descriptionVector",
                 doc -> {
                     Map<String, Object> source = doc.getSource();
                     if (source != null) {

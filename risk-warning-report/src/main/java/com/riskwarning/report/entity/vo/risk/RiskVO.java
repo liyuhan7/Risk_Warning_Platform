@@ -46,5 +46,5 @@ public class RiskVO {
 
     private List<RelatedRegulation> relatedRegulations;
 
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 }

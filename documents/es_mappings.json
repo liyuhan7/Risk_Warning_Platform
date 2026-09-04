@@ -3,22 +3,24 @@
     "mappings": {
       "properties": {
         "id": { "type": "keyword" },
-        "project_id": { "type": "long" },
+        "projectId": { "type": "long" },
         "description": {
           "type": "text",
-          "analyzer": "ik_max_word"
+          "analyzer": "standard"
+        },
+        "descriptionVector": {
+          "type": "dense_vector",
+          "dims": 768,
+          "index": true,
+          "similarity": "cosine"
         },
         "type": { "type": "keyword" },
         "dimension": { "type": "keyword" },
         "tags": { "type": "keyword" },
         "status": { "type": "keyword" },
-        "quantitative_data": { "type": "double" },
-        "behavior_date": { "type": "date" },
-        "vector": {
-          "type": "dense_vector",
-          "dims": 768
-        },
-        "created_at": { "type": "date" }
+        "quantitativeData": { "type": "double" },
+        "behaviorDate": { "type": "date" },
+        "createdAt": { "type": "date" }
       }
     }
   },
@@ -28,110 +30,129 @@
         "id": { "type": "keyword" },
         "name": {
           "type": "text",
-          "analyzer": "ik_max_word",
+          "analyzer": "standard",
           "fields": { "keyword": { "type": "keyword" } }
+        },
+        "nameVector": {
+          "type": "dense_vector",
+          "dims": 768,
+          "index": true,
+          "similarity": "cosine"
         },
         "description": {
           "type": "text",
-          "analyzer": "ik_max_word"
+          "analyzer": "standard"
         },
         "type": { "type": "keyword" },
-        "indicator_level": { "type": "integer" },
-        "parent_indicator_id": { "type": "keyword" },
+        "indicatorLevel": { "type": "long" },
+        "parentIndicatorId": {
+          "type": "text",
+          "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
+        },
         "dimension": { "type": "keyword" },
-        "industry": { "type": "keyword" },
+        "complianceDomain": { "type": "keyword" },
         "region": { "type": "keyword" },
         "tags": { "type": "keyword" },
-        "max_score": { "type": "double" },
-        "calculation_rule": {
+        "maxScore": { "type": "float" },
+        "calculationRule": {
           "type": "object",
           "properties": {
-            "rule_type": { "type": "keyword" },
-            "binary_rule": {
+            "ruleType": {
+              "type": "text",
+              "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
+            },
+            "binaryRule": {
               "type": "object",
               "properties": {
-                "condition": { "type": "text" },
-                "true_score": { "type": "double" },
-                "false_score": { "type": "double" }
+                "condition": {
+                  "type": "text",
+                  "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
+                },
+                "trueScore": { "type": "float" },
+                "falseScore": { "type": "float" }
               }
             },
-            "range_rule": {
+            "rangeRule": {
               "type": "object",
               "properties": {
-                "min_value": { "type": "double" },
-                "max_value": { "type": "double" },
-                "calculation_method": { "type": "keyword" },
-                "out_of_range_score": { "type": "double" },
-                "max_score": { "type": "double" }
+                "minValue": { "type": "float" },
+                "maxValue": { "type": "float" },
+                "calculationMethod": {
+                  "type": "text",
+                  "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
+                },
+                "outOfMinScore": { "type": "float" },
+                "outOfMaxScore": { "type": "float" },
+                "maxScore": { "type": "float" }
               }
             }
           }
         },
-        "risk_rule": {
+        "riskRule": {
           "type": "object",
           "properties": {
-            "description": {"type": "keyword"},
-            "static_threshold": {
+            "description": {
+              "type": "text",
+              "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
+            },
+            "staticThreshold": {
               "type": "object",
               "properties": {
-                "operator": { "type": "keyword" },
-                "threshold_value": { "type": "double" },
-                "risk_level": { "type": "keyword" }
+                "operator": {
+                  "type": "text",
+                  "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
+                },
+                "thresholdValue": { "type": "float" },
+                "riskLevel": {
+                  "type": "text",
+                  "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
+                }
               }
             },
-            "adjustment_factor": {
+            "adjustmentFactor": {
               "type": "object",
               "properties": {
                 "enabled": { "type": "boolean" },
-                "required_low_count": { "type": "integer" },
-                "risk_level_increase": { "type": "keyword" }
+                "requiredLowCount": { "type": "long" },
+                "riskLevelIncrease": {
+                  "type": "text",
+                  "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
+                }
               }
             }
           }
         },
-        "questionnaire_form": {
+        "questionnaireForm": {
           "type": "object",
           "properties": {
-            "question_type": { "type": "keyword" },
-            "question_text": {"type": "keyword"},
-            "input_type": { "type": "keyword" },
-            "validation_rules": {
+            "questionType": { "type": "keyword" },
+            "questionText": { "type": "keyword" },
+            "inputType": { "type": "keyword" },
+            "validationRules": {
               "type": "object",
               "properties": {
-                "min_length": { "type": "integer" },
-                "max_length": { "type": "integer" },
-                "min_value": { "type": "double" },
-                "max_value": { "type": "double" },
+                "minLength": { "type": "integer" },
+                "maxLength": { "type": "integer" },
+                "minValue": { "type": "double" },
+                "maxValue": { "type": "double" },
                 "pattern": { "type": "keyword" },
-                "custom_validation": { "type": "text" }
+                "customValidation": { "type": "text" }
               }
             },
             "options": {
               "type": "nested",
               "properties": {
                 "value": { "type": "keyword" },
-                "label": {
-                  "type": "text",
-                  "analyzer": "ik_max_word"
-                },
-                "score_mapping": { "type": "double" },
-                "is_default": { "type": "boolean" }
+                "label": { "type": "text", "analyzer": "standard" },
+                "scoreMapping": { "type": "double" },
+                "isDefault": { "type": "boolean" }
               }
             },
-            "help_text": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "placeholder": {
-              "type": "keyword"
-            }
+            "helpText": { "type": "text", "analyzer": "standard" },
+            "placeholder": { "type": "keyword" }
           }
         },
-        "vector": {
-          "type": "dense_vector",
-          "dims": 768
-        },
-        "created_at": { "type": "date" }
+        "createdAt": { "type": "date" }
       }
     }
   },
@@ -141,117 +162,106 @@
         "id": { "type": "keyword" },
         "name": {
           "type": "text",
-          "analyzer": "ik_max_word",
+          "analyzer": "standard",
           "fields": { "keyword": { "type": "keyword" } }
+        },
+        "fullTextVector": {
+          "type": "dense_vector",
+          "dims": 768,
+          "index": true,
+          "similarity": "cosine"
         },
         "type": { "type": "keyword" },
         "dimension": { "type": "keyword" },
-        "industry": { "type": "keyword" },
+        "complianceDomain": { "type": "keyword" },
         "tags": { "type": "keyword" },
         "region": { "type": "keyword" },
-        "applicable_subject": { "type": "keyword" },
-        "full_text": {
+        "applicableSubject": { "type": "keyword" },
+        "fullText": {
           "type": "text",
-          "analyzer": "ik_max_word"
+          "analyzer": "standard"
         },
         "direction": { "type": "keyword" },
-        "quantitative_indicator": { "type": "double" },
-        "vector": {
-          "type": "dense_vector",
-          "dims": 768
-        },
-        "created_at": { "type": "date" }
+        "quantitativeIndicator": { "type": "double" },
+        "createdAt": { "type": "date" }
       }
     }
   },
   "t_risk": {
-        "mappings": {
+    "mappings": {
+      "properties": {
+        "id": { "type": "keyword" },
+        "projectId": { "type": "long" },
+        "assessmentId": { "type": "long" },
+        "name": {
+          "type": "text",
+          "analyzer": "standard",
+          "fields": { "keyword": { "type": "keyword" } }
+        },
+        "dimension": { "type": "keyword" },
+        "description": {
+          "type": "text",
+          "analyzer": "standard"
+        },
+        "riskLevel": { "type": "keyword" },
+        "probability": { "type": "double" },
+        "impact": { "type": "double" },
+        "detectability": { "type": "double" },
+        "status": { "type": "keyword" },
+        "processingStatus": {
+          "type": "text",
+          "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
+        },
+        "responsibleParty": { "type": "keyword" },
+        "affectedObjects": { "type": "keyword" },
+        "impactScope": { "type": "keyword" },
+        "countermeasures": {
+          "type": "text",
+          "analyzer": "standard"
+        },
+        "relatedIndicators": {
+          "type": "nested",
           "properties": {
-            "id": { "type": "keyword" },
-            "project_id": { "type": "long" },
-            "assessment_id": { "type": "long" },
-            "name": {
+            "indicatorId": { "type": "keyword" },
+            "indicatorName": {
               "type": "text",
-              "analyzer": "ik_max_word",
+              "analyzer": "standard",
               "fields": { "keyword": { "type": "keyword" } }
             },
-            "dimension": { "type": "keyword" },
-            "description": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "risk_level": { "type": "keyword" },
-            "probability": { "type": "double" },
-            "impact": { "type": "double" },
-            "detectability": { "type": "double" },
-            "status": { "type": "keyword" },
-            "responsible_party": { "type": "keyword" },
-            "affected_objects": { "type": "keyword" },
-            "impact_scope": { "type": "keyword" },
-            "countermeasures": {
-              "type": "text",
-              "analyzer": "ik_max_word"
-            },
-            "related_indicators": {
+            "score": { "type": "double" },
+            "maxScore": { "type": "double" },
+            "isPrimaryTrigger": { "type": "boolean" },
+            "primaryTrigger": { "type": "boolean" },
+            "relatedBehaviors": {
               "type": "nested",
               "properties": {
-                "indicator_id": {
-                  "type": "keyword"
-                },
-                "indicator_name": {
+                "projectId": { "type": "long" },
+                "description": {
                   "type": "text",
-                  "analyzer": "ik_max_word",
-                  "fields": {
-                    "keyword": { "type": "keyword" }
-                  }
+                  "analyzer": "standard"
                 },
-                "score": {
-                  "type": "double"
-                },
-                "max_score": {
-                  "type": "double"
-                },
-                "is_primary_trigger": {
-                  "type": "boolean"
-                },
-                "related_behaviors": {
+                "relatedRegulations": {
                   "type": "nested",
                   "properties": {
-                    "project_id": {
-                      "type": "long"
-                    },
-                    "description": {
+                    "regulationId": { "type": "keyword" },
+                    "regulationName": {
                       "type": "text",
-                      "analyzer": "ik_max_word"
+                      "analyzer": "standard",
+                      "fields": { "keyword": { "type": "keyword" } }
                     },
-                    "related_regulations": {
-                      "type": "nested",
-                      "properties": {
-                        "regulation_id": {
-                          "type": "keyword"
-                        },
-                        "regulation_name": {
-                          "type": "text",
-                          "analyzer": "ik_max_word",
-                          "fields": {
-                            "keyword": { "type": "keyword" }
-                          }
-                        },
-                        "violation_type": {
-                          "type": "keyword"
-                        },
-                        "compliance_requirement": {
-                          "type": "text",
-                          "analyzer": "ik_max_word"
-                        }
-                      }
+                    "violationType": { "type": "keyword" },
+                    "complianceRequirement": {
+                      "type": "text",
+                      "analyzer": "standard"
                     }
                   }
                 }
               }
-            },
-            "created_at": { "type": "date" }
+            }
           }
+        },
+        "createdAt": { "type": "date" }
+      }
     }
   }
 }

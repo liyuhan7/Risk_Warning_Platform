@@ -51,5 +51,5 @@ public class Risk {
 
     private List<RelatedIndicator> relatedIndicators;
 
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 }

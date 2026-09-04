@@ -124,8 +124,9 @@ public class VectorSearchService {
     private String buildFilterExpression(String industry, String region, String dimension) {
         List<String> conditions = new ArrayList<>();
         
+        // 过滤字段已随 P0-11 决议 1.5 改名：industry -> compliance_domain
         if (industry != null && !industry.trim().isEmpty()) {
-            conditions.add(String.format("industry == \"%s\"", industry.trim()));
+            conditions.add(String.format("compliance_domain == \"%s\"", industry.trim()));
         }
         
         if (region != null && !region.trim().isEmpty()) {
@@ -164,8 +165,8 @@ public class VectorSearchService {
                 if (wrapper.getFieldWrapper("dimension") != null) {
                     dimensionFieldData = wrapper.getFieldWrapper("dimension").getFieldData();
                 }
-                if (wrapper.getFieldWrapper("industry") != null) {
-                    industryFieldData = wrapper.getFieldWrapper("industry").getFieldData();
+                if (wrapper.getFieldWrapper("compliance_domain") != null) {
+                    industryFieldData = wrapper.getFieldWrapper("compliance_domain").getFieldData();
                 }
                 if (wrapper.getFieldWrapper("region") != null) {
                     regionFieldData = wrapper.getFieldWrapper("region").getFieldData();

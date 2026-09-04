@@ -80,11 +80,11 @@ public class MilvusRepository {
                 .withMaxLength(64)
                 .build());
         
-        // 行业字段
+        // 合规领域字段（P0-11 决议 1.5：industry 语义改名，与 ES complianceDomain 同窗口）
         fields.add(FieldType.newBuilder()
-                .withName("industry")
+                .withName("compliance_domain")
                 .withDataType(DataType.VarChar)
-                .withMaxLength(64)
+                .withMaxLength(256)
                 .build());
         
         // 地域字段
@@ -198,7 +198,7 @@ public class MilvusRepository {
             row.put("es_id", esIds != null && i < esIds.size() ? esIds.get(i) : "");
             row.put("name", names != null && i < names.size() ? names.get(i) : "");
             row.put("dimension", dimensions != null && i < dimensions.size() ? dimensions.get(i) : "");
-            row.put("industry", industries != null && i < industries.size() ? industries.get(i) : "");
+            row.put("compliance_domain", industries != null && i < industries.size() ? industries.get(i) : "");
             row.put("region", regions != null && i < regions.size() ? regions.get(i) : "");
             rows.add(row);
         }
@@ -227,20 +227,20 @@ public class MilvusRepository {
                 .withVectors(queryVectors)
                 .withTopK(topK)
                 .withMetricType(MetricType.COSINE)
-                .withOutFields(Arrays.asList("id", "es_id", "name", "dimension", "industry", "region"))
+                .withOutFields(Arrays.asList("id", "es_id", "name", "dimension", "compliance_domain", "region"))
                 .withConsistencyLevel(ConsistencyLevelEnum.STRONG);
-        
+
         if (expr != null && !expr.trim().isEmpty()) {
             searchBuilder.withExpr(expr);
         }
-        
+
         SearchParam searchParam = searchBuilder.build();
-        
+
         R<SearchResults> response = milvusClient.search(searchParam);
         if (response.getStatus() != R.Status.Success.getCode()) {
             throw new RuntimeException("向量搜索失败: " + response.getMessage());
         }
-        
+
         SearchResultsWrapper wrapper = new SearchResultsWrapper(response.getData().getResults());
         return wrapper.getIDScore(0);  // 返回第一个查询的结果
     }
@@ -265,15 +265,15 @@ public class MilvusRepository {
                 .withVectors(queryVectors)
                 .withTopK(topK)
                 .withMetricType(MetricType.COSINE)
-                .withOutFields(Arrays.asList("id", "es_id", "name", "dimension", "industry", "region"))
+                .withOutFields(Arrays.asList("id", "es_id", "name", "dimension", "compliance_domain", "region"))
                 .withConsistencyLevel(ConsistencyLevelEnum.STRONG);
-        
+
         if (expr != null && !expr.trim().isEmpty()) {
             searchBuilder.withExpr(expr);
         }
-        
+
         SearchParam searchParam = searchBuilder.build();
-        
+
         R<SearchResults> response = milvusClient.search(searchParam);
         if (response.getStatus() != R.Status.Success.getCode()) {
             String errorMsg = response.getMessage();

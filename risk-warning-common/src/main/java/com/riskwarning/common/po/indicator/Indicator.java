@@ -1,9 +1,7 @@
 package com.riskwarning.common.po.indicator;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -25,14 +23,13 @@ public class Indicator {
     private Integer indicatorLevel;
     private String parentIndicatorId;
     private String dimension;
-    private List<String> industry;
+    /** P0-11 决议 3.2：语义为合规领域，ES 字段已改名 complianceDomain */
+    private List<String> complianceDomain;
     private String region;
     private List<String> tags;
     private Double maxScore;
     private CalculationRule calculationRule;
     private RiskRule riskRule;
-    private LocalDateTime createAt;
-    @JsonProperty("name_vector")
     private List<Float> nameVector;
 
 
@@ -45,13 +42,12 @@ public class Indicator {
                 ", indicatorLevel=" + indicatorLevel +
                 ", parentIndicatorId='" + parentIndicatorId + '\'' +
                 ", dimension='" + dimension + '\'' +
-                ", industry=" + industry +
+                ", complianceDomain=" + complianceDomain +
                 ", region='" + region + '\'' +
                 ", tags=" + tags +
                 ", maxScore=" + maxScore +
                 ", calculationRule=" + calculationRule +
                 ", riskRule=" + riskRule +
-                ", createAt=" + createAt +
                 '}';
     }
 }

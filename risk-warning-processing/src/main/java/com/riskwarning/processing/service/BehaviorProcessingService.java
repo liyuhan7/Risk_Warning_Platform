@@ -56,11 +56,11 @@ public class BehaviorProcessingService {
 
     private static final double REG_TO_INDICATOR_THRESHOLD = 0.2;
 
-    private static final String BEHAVIOR_VECTOR_FIELD = "description_vector";
+    private static final String BEHAVIOR_VECTOR_FIELD = "descriptionVector";
 
-    private static final String INDICATOR_VECTOR_FIELD = "name_vector";
+    private static final String INDICATOR_VECTOR_FIELD = "nameVector";
 
-    private static final String REGULATION_VECTOR_FIELD = "full_text_vector";
+    private static final String REGULATION_VECTOR_FIELD = "fullTextVector";
 
     private static final Integer CANDIDATE_FETCH_SIZE = 200;
 
@@ -653,11 +653,11 @@ public class BehaviorProcessingService {
                 // 获取指标向量
                 List<Float> indVec = ind.getNameVector();
 
-                // 计算法规与指标的相似度
+                // 计算法规与指标的相似度（complianceDomain 为 P0-11 改名后的合规领域字段）
                 double regIndSim = SimilarityCalculator.scoreRegToIndicatorDefault(
                         regVec, indVec,
                         reg.getTags(), ind.getTags(),
-                        reg.getIndustry(), ind.getIndustry()
+                        reg.getComplianceDomain(), ind.getComplianceDomain()
                 );
 
                 // 计算影响力：法规与指标相似度 * 行为与法规相似度
@@ -844,7 +844,7 @@ public class BehaviorProcessingService {
         SearchResponse<Behavior> resp = esClient.search(s -> s
                         .index(ElasticSearchConfig.BEHAVIOR_INDEX)
                         .size(fetchSize)
-                        .query(q -> q.bool(ma -> ma.must(m1 -> m1.term(t -> t.field("project_id").value(projectId))))),
+                        .query(q -> q.bool(ma -> ma.must(m1 -> m1.term(t -> t.field("projectId").value(projectId))))),
                 Behavior.class
         );
 

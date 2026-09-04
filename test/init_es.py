@@ -1,8 +1,25 @@
+# -*- coding: utf-8 -*-
+"""按 documents/es_mappings.json 重建四索引并灌入种子数据。
+
+删除重建流程会销毁存量数据，运行前必须显式确认（P0-11 决议 1.3 的确认门）。
+"""
 import json
 import requests
 import os
+import sys
 
 ES_BASE_URL = "http://localhost:9200"
+
+# 确认门：--yes 显式跳过，否则交互确认
+if "--yes" not in sys.argv:
+    indices = list(json.load(open("documents/es_mappings.json", encoding="utf-8")).keys())
+    answer = input(
+        "即将删除并重建索引: %s\n该操作销毁存量数据，回滚需 restore 快照 pre_camelcase_migration。\n"
+        "确认请输入大写 YES: " % indices
+    )
+    if answer != "YES":
+        print("已取消，未做任何改动。")
+        sys.exit(1)
 
 def create_indices():
     with open("documents/es_mappings.json", "r", encoding="utf-8") as f:

@@ -93,7 +93,7 @@ public class AssessmentServiceImpl implements AssessmentService {
                         .impactScope("")
                         .countermeasures("")
                         .relatedIndicators(ir.getCalculationDetails().getRelatedIndicators())
-                        .createAt(LocalDateTime.now())
+                        .createdAt(LocalDateTime.now())
                         .build();
                 risks.add(risk);
             }

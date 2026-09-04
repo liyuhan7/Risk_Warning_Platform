@@ -8,7 +8,7 @@ import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -58,7 +58,11 @@ public class ElasticSearchConfig {
         RestClient restClient = builder.build();
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        // LocalDateTime 序列化为 ISO 字符串（如 2026-09-04T23:08:33），与 ES date 字段契约一致；
+        // 默认 WRITE_DATES_AS_TIMESTAMPS 会输出 [年,月,日,...] 数组，date 字段仅取首元素，语义损失
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        // P0-11 决议 1.1：四索引已统一 camelCase，SNAKE_CASE 全局策略移除，
+        // 字段名与 Java DTO 属性一致（个别向量字段在 PO 上以 @JsonProperty 显式声明）
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true);
         ElasticsearchTransport elasticsearchTransport = new RestClientTransport(restClient, new JacksonJsonpMapper(objectMapper));

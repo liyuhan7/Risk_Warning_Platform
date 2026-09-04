@@ -1,0 +1,59 @@
+{
+  "_comment": "P0-06 固定 Prompt 的固定输入。与 documents/plan0/baseline/p0-05-schema-examples.json 同一案例，便于对照。修改本文件等同于更换测试基线，须同步提升 promptVersion。",
+
+  "caseId": "P0-06-CASE-A",
+  "promptVersion": "compliance-reasoning-v1.0",
+
+  "enterpriseName": "示例制造有限公司",
+  "complianceDomain": "SUPPLY_CHAIN",
+  "region": "CN",
+
+  "subject": "本公司",
+  "action": "完成一级供应商年度合规审查",
+  "object": "12 家一级供应商",
+  "status": "IN_PROGRESS",
+  "behaviorDate": "2025-11-30T00:00:00",
+  "quantitativeData": 3.0,
+  "quantitativeUnit": "家",
+  "description": "对 12 家一级供应商完成年度合规审查，3 家未提供有效环境许可证明，已列入整改清单但尚未完成整改。",
+  "evidenceIds": ["9f2a7c41d8b3e05614a7c9de2f83b110"],
+
+  "evidenceTexts": [
+    {
+      "id": "9f2a7c41d8b3e05614a7c9de2f83b110",
+      "sourceFileName": "供应商合规审查报告.docx",
+      "pageNumber": 4,
+      "text": "公司于 2025 年 11 月对全部 12 家一级供应商完成了年度合规审查，其中 3 家未提供有效的环境许可证明文件，已列入整改清单但截至报告日尚未完成整改。"
+    }
+  ],
+
+  "indicatorId": "ZGtGpJcBk1sQ2mXvL4Rt",
+  "indicatorName": "供应商环境资质合规率",
+  "dimension": "供应链风险",
+
+  "candidateRegulations": [
+    {
+      "id": "R7xKmZcBk1sQ2mXvA9Ye",
+      "name": "供应链环境合规管理办法 第十二条",
+      "direction": "必须",
+      "applicableSubject": "生产制造企业",
+      "fullText": "企业应当要求其一级供应商提供有效的环境许可证明文件，并每年至少开展一次合规审查。"
+    },
+    {
+      "id": "R8yLnAdCl2tR3nYwB0Zf",
+      "name": "环境保护税法 第三条",
+      "direction": "必须",
+      "applicableSubject": "直接向环境排放应税污染物的企业",
+      "fullText": "直接向环境排放应税污染物的企业事业单位和其他生产经营者为环境保护税的纳税人，应当依照本法规定缴纳环境保护税。"
+    }
+  ],
+
+  "_expectation": {
+    "_comment": "期望结论，用于人工核对而非自动断言——LLM 输出允许在合理范围内浮动。自动校验只判 Schema 合规性与交叉规则。",
+    "applicable": "APPLICABLE",
+    "complianceStatus": "NON_COMPLIANT",
+    "regulationIdsShouldContain": "R7xKmZcBk1sQ2mXvA9Ye",
+    "regulationIdsShouldNotContain": "R8yLnAdCl2tR3nYwB0Zf",
+    "reason": "第二条法规是干扰项——环境保护税与供应商资质审查无关，若模型把它列入 regulationIds 说明未做适用性判断"
+  }
+}

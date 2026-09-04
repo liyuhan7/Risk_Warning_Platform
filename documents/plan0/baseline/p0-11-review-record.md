@@ -193,6 +193,13 @@ gateway 本不需要 `LLMUtil`，扫到它属历史遗留。收窄扫描范围�
 
 Milvus 侧无快照方案，`indicator_vectors` 须先 load 并记录条数，`regulation_vectors` 须记录条数，作为迁移后核对基准。
 
+**前置条件已完成（2026-08 实测）：**
+
+- ES：`build/docker-compose-elasticsearch.yml` 增加 `path.repo=/usr/share/elasticsearch/data/snapshots` 后重建容器，注册仓库 `p0_backup`，快照 `pre_camelcase_migration` 状态 SUCCESS，覆盖四索引 4/4 分片、70 个文件、约 115.9MB。失败回滚路径：删索引 → `restore` 该快照。
+- ES 基线条数：`t_risk` 444,373 / `t_regulation` 4,865 / `t_indicator` 1,144 / `t_behavior` 2,146。
+- Milvus 基线条数：`regulation_vectors` 4,765（IVF_FLAT/COSINE 索引在位）；`indicator_vectors` 1,144（**无向量索引**，load 报 error 700，建索引随迁移窗口第 5 步一并执行）。
+- Milvus 实测发现 `regulation_vectors` 较 ES `t_regulation` **缺 100 条**：全部为 2025-12-04 批、id 前缀均匀散落、无孤儿记录。根因是 `test/sync_to_milvus.py` 用 `from/size` 深分页翻页，同步过程中写入导致页偏移跳过文档。处理决定：**修复脚本并补齐 100 条列入迁移窗口第 5 步**，不单独提前执行。
+
 ### 5.2 窗口内执行顺序
 
 一次性切换把四项变更并入同一窗口，其中 `t_project_file` 在 PostgreSQL、其余在 ES 与 Milvus。**一次回滚需同时还原三个存储**，因此顺序须使失败时的还原成本最低：
@@ -205,8 +212,11 @@ Milvus 侧无快照方案，`indicator_vectors` 须先 load 并记录条数，`r
 4. ES：存量迁移 —— camelCase 改名（1.1）+ createdAt 修正（1.4）
         + complianceDomain 回填（3.2），同批完成
 5. Milvus：industry → compliance_domain 同步改名（1.5）
+        + indicator_vectors 建 IVF_FLAT/COSINE 索引并 load
+        + 修复 sync_to_milvus.py 后补齐缺失的 100 条 regulation 向量
 6. 移除 ElasticSearchConfig.java:61 的 SNAKE_CASE（1.1）
 7. 核对：四索引字段覆盖数不下降，Milvus 条数与 5.1 基准一致
+        （regulation_vectors 核对基准为 4865 —— 含补齐后的 100 条）
 ```
 
 第 1、2 步的 PostgreSQL 改动向后兼容，失败时无需还原；第 3 步及之后失败则从 5.1 的 ES 快照恢复。第 6 步必须在第 4 步核对通过后执行——提前移除会立刻打断 `t_behavior` / `t_regulation` / `t_risk` 的读写。
@@ -249,7 +259,8 @@ F 系列：F-01 已完成，F-02 至 F-10、F-12 本次决策完毕，F-11（汇
 | — | 六维度阈值表实测校正（2.3 唯一未经数据验证项） | `P3-06` | 计划 3 结束前 |
 | — | `industry` 取值域清理（53 个取值混杂行业与适用范围） | 计划 2 | 定义取值域时 |
 | D-13 | RANGE 规则 JavaScript 表达式处置 | `P3-05` | 计划 3 启动前 |
-| — | `indicator_vectors` collection 未 load，存量条数未确认 | 迁移执行前 | 5.1 |
+| — | ~~`indicator_vectors` collection 未 load，存量条数未确认~~ 已实测：1,144 条、无向量索引，建索引随迁移窗口第 5 步 | 迁移窗口第 5 步 | 第 7 步核对前 |
+| — | `sync_to_milvus.py` 的 `from/size` 深分页缺陷修复 + `regulation_vectors` 补齐 100 条 | 迁移窗口第 5 步 | 第 7 步核对前 |
 | — | `P0-10` 已跳过，Evidence / AnalysisResult 前端类型须补做 | 计划 4 前 | 前端联调前 |
 | D-21 | 旧 LLM Key 的供应商侧吊销与 git 历史清除 | 用户执行 | 越早越好 |
 | — | `P0-06` 连续 10 次真实 LLM 调用 | 用户提供新凭据后 | 计划 3 启动前 |

@@ -353,6 +353,29 @@
 - 状态：**已修复**。请求体显式写入 `temperature`，`LlmProviderProperties.temperature` 默认 `0.0` 且可配置
 - 验证：单测断言 `temperature` 出现在实际请求体且值为 0.0；「同一输入连续调用 10 次输出逐字节一致」须等真实凭据到位后随 P0-06 live 模式验证
 
+### D-33 Milvus 领域过滤对多值字段使用精确相等匹配
+
+- 优先级：P2
+- 位置：`VectorSearchService.java:129`（`buildFilterExpression`）
+- 现象：`compliance_domain == "人工智能"` 精确匹配，但 Milvus 侧该字段是逗号拼接串（如「人工智能,电子制造,航空运输」），单值精确匹配恒为空。
+- 实证：`search/regulations` 带 `industry=人工智能` 过滤返回 0 条；去掉过滤同 query 返回 3 条。Milvus 实测前 200 行中含「人工智能」子串 2 行、精确等于 0 行。旧 `industry` 字段时代即为同一拼接格式，本缺陷先于改名存在，非迁移引入。
+- 根因：多值语义用单值串存储（逗号拼接），过滤用 `==` 单值匹配。Milvus 表达式仅支持前缀 `like "ab%"`，不支持两侧通配，无法用 like 兜底。
+- 后果：按领域过滤的检索（`P2-04` Metadata Filter）静默返回空，不报错。当前无生产调用方（仅测试接口暴露），计划 2 检索链接入时才真正生效。
+- 关联：P0-11 决议 1.5（改名同步）；PLAN.md 计划 2 「industry 取值域清理」（遗留事项）
+- 状态：未开始。候选方案：① 写入侧改用 Milvus `Array<String>` 字段类型（`array_contains` 原生支持）；② 过滤侧改多个 `or` 拼接（须先拉全量不同值域）；③ ES 侧 keyword 数组过滤替代。须在计划 2 定义取值域时一并决策。
+- 验证：带领域过滤的检索能召回该领域下的文档，且不误召回其他领域文档。
+
+### D-34 Milvus VarChar 长度按字节校验，中文超长写入失败
+
+- 优先级：P2
+- 位置：`MilvusRepository.java` 写入链（`insertVectors`）
+- 现象：schema `name` 字段 `max_length=256`，92 个中文字符的 name 为 258 个 UTF-8 字节，Milvus 按字节拒绝：`the length (258) of 0th string exceeds max length (256)`。
+- 实证：Milvus 差集补数时 2 条法规（`8AUtUZ0B...`、`FAUtUZ0B...`）稳定失败，Python 按字符数测长合规、按 UTF-8 字节数测长超限。当次以 250 字节安全截断绕过。
+- 后果：任何超长中文名（约 85+ 字）写入 Milvus 即失败，且整个批次 insert 一并失败——批量存储场景下单条脏数据会阻塞全批。当前仅测试接口暴露，知识库向量化链在计划 2 检索接入时生效。
+- 关联：D-33（同属 Milvus 写入/过滤链健壮性）
+- 状态：未开始。候选方案：① `VectorStorageService` 写入前按 UTF-8 字节统一截断（含 name/compliance_domain/dimension/region 全字段）；② schema `max_length` 提至 512 以上并同步 `MilvusRepository.createCollectionIfNotExists`。
+- 验证：构造 300 字节中文名与 300 字节领域串的写入用例，不抛异常且截断后不劈开多字节字符。
+
 ### D-22 行为写入无幂等键
 
 - 优先级：P2
@@ -468,8 +491,8 @@
 | --- | --- | --- | --- |
 | P0 | 8（D-01、D-02、D-03、D-04、D-05、D-21、D-26、D-30） | 0 | 0（D-21 代码侧已处理，供应商侧吊销待用户执行） |
 | P1 | 15（D-23 由 P2 上调；含 D-28、D-31、D-32） | 1（D-13） | 3（D-09、D-31、D-32） |
-| P2 | 9 | 0 | 0 |
-| 合计 | 32 | 1 | 3 |
+| P2 | 11（含 D-33、D-34，2026-09-04 业务回归实测发现） | 0 | 0 |
+| 合计 | 34 | 1 | 3 |
 
 P0-05 的九条决议消掉了 3 条待决策（D-23 存储粒度、D-28 维度取值、D-29 字段语义），同时「允许重复分析」这一决议引出 D-30，净减 2 条。
 
@@ -484,6 +507,8 @@ P0-09 不关闭任何缺陷（属对账与冻结任务，未改代码），但�
 `P0-11` 完成 15 项决策，关闭上述全部 9 条待决策及 D-24，详见 `p0-11-review-record.md`。待决策由 9 条降至 1 条——仅剩 D-13（RANGE 规则的 JavaScript 表达式处置），因 110 条规则去重后有 98 种不同表达式，须结合真实表达式分布在 `P3-05` 决定。评审另实测补齐 F-12：Milvus `regulation_vectors` 确有 `industry` 存量且被 `VectorSearchService.java:128` 精确匹配过滤使用，故 `complianceDomain` 改名须同步 Milvus，否则检索过滤静默失效——与 D-01 的 Jackson 静默赋 null 属同类失败模式。`indicator_vectors` 当前未 load，存量条数待迁移前确认。新增 F-13：删除 `BatchTest` 后 Batch 链路失去回归依据，须在 `P1-07` 补不依赖基础设施的单元测试。
 
 **全部破坏性变更均未执行。** `P0-11` 只作决策，实施须先完成四索引 ES snapshot 备份，再按记录第五节的窗口顺序执行。
+
+> 迁移窗口执行记录（2026-09-04）：5.2 七步全部完成并核对通过；ES 快照 `pre_camelcase_migration` 保留待业务回归后清理。窗口后补做：`t_risk` 孤儿 96 条清理（assessment 29/30/31 已删，级联缺失遗留）、`createdAt` 按 PG 评估时间回填 2500 条、Milvus 差集补齐 100 条（发现 D-34）、种子文件 camelCase 转换（备份于 `documents/data/backup_snake_case/`）、F-09 Java 侧修正（`Risk.java`/`RiskVO.java`/`AssessmentServiceImpl`）。补数过程中发现 D-33（领域过滤精确匹配对多值串恒空）。
 
 ## 八、证据来源说明
 

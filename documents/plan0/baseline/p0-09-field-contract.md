@@ -174,7 +174,7 @@ F-05 由 `p0-05-core-schemas.md:561` 指派至本任务。U-09 决议将 `Indust
 
 `MilvusRepository.java:78` 的 collection schema 含 `dimension` 字段，`:230` / `:268` 的 `withOutFields` 列出 `id`、`es_id`、`name`、`dimension`、`industry`、`region`。
 
-**Milvus 存量已由 `P0-11` 实测**：`indicator_vectors` 与 `regulation_vectors` 两个 collection 均存在；`regulation_vectors` 有数据且 `industry` 字段含真实值（如「征信业,金融业,综合类」）；`indicator_vectors` 未 load，存量条数待迁移前确认。`VectorSearchService.java:128` 以 `industry == "%s"` 精确匹配过滤，因此改名须同步 Milvus collection 结构，否则过滤静默失效——不再视为独立迁移，已并入 `p0-11-review-record.md` 5.2 的同窗口顺序第 5 步。
+**Milvus 存量已由 `P0-11` 实测**：`indicator_vectors` 与 `regulation_vectors` 两个 collection 均存在；`regulation_vectors` 有数据（4,765 条，`industry` 字段含真实值如「征信业,金融业,综合类」，IVF_FLAT/COSINE 索引在位）但较 ES `t_regulation` 缺 100 条，根因是 `test/sync_to_milvus.py` 的 `from/size` 深分页缺陷，修复脚本并补数已列入迁移窗口第 5 步；`indicator_vectors` 1,144 条、无向量索引（load 报 error 700），建索引随迁移窗口第 5 步执行。`VectorSearchService.java:128` 以 `industry == "%s"` 精确匹配过滤，因此改名须同步 Milvus collection 结构，否则过滤静默失效——不再视为独立迁移，已并入 `p0-11-review-record.md` 5.2 的同窗口顺序第 5 步。
 
 ## 7. 本次未做的修改
 
@@ -185,7 +185,7 @@ F-05 由 `p0-05-core-schemas.md:561` 指派至本任务。U-09 决议将 `Indust
 - F-09 修正需迁移 2596 条 `t_risk` 存量数据。
 - F-05 的 `complianceDomain` 回填须等 D-01 命名决策，否则会再造命名分歧。
 
-上述各项已由 `P0-11` 接口评审决策（见 `p0-11-review-record.md`），但**均未实施**。实施须先完成四索引 ES snapshot 备份，再按该记录 5.2 的窗口顺序执行：PostgreSQL 先改（向后兼容）、ES 按改写后的 mapping 新建索引并迁移存量、Milvus 同步改名、核对通过后移除 `SNAKE_CASE`。
+上述各项已由 `P0-11` 接口评审决策（见 `p0-11-review-record.md`），但**均未实施**。迁移前置的 ES 快照与双侧基线已于 2026-08 实测完成（快照 `pre_camelcase_migration` 于仓库 `p0_backup`，SUCCESS），实施按该记录 5.2 的窗口顺序执行：PostgreSQL 先改（向后兼容）、ES 按改写后的 mapping 新建索引并迁移存量、Milvus 同步改名、核对通过后移除 `SNAKE_CASE`。
 
 ## 8. 验证方式
 
@@ -201,4 +201,4 @@ F-05 由 `p0-05-core-schemas.md:561` 指派至本任务。U-09 决议将 `Indust
 | F-09 | ~~`createAt` 拼写修正~~ 已由 `P0-11` 决议修正并迁移 2596 条 | 待实施 |
 | F-10 | ~~`es_mappings.json` 不可重建运行时~~ 已由 `P0-11` 决议：导出运行时 mapping 改写为 camelCase，作为新建索引唯一依据 | 待实施 |
 | F-11 | 汇报稿向量字段记载矛盾 | 随 F-08（风险等级口径统一后的文档更正）一并修订 |
-| F-12 | ~~Milvus collection 是否有 `industry` 存量数据~~ **已实测确认有**：`regulation_vectors` 的 `industry` 含真实值，`indicator_vectors` 条数待 load 后核对 | 迁移时须同步改名 |
+| F-12 | ~~Milvus collection 是否有 `industry` 存量数据~~ **已实测确认有**：`regulation_vectors` 4,765 条（含 `industry` 真实值，较 ES 缺 100 条待补）、`indicator_vectors` 1,144 条（无索引） | 迁移时须同步改名 |

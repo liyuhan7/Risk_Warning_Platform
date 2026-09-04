@@ -53,7 +53,18 @@ public enum RiskLevelEnum {
         return this.code;
     }
 
+    /**
+     * 按得分比例判定风险等级。比例越低风险越高。
+     *
+     * @param scoreRatio 得分比例，不得为 NaN
+     * @return 对应的风险等级
+     * @throws IllegalArgumentException 入参为 NaN 时抛出。NaN 表示无法计算，
+     *         与「比例极低」语义相反，不能共用最低档分支被静默判为高风险
+     */
     public static RiskLevelEnum getByScoreRatio(double scoreRatio) {
+        if (Double.isNaN(scoreRatio)) {
+            throw new IllegalArgumentException("scoreRatio 不能为 NaN，无法计算的比例不得参与风险等级判定");
+        }
         if (scoreRatio >= 0.4) {
             return LOW_RISK;
         } else if (scoreRatio >= 0.2) {
@@ -63,7 +74,22 @@ public enum RiskLevelEnum {
         }
     }
 
+    /**
+     * 按各等级的风险数量聚合总体风险等级。
+     *
+     * 三个入参统计的是**已触发风险**的指标数量，因此全为 0 表示没有任何指标触发风险，
+     * 属最好情况，须返回最低档；不可让分母为 0 得到 NaN 后落入最高档。
+     *
+     * @param lowRiskCount 低风险指标数
+     * @param mediumRiskCount 中风险指标数
+     * @param highRiskCount 高风险指标数
+     * @return 总体风险等级
+     */
     public static RiskLevelEnum getByRiskCount(int lowRiskCount, int mediumRiskCount, int highRiskCount) {
+        int totalRiskCount = lowRiskCount + mediumRiskCount + highRiskCount;
+        if (totalRiskCount == 0) {
+            return LOW_RISK;
+        }
         if(highRiskCount >= 5){
             return HIGH_RISK;
         }
@@ -71,7 +97,7 @@ public enum RiskLevelEnum {
             return MEDIUM_RISK;
         }
         double totalWeight = lowRiskCount * LOW_RISK_WEIGHT + mediumRiskCount * MEDIUM_RISK_WEIGHT + highRiskCount * HIGH_RISK_WEIGHT;
-        double averageWeight = 1 - totalWeight / (lowRiskCount + mediumRiskCount + highRiskCount);
+        double averageWeight = 1 - totalWeight / totalRiskCount;
         return RiskLevelEnum.getByScoreRatio(averageWeight);
     }
 }

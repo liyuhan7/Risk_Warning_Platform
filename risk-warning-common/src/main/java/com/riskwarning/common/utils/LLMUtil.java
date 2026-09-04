@@ -1,35 +1,30 @@
 package com.riskwarning.common.utils;
 
 import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import okhttp3.*;
+import com.riskwarning.common.provider.AiChatProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
- * 大模型工具类
- * 用于调用百度千帆大模型API进行各种NLP任务
+ * 指标与行为的属性推断工具。
+ *
+ * 只负责 Prompt 构建与响应解析，实际调用经 {@link AiChatProvider} 完成，
+ * 因此本类不持有端点、凭据或供应商专用逻辑。
+ * 仅在 llm.enabled=true 时注册，与 Provider 的生效条件保持一致。
  */
+@Component
+@ConditionalOnProperty(prefix = "llm", name = "enabled", havingValue = "true")
 public class LLMUtil {
 
-    // 百度千帆API配置
-    private static final String LLM_API_URL = "https://qianfan.baidubce.com/v2/chat/completions";
-    private static final String MODEL = "ernie-4.5-turbo-vl-32k";
-    private static final String API_KEY = "bce-v3/ALTAK-m4diFz1se7ge4TOuIrbU5/6eb7acaf3c682582e95f100ad97c67eaa44c476e";
+    private final AiChatProvider chatProvider;
 
-    // HTTP客户端
-    private static final OkHttpClient client = new OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(60, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .build();
-
-
+    public LLMUtil(AiChatProvider chatProvider) {
+        this.chatProvider = chatProvider;
+    }
 
     /**
      * 预定义的标签分类列表
@@ -137,11 +132,10 @@ public class LLMUtil {
      *
      * @param indicatorName 指标名称
      * @return 推断出的标签列表
-     * @throws IOException 网络请求异常
      */
-    public static List<String> inferTags(String indicatorName) throws IOException {
+    public List<String> inferTags(String indicatorName) {
         String prompt = buildTagsInferencePrompt(indicatorName);
-        String response = callLLMApi(prompt);
+        String response = chatProvider.chat(prompt);
         return parseTagsFromResponse(response);
     }
 
@@ -150,15 +144,14 @@ public class LLMUtil {
      *
      * @param textList 需要推断标签的文本列表
      * @return 每个文本对应的标签列表，返回结果为List<List<String>>
-     * @throws IOException 网络请求异常
      */
-    public static List<List<String>> inferTagsBatch(List<String> textList) throws IOException {
+    public List<List<String>> inferTagsBatch(List<String> textList) {
         if (textList == null || textList.isEmpty()) {
             return new java.util.ArrayList<>();
         }
 
         String prompt = buildBatchTagsInferencePrompt(textList);
-        String response = callLLMApi(prompt);
+        String response = chatProvider.chat(prompt);
         return parseBatchTagsFromResponse(response, textList.size());
     }
 
@@ -228,11 +221,10 @@ public class LLMUtil {
      *
      * @param indicatorName 指标名称
      * @return 推断出的行业列表
-     * @throws IOException 网络请求异常
      */
-    public static List<String> inferIndustry(String indicatorName) throws IOException {
+    public List<String> inferIndustry(String indicatorName) {
         String prompt = buildIndustryInferencePrompt(indicatorName);
-        String response = callLLMApi(prompt);
+        String response = chatProvider.chat(prompt);
         return parseIndustriesFromResponse(response);
     }
 
@@ -241,15 +233,14 @@ public class LLMUtil {
      *
      * @param behaviorList 行为描述列表
      * @return 每个行为对应的类型列表，返回结果为List<String>
-     * @throws IOException 网络请求异常
      */
-    public static List<String> inferBehaviorTypesBatch(List<String> behaviorList) throws IOException {
+    public List<String> inferBehaviorTypesBatch(List<String> behaviorList) {
         if (behaviorList == null || behaviorList.isEmpty()) {
             return new java.util.ArrayList<>();
         }
 
         String prompt = buildBehaviorTypesInferencePrompt(behaviorList);
-        String response = callLLMApi(prompt);
+        String response = chatProvider.chat(prompt);
         return parseBehaviorTypesFromResponse(response, behaviorList.size());
     }
 
@@ -258,15 +249,14 @@ public class LLMUtil {
      *
      * @param behaviorList 行为描述列表
      * @return 每个行为对应的状态列表，返回结果为List<String>
-     * @throws IOException 网络请求异常
      */
-    public static List<String> inferBehaviorStatusesBatch(List<String> behaviorList) throws IOException {
+    public List<String> inferBehaviorStatusesBatch(List<String> behaviorList) {
         if (behaviorList == null || behaviorList.isEmpty()) {
             return new java.util.ArrayList<>();
         }
 
         String prompt = buildBehaviorStatusesInferencePrompt(behaviorList);
-        String response = callLLMApi(prompt);
+        String response = chatProvider.chat(prompt);
         return parseBehaviorStatusesFromResponse(response, behaviorList.size());
     }
 
@@ -275,15 +265,14 @@ public class LLMUtil {
      *
      * @param behaviorList 行为描述列表
      * @return 每个行为对应的风险维度列表，返回结果为List<String>
-     * @throws IOException 网络请求异常
      */
-    public static List<String> inferBehaviorDimensionsBatch(List<String> behaviorList) throws IOException {
+    public List<String> inferBehaviorDimensionsBatch(List<String> behaviorList) {
         if (behaviorList == null || behaviorList.isEmpty()) {
             return new java.util.ArrayList<>();
         }
 
         String prompt = buildBehaviorDimensionsInferencePrompt(behaviorList);
-        String response = callLLMApi(prompt);
+        String response = chatProvider.chat(prompt);
         return parseBehaviorDimensionsFromResponse(response, behaviorList.size());
     }
 
@@ -423,67 +412,6 @@ public class LLMUtil {
         promptBuilder.append("4. 结果数组的长度必须与输入行为数量一致（").append(behaviorList.size()).append("个）\n");
 
         return promptBuilder.toString();
-    }
-
-    /**
-     * 调用大模型API
-     *
-     * @param prompt 提示词
-     * @return 大模型的响应内容
-     * @throws IOException 网络请求异常
-     */
-    private static String callLLMApi(String prompt) throws IOException {
-        // 构建请求体
-        JSONObject requestBody = new JSONObject();
-        requestBody.set("model", MODEL);
-
-        JSONArray messages = new JSONArray();
-        JSONObject message = new JSONObject();
-        message.set("role", "user");
-        message.set("content", prompt);
-        messages.add(message);
-
-        requestBody.set("messages", messages);
-
-        // 创建请求
-        RequestBody body = RequestBody.create(
-                requestBody.toString(),
-                MediaType.parse("application/json; charset=utf-8")
-        );
-
-        Request request = new Request.Builder()
-                .url(LLM_API_URL)
-                .post(body)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("Authorization", "Bearer " + API_KEY)
-                .build();
-
-        // 发送请求
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                String errorBody = response.body() != null ? response.body().string() : "Unknown error";
-                throw new IOException("LLM API request failed with status " + response.code() + ": " + errorBody);
-            }
-
-            if (response.body() == null) {
-                throw new IOException("Empty response body");
-            }
-
-            String responseBody = response.body().string();
-
-            // 解析响应
-            JSONObject responseJson = JSONUtil.parseObj(responseBody);
-
-            if (responseJson.get("choices") != null && !responseJson.getJSONArray("choices").isEmpty()) {
-                JSONObject choice = responseJson.getJSONArray("choices").getJSONObject(0);
-                if (choice.get("message") != null && choice.getJSONObject("message").get("content") != null) {
-                    System.out.println(choice.getJSONObject("message").getStr("content"));
-                    return choice.getJSONObject("message").getStr("content");
-                }
-            }
-
-            throw new IOException("Invalid response format from LLM API");
-        }
     }
 
     /**
@@ -770,38 +698,16 @@ public class LLMUtil {
 
 
     /**
-     * 测试方法 - 验证大模型连接是否成功
-     * @return 是否连接成功
+     * 探活调用，用于确认 Provider 配置与凭据可用。
+     *
+     * @return 是否调用成功
      */
-    public static boolean testConnection() {
+    public boolean testConnection() {
         try {
-            String testResponse = callLLMApi("请回复：连接成功");
+            String testResponse = chatProvider.chat("请回复：连接成功");
             return testResponse != null && !testResponse.trim().isEmpty();
         } catch (Exception e) {
-            System.err.println("LLM connection test failed: " + e.getMessage());
             return false;
         }
-    }
-
-    public static void main(String[] args) throws IOException {
-        System.out.println("=== LLM工具类测试 ===");
-//        String testDescription = "评估企业股东结构的完整性和透明度";
-//        Double testMaxScore = 10.0;
-
-        List<String> behaviors = new ArrayList<>();
-        behaviors.add("华东启盛建设有限公司在年度关联交易自查中统计发现，已按制度披露的关联交易占比为 90%。");
-        behaviors.add("华东启盛建设有限公司在跨境资金监测中，对 165 万美元以上的大额付款进行逐笔审核。");
-        behaviors.add("华东启盛建设有限公司在年度关联交易自查中统计发现，已按制度披露的关联交易占比为 95%。");
-        behaviors.add("华东启盛建设有限公司在年度管理复盘中公布了部分项目存在制度适配不足的问题，公司已着手安排后续工作。");
-        List<List<String>> behaviorsResult = inferTagsBatch(behaviors);
-        for(List<String> res : behaviorsResult){
-            System.out.println(res);
-        }
-        List<String> behaviorTypes = inferBehaviorTypesBatch(behaviors);
-        System.out.println("行为类型："+behaviorTypes);
-        List<String> behaviorStatuses = inferBehaviorStatusesBatch(behaviors);
-        System.out.println("行为状态："+behaviorStatuses);
-        List<String> behaviorDimensions = inferBehaviorDimensionsBatch(behaviors);
-        System.out.println("行为风险维度："+behaviorDimensions);
     }
 }

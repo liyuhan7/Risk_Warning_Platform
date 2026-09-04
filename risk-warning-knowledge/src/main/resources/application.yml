@@ -24,3 +24,20 @@ spring:
   elasticsearch:
     # uris: http://172.29.7.168:30920 先使用本地ES测试
     uris: http://localhost:9200
+
+# 大模型 Provider 配置
+# 按 OpenAI 兼容的 /chat/completions 协议接入，更换供应商只需调整 base-url 与 model。
+# 凭据必须由环境变量 LLM_API_KEY 提供，禁止写入本文件。
+llm:
+  enabled: ${LLM_ENABLED:false}
+  base-url: ${LLM_BASE_URL:}
+  model: ${LLM_MODEL:}
+  api-key: ${LLM_API_KEY:}
+  temperature: 0.0
+  connect-timeout-seconds: 30
+  read-timeout-seconds: 60
+  write-timeout-seconds: 30
+  retry:
+    max-attempts: 3
+    initial-backoff-millis: 500
+    backoff-multiplier: 2.0

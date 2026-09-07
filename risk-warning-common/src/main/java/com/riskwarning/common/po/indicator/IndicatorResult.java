@@ -46,6 +46,10 @@ public class IndicatorResult implements Serializable {
     @Column(name = "assessment_id", nullable = false)
     private Long assessmentId;
 
+    /** 产生本结果的独立分析运行；历史记录允许为空。 */
+    @Column(name = "analysis_run_id", length = 64)
+    private String analysisRunId;
+
     // indicator_es_id TEXT NOT NULL
     @Column(name = "indicator_es_id", nullable = false)
     private String indicatorEsId;

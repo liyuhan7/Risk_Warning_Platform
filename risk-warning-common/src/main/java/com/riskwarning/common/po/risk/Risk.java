@@ -23,6 +23,9 @@ public class Risk {
 
     private Long assessmentId;
 
+    /** 产生本风险的独立分析运行。 */
+    private String analysisRunId;
+
     private String name;
 
     private String dimension;

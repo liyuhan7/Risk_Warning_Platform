@@ -13,7 +13,12 @@ import java.util.TreeMap;
 public class IndicatorCalculationTaskMessage extends Message{
 
     public IndicatorCalculationTaskMessage(String messageId, String timestamp, String traceId, Long userId, Long projectId, Long assessmentId) {
-        super(messageId, timestamp, traceId, userId, projectId, assessmentId);
+        this(messageId, timestamp, traceId, userId, projectId, assessmentId, null);
+    }
+
+    public IndicatorCalculationTaskMessage(String messageId, String timestamp, String traceId, Long userId,
+                                           Long projectId, Long assessmentId, String analysisRunId) {
+        super(messageId, timestamp, traceId, userId, projectId, assessmentId, analysisRunId);
         this.setTopic(KafkaTopic.INDICATOR_CALCULATION_TASKS);
     }
 

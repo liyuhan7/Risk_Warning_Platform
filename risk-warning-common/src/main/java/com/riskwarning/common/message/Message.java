@@ -26,13 +26,21 @@ public class Message {
 
     private Long assessmentId;
 
+    private String analysisRunId;
+
     public Message(String messageId, String timestamp, String traceId, Long userId, Long projectId, Long assessmentId) {
+        this(messageId, timestamp, traceId, userId, projectId, assessmentId, null);
+    }
+
+    public Message(String messageId, String timestamp, String traceId, Long userId, Long projectId,
+                   Long assessmentId, String analysisRunId) {
         this.messageId = messageId;
         this.timestamp = timestamp;
         this.traceId = traceId;
         this.userId = userId;
         this.projectId = projectId;
         this.assessmentId = assessmentId;
+        this.analysisRunId = analysisRunId;
     }
 
     public String toJson() {

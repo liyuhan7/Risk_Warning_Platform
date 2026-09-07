@@ -36,11 +36,17 @@ public class LlmProviderProperties {
     /** 凭据，通过 ${LLM_API_KEY} 注入 */
     private String apiKey;
 
-    /**
-     * 采样温度。固定 Prompt 的结构化输出要求确定性，默认 0。
+    /** 采样温度。固定 Prompt 的结构化输出要求确定性，默认 0。
      * 供应商默认值通常大于 0，会使同一 Prompt 多次调用结果不稳定。
      */
     private Double temperature = 0.0D;
+
+    /**
+     * 附加请求体字段（JSON 字符串，如 {"thinking":{"type":"disabled"}}）。
+     * 供需要携带供应商可选参数的场景使用，顶层按键与固定字段合并；
+     * 合并发生在固定字段（model/messages/temperature）写入之前，固定字段优先级更高。
+     */
+    private String extraBody;
 
     private Integer connectTimeoutSeconds = 30;
 

@@ -11,7 +11,12 @@ public class RiskAssessmentTaskMessage extends Message {
     private IndicatorResultDTO indicatorResult;
 
     public RiskAssessmentTaskMessage(String messageId, String timestamp, String traceId, Long userId, Long projectId, Long assessmentId) {
-        super(messageId, timestamp, traceId, userId, projectId, assessmentId);
+        this(messageId, timestamp, traceId, userId, projectId, assessmentId, null);
+    }
+
+    public RiskAssessmentTaskMessage(String messageId, String timestamp, String traceId, Long userId,
+                                     Long projectId, Long assessmentId, String analysisRunId) {
+        super(messageId, timestamp, traceId, userId, projectId, assessmentId, analysisRunId);
         this.setTopic(KafkaTopic.RISK_ASSESSMENT_TASKS);
     }
 

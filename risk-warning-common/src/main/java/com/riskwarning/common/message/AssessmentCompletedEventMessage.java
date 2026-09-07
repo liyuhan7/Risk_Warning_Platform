@@ -10,7 +10,12 @@ import lombok.EqualsAndHashCode;
 public class AssessmentCompletedEventMessage extends Message {
 
     public AssessmentCompletedEventMessage(String messageId, String timestamp, String traceId, Long userId, Long projectId, Long assessmentId) {
-        super(messageId, timestamp, traceId, userId, projectId, assessmentId);
+        this(messageId, timestamp, traceId, userId, projectId, assessmentId, null);
+    }
+
+    public AssessmentCompletedEventMessage(String messageId, String timestamp, String traceId, Long userId,
+                                           Long projectId, Long assessmentId, String analysisRunId) {
+        super(messageId, timestamp, traceId, userId, projectId, assessmentId, analysisRunId);
         this.setTopic(KafkaTopic.ASSESSMENT_COMPLETED_EVENTS);
     }
 

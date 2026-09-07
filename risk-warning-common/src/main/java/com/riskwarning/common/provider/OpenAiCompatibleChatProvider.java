@@ -36,6 +36,9 @@ public class OpenAiCompatibleChatProvider implements AiChatProvider {
 
     private final OkHttpClient client;
 
+    /** 附加请求体字段的解析结果；未配置时为 null。 */
+    private final JSONObject extraBodyJson;
+
     public OpenAiCompatibleChatProvider(LlmProviderProperties properties) {
         // 启用后凭据与端点必须齐备，否则每次调用都会失败，及早暴露配置缺失优于运行期报错
         if (!StringUtils.hasText(properties.getApiKey())) {
@@ -48,6 +51,7 @@ public class OpenAiCompatibleChatProvider implements AiChatProvider {
             throw new IllegalStateException("llm.enabled=true 但未配置 llm.model");
         }
         this.properties = properties;
+        this.extraBodyJson = parseExtraBody(properties.getExtraBody());
         this.client = new OkHttpClient.Builder()
                 .connectTimeout(properties.getConnectTimeoutSeconds(), TimeUnit.SECONDS)
                 .readTimeout(properties.getReadTimeoutSeconds(), TimeUnit.SECONDS)
@@ -92,11 +96,39 @@ public class OpenAiCompatibleChatProvider implements AiChatProvider {
     }
 
     /**
+     * 解析附加请求体 JSON。配置非法 JSON 属配置错误，在构造阶段及早暴露。
+     *
+     * @return 解析后的顶层对象；未配置时为 null
+     */
+    private JSONObject parseExtraBody(String extraBody) {
+        if (!StringUtils.hasText(extraBody)) {
+            return null;
+        }
+        try {
+            JSONObject parsed = JSONUtil.parseObj(extraBody);
+            if (!parsed.isEmpty() && parsed.containsKey("apiKey")) {
+                throw new IllegalStateException("llm.extra-body 禁止携带 apiKey");
+            }
+            return parsed;
+        } catch (IllegalStateException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    "llm.extra-body 不是合法 JSON 对象：" + e.getMessage(), e);
+        }
+    }
+
+    /**
      * 发起单次请求并解析正文。
      *
      * @throws LlmProviderException 网络异常、非 2xx 响应或响应结构不符合预期
      */
     private String executeOnce(String prompt) {
+        JSONObject requestBody = new JSONObject();
+        // 附加字段先写入，固定字段后写入以保持固定契约优先级最高
+        if (extraBodyJson != null) {
+            extraBodyJson.forEach(requestBody::set);
+        }
         JSONObject message = new JSONObject();
         message.set("role", "user");
         message.set("content", prompt);
@@ -104,7 +136,6 @@ public class OpenAiCompatibleChatProvider implements AiChatProvider {
         JSONArray messages = new JSONArray();
         messages.add(message);
 
-        JSONObject requestBody = new JSONObject();
         requestBody.set("model", properties.getModel());
         requestBody.set("messages", messages);
         // 结构化输出依赖确定性，必须显式指定温度而非沿用供应商默认值

@@ -223,6 +223,57 @@ class OpenAiCompatibleChatProviderTest {
         assertEquals(0, requestCount.get());
     }
 
+    /**
+     * 附加请求体应合并进发送正文，且固定字段优先级高于附加字段。
+     */
+    @Test
+    void shouldMergeExtraBodyWhileKeepingCoreFieldsWinning() {
+        startStub(exchange -> respond(exchange, 200, chatCompletion("附加字段生效")));
+
+        LlmProviderProperties properties = properties();
+        properties.setExtraBody("{\"thinking\":{\"type\":\"disabled\"},"
+                + "\"temperature\":0.9,\"model\":\"hack-model\"}");
+
+        String content = newProvider(properties).chat("测试提示词");
+
+        assertEquals("附加字段生效", content);
+        JSONObject sentBody = JSONUtil.parseObj(receivedBodies.get(0));
+        // 附加字段生效
+        assertEquals("disabled",
+                sentBody.getJSONObject("thinking").getStr("type"));
+        // 固定字段优先级更高，不允许附加字段篡改
+        assertEquals(0.0D, sentBody.getDouble("temperature"), 0.0001D);
+        assertEquals("test-model", sentBody.getStr("model"));
+    }
+
+    /**
+     * 附加请求体不是合法 JSON 属配置错误，应在构造阶段失败。
+     */
+    @Test
+    void shouldRejectConstructionWhenExtraBodyIsInvalidJson() {
+        LlmProviderProperties properties = properties();
+        properties.setExtraBody("not-a-json-object");
+
+        IllegalStateException e = assertThrows(IllegalStateException.class,
+                () -> new OpenAiCompatibleChatProvider(properties));
+
+        assertTrue(e.getMessage().contains("llm.extra-body"));
+    }
+
+    /**
+     * 附加请求体禁止携带凭据，防止配置误写泄露密钥。
+     */
+    @Test
+    void shouldRejectExtraBodyCarryingApiKey() {
+        LlmProviderProperties properties = properties();
+        properties.setExtraBody("{\"apiKey\":\"sk-leaked\"}");
+
+        IllegalStateException e = assertThrows(IllegalStateException.class,
+                () -> new OpenAiCompatibleChatProvider(properties));
+
+        assertTrue(e.getMessage().contains("apiKey"));
+    }
+
     private interface StubHandler {
         void handle(HttpExchange exchange) throws IOException;
     }

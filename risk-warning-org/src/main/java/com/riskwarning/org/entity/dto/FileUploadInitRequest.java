@@ -5,8 +5,9 @@ import lombok.NonNull;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.Max;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Data
 public class FileUploadInitRequest {
@@ -14,7 +15,7 @@ public class FileUploadInitRequest {
     @NotNull
     private Long projectId;
 
-    @NotEmpty
+    @NotBlank
     private String fileHash;
 
     @NotNull
@@ -24,8 +25,12 @@ public class FileUploadInitRequest {
     @NotNull
     private Integer totalChunks;
 
-    @NotEmpty
+    @NotBlank
     private String fileType;
 
+    /** 原始文件名仅用于展示和证据回溯，不参与服务器存储路径生成。 */
+    @NotBlank
+    @Size(max = 512)
+    private String fileName;
 
 }

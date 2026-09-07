@@ -32,7 +32,8 @@ public class FileController {
                 fileUploadInitRequest.getFileHash(),
                 fileUploadInitRequest.getFileSize(),
                 fileUploadInitRequest.getTotalChunks(),
-                fileUploadInitRequest.getFileType()
+                fileUploadInitRequest.getFileType(),
+                fileUploadInitRequest.getFileName()
         );
         return Result.success(new FileUploadInitResponse(uploadId));
     }

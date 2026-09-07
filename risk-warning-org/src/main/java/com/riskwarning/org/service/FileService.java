@@ -7,7 +7,8 @@ import java.util.List;
 
 public interface FileService {
 
-    public String initUpload(Long projectId, String fileHash, Long fileSize, Integer totalChunks, String fileType);
+    public String initUpload(Long projectId, String fileHash, Long fileSize, Integer totalChunks,
+                             String fileType, String originalFileName);
 
     public void uploadChunk(Long projectId, String uploadId, Integer chunkIndex, MultipartFile file);
 

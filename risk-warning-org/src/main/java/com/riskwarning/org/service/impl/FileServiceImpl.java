@@ -31,7 +31,9 @@ public class FileServiceImpl implements FileService {
     private FileRepository fileRepository;
 
     @Override
-    public String initUpload(Long projectId, String fileHash, Long fileSize, Integer totalChunks, String fileType) {
+    public String initUpload(Long projectId, String fileHash, Long fileSize, Integer totalChunks,
+                             String fileType, String originalFileName) {
+        validateOriginalFileName(originalFileName);
         String redisFileKey = String.format(RedisKey.REDIS_KEY_FILE, projectId);
         // 检查该项目是否已经上传过文件进行解析
         if(redisUtil.sHasKey(redisFileKey, fileHash)){
@@ -63,6 +65,7 @@ public class FileServiceImpl implements FileService {
                 .fileHash(fileHash)
                 .totalChunks(totalChunks)
                 .fileSuffix(fileType)
+                .originalFileName(originalFileName.trim())
                 .build();
 
         long putHashRes = redisUtil.sSetAndTime(redisFileKey, RedisKey.REDIS_KEY_FILE_EXPIRE_TIME_SECONDS, fileHash);
@@ -71,6 +74,16 @@ public class FileServiceImpl implements FileService {
         }
         redisUtil.hset(String.format(RedisKey.REDIS_KEY_FILE_UPLOAD_INFO, projectId), uploadId, uploadFileDto, RedisKey.REDIS_KEY_UPLOAD_INFO_EXPIRE_TIME_SECONDS);
         return uploadId;
+    }
+
+    /** 原始名只能作为展示字段，拒绝路径和控制字符，避免其被误作服务器文件路径。 */
+    private void validateOriginalFileName(String originalFileName) {
+        if (originalFileName == null || originalFileName.trim().isEmpty()
+                || originalFileName.length() > 512
+                || originalFileName.indexOf('/') >= 0 || originalFileName.indexOf('\\') >= 0
+                || originalFileName.chars().anyMatch(Character::isISOControl)) {
+            throw new BusinessException("原始文件名不合法");
+        }
     }
 
     @Override

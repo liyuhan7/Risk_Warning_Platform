@@ -30,4 +30,7 @@ public class UploadFileDto implements Serializable {
     private String filePath;
 
     private String fileSuffix;
+
+    /** 浏览器上报的原始文件名；旧 Redis 上传任务反序列化时允许为空。 */
+    private String originalFileName;
 }

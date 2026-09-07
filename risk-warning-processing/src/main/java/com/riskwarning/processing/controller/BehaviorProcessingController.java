@@ -21,27 +21,6 @@ public class BehaviorProcessingController {
 
     private final BehaviorProcessingService behaviorProcessingService;
 
-//    /**
-//     * 接收一个行为（Behavior），调用服务进行指标评估并写入数据库。
-//     *
-//     * 注意：Behavior 中必须包含有效的 projectId，否则服务会抛出 IllegalArgumentException。
-//     */
-//    @PostMapping("/process")
-//    public Result<MappingResult> process(@RequestBody Behavior behavior) {
-//        try {
-//            MappingResult result = behaviorProcessingService.processAndPersistFromBehavior(behavior);
-//            return Result.success(result);
-//        } catch (IllegalArgumentException e) {
-//            // 业务参数错误
-//            log.warn("处理行为时参数错误: {}", e.getMessage());
-//            return Result.fail(400, e.getMessage());
-//        } catch (Exception e) {
-//            // 其他未知错误
-//            log.error("处理行为失败", e);
-//            return Result.fail("处理行为失败: " + e.getMessage());
-//        }
-//    }
-
     /**
      * 新接口：根据 projectId 处理该项目的所有 behaviors
      *
@@ -53,12 +32,14 @@ public class BehaviorProcessingController {
      * @param projectId 项目ID
      * @return 聚合的评估结果
      */
-    @PostMapping("/process-project/{projectId}/{assessmentId}")
+    @PostMapping("/process-project/{projectId}/{assessmentId}/{analysisRunId}")
     @AuthRequired
-    public Result processProject(@PathVariable Long projectId, @PathVariable Long assessmentId) {
+    public Result processProject(@PathVariable Long projectId, @PathVariable Long assessmentId,
+                                 @PathVariable String analysisRunId) {
         try {
             log.info("开始处理项目的所有行为: projectId={}", projectId);
-            behaviorProcessingService.processProjectBehaviors(UserContext.getUser().getId(), projectId, assessmentId);
+            behaviorProcessingService.processProjectBehaviors(
+                    UserContext.getUser().getId(), projectId, assessmentId, analysisRunId);
             return Result.success("项目行为处理开始");
         } catch (IllegalArgumentException e) {
             log.warn("处理项目行为时参数错误: projectId={}, error={}", projectId, e.getMessage());

@@ -59,12 +59,6 @@
             <artifactId>spring-kafka</artifactId>
         </dependency>
 
-        <!-- Spring Batch -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-batch</artifactId>
-        </dependency>
-
         <!-- Redis -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -4,7 +4,6 @@ package com.riskwarning.common;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.InfoResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
-import com.riskwarning.common.config.TestConsumer;
 import com.riskwarning.common.enums.AssessmentStatusEnum;
 import com.riskwarning.common.enums.indicator.IndicatorRiskStatus;
 import com.riskwarning.common.enums.risk.RiskLevelEnum;
@@ -44,9 +43,6 @@ public class ConnectivityTest {
 
     @Autowired
     private KafkaTemplate<String, Message> kafkaTemplate;
-
-    @Autowired
-    private TestConsumer testConsumer;
 
 //    @Autowired
 //    private IndicatorResultRepository indicatorResultRepository;

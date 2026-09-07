@@ -2,7 +2,9 @@ package com.riskwarning.report.repository;
 
 import com.riskwarning.common.po.indicator.IndicatorResult;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,20 +16,13 @@ import java.util.Optional;
 public interface IndicatorResultRepository extends JpaRepository<IndicatorResult, Long> {
 
 
-    /**
-     * 根据 assessmentId 和 indicatorEsId 查找记录
-     */
-    Optional<IndicatorResult> findByAssessmentIdAndIndicatorEsId(Long assessmentId, String indicatorEsId);
+    /** 按评估和独立运行读取结果，避免跨轮汇总。 */
+    List<IndicatorResult> findByAssessmentIdAndAnalysisRunId(Long assessmentId, String analysisRunId);
 
-    /**
-     * 统计指定 assessmentId 的记录数
-     */
-    long countByAssessmentId(Long assessmentId);
-
-    /**
-     * 根据 assessmentId 查找所有记录
-     */
-    List<IndicatorResult> findByAssessmentId(Long assessmentId);
+    /** 成功切换后删除本评估中非当前运行的指标结果。 */
+    @Modifying
+    @Transactional
+    long deleteByAssessmentIdAndAnalysisRunIdNot(Long assessmentId, String analysisRunId);
 
 
 

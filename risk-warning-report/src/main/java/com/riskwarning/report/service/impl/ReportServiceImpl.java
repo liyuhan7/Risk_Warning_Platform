@@ -6,10 +6,12 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.alibaba.fastjson2.JSON;
 import com.riskwarning.common.config.ElasticSearchConfig;
+import com.riskwarning.common.enums.AnalysisRunStatus;
 import com.riskwarning.common.enums.RiskDimensionEnum;
 import com.riskwarning.common.enums.risk.RiskLevelEnum;
 import com.riskwarning.common.exception.BusinessException;
 import com.riskwarning.common.po.indicator.IndicatorResult;
+import com.riskwarning.common.po.analysis.AnalysisRun;
 import com.riskwarning.common.po.report.Assessment;
 import com.riskwarning.common.po.risk.Risk;
 import com.riskwarning.report.entity.vo.AssessmentGeneralDetails;
@@ -18,6 +20,7 @@ import com.riskwarning.report.entity.vo.indicator.IndicatorDistributionVO;
 import com.riskwarning.report.entity.vo.indicator.ScoreRatioDistributionItemVO;
 import com.riskwarning.report.entity.vo.risk.RiskVO;
 import com.riskwarning.report.repository.AssessmentRepository;
+import com.riskwarning.report.repository.AnalysisRunRepository;
 import com.riskwarning.report.repository.IndicatorResultRepository;
 import com.riskwarning.report.service.ReportService;
 import lombok.extern.slf4j.Slf4j;
@@ -41,11 +44,13 @@ public class ReportServiceImpl implements ReportService {
     private IndicatorResultRepository indicatorResultRepository;
 
     @Autowired
+    private AnalysisRunRepository analysisRunRepository;
+
+    @Autowired
     private ElasticsearchClient esClient;
 
     @Override
     public IndicatorDistributionVO assembleIndicatorResult(Assessment assessment) {
-
         // 检查assessment的detail属性是否已经存在indicatorDistribution信息，若存在则直接反序列化返回，避免重复计算
         if(assessment.getDetails() != null && !assessment.getDetails().isEmpty()) {
             try{
@@ -57,8 +62,14 @@ public class ReportServiceImpl implements ReportService {
             }
 
         }
-        // TODO: 目前写在内存中进行聚合，之后可能考虑使用数据库进行聚合计算
-        List<IndicatorResult> indicatorResults = indicatorResultRepository.findByAssessmentId(assessment.getId());
+        return assembleIndicatorResult(assessment, findCurrentSuccessfulRunId(assessment.getId()));
+    }
+
+    @Override
+    public IndicatorDistributionVO assembleIndicatorResult(Assessment assessment, String analysisRunId) {
+        List<IndicatorResult> indicatorResults = analysisRunId == null
+                ? Collections.emptyList()
+                : indicatorResultRepository.findByAssessmentIdAndAnalysisRunId(assessment.getId(), analysisRunId);
         IndicatorDistributionVO indicatorDistributionVO = new IndicatorDistributionVO();
         indicatorDistributionVO.setAssessmentId(assessment.getId());
         indicatorDistributionVO.setRiskDimensionEnum(null);
@@ -168,7 +179,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<RiskVO> assembleRisk(Long assessmentId) {
-        List<Risk> risks = fetchRisksFromES(assessmentId);
+        List<Risk> risks = fetchRisksFromES(assessmentId, findCurrentSuccessfulRunId(assessmentId));
         List<RiskVO> riskVOList = new ArrayList<>();
         for(Risk risk : risks) {
             RiskVO riskVO = new RiskVO();
@@ -200,7 +211,8 @@ public class ReportServiceImpl implements ReportService {
                 throw new BusinessException("评估报告已存在详细信息但反序列化失败");
             }
         }
-        List<Risk> risks = fetchRisksFromES(assessment.getId());
+        List<Risk> risks = fetchRisksFromES(assessment.getId(),
+                findCurrentSuccessfulRunId(assessment.getId()));
         return assembleGeneralWithRisks(assessment, risks);
     }
 
@@ -269,10 +281,19 @@ public class ReportServiceImpl implements ReportService {
     }
 
 
-    public List<Risk> fetchRisksFromES(Long assessmentId) {
+    private String findCurrentSuccessfulRunId(Long assessmentId) {
+        return analysisRunRepository.findFirstByAssessmentIdAndStatusOrderByFinishedAtDesc(
+                        assessmentId, AnalysisRunStatus.SUCCEEDED)
+                .map(AnalysisRun::getAnalysisRunId)
+                .orElse(null);
+    }
+
+    public List<Risk> fetchRisksFromES(Long assessmentId, String analysisRunId) {
+        if (analysisRunId == null || analysisRunId.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
         try {
-            log.info("[Fetching Risks] assessmentId={}, dimension={}, riskLevel={}",
-                    assessmentId);
+            log.info("[Fetching Risks] assessmentId={}, analysisRunId={}", assessmentId, analysisRunId);
 
             SearchResponse<Risk> resp = esClient.search(s -> s
                             .index(ElasticSearchConfig.RISK_INDEX)
@@ -280,6 +301,7 @@ public class ReportServiceImpl implements ReportService {
                             .query(q -> q
                                     .bool(b -> b
                                             .must(m1 -> m1.term(t -> t.field("assessmentId").value(assessmentId)))
+                                            .must(m2 -> m2.term(t -> t.field("analysisRunId").value(analysisRunId)))
                                     )
                             )
                             .sort(sort -> sort
@@ -297,16 +319,17 @@ public class ReportServiceImpl implements ReportService {
                     Risk risk = hit.source();
                     if (risk != null) {
                         risks.add(risk);
-                        log.debug("[Risk Fetched] assessmentId={}, riskId={}", assessmentId, risk.getId());
+                        log.debug("[Risk Fetched] assessmentId={}, analysisRunId={}, riskId={}",
+                                assessmentId, analysisRunId, risk.getId());
                     }
                 }
             }
 
-            log.info("[Fetching Risks Completed] assessmentId={}, totalRisks={}",
-                    assessmentId, risks.size());
+            log.info("[Fetching Risks Completed] assessmentId={}, analysisRunId={}, totalRisks={}",
+                    assessmentId, analysisRunId, risks.size());
             return risks;
         } catch (Exception e) {
-            log.error("[Fetching Risks Failed] assessmentId={}", assessmentId, e);
+            log.error("[Fetching Risks Failed] assessmentId={}, analysisRunId={}", assessmentId, analysisRunId, e);
             return Collections.emptyList();
         }
     }

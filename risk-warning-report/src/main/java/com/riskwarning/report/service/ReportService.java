@@ -12,6 +12,9 @@ public interface ReportService {
 
     IndicatorDistributionVO assembleIndicatorResult(Assessment assessment);
 
+    /** 供运行完成阶段按指定 Run 组装尚未切换的结果。 */
+    IndicatorDistributionVO assembleIndicatorResult(Assessment assessment, String analysisRunId);
+
     List<RiskVO> assembleRisk(Long assessmentId);
 
     AssessmentDetailVO assembleGeneral(Assessment assessment);

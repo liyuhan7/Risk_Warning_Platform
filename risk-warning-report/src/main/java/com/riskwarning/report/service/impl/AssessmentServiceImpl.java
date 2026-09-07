@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
 import com.alibaba.fastjson2.JSON;
 import com.riskwarning.common.config.ElasticSearchConfig;
+import com.riskwarning.common.po.evidence.EvidenceChunk;
 import com.riskwarning.common.enums.AssessmentStatusEnum;
 import com.riskwarning.common.enums.indicator.IndicatorRiskStatus;
 import com.riskwarning.common.enums.risk.RiskLevelEnum;
@@ -52,13 +53,17 @@ public class AssessmentServiceImpl implements AssessmentService {
     private final static Double THRESHOLD_RATIO = 0.5;
 
     @Override
-    public void aggregateInformation(Long userId, Long projectId, Long assessmentId) {
+    public void aggregateInformation(Long userId, Long projectId, Long assessmentId, String analysisRunId) {
+        if (analysisRunId == null || analysisRunId.trim().isEmpty()) {
+            throw new IllegalArgumentException("analysisRunId must not be blank");
+        }
         Assessment assessment = assessmentRepository.findById(assessmentId).orElse(null);
         if (assessment == null) {
             throw new RuntimeException("Assessment not found");
         }
         // todo：查询IndicatorResult表，获取所有指标结果，计算结果小于maxScore * 0.5的产生风险，预留处置接口
-        List<IndicatorResult> indicatorResults = indicatorResultRepository.findByAssessmentId(assessmentId);
+        List<IndicatorResult> indicatorResults = indicatorResultRepository
+                .findByAssessmentIdAndAnalysisRunId(assessmentId, analysisRunId);
         List<Risk> risks = new ArrayList<>();
         double totalScore = 0.0;
         int lowRiskCount = 0, mediumRiskCount = 0, highRiskCount = 0, totalRiskCount = 0;
@@ -75,26 +80,7 @@ public class AssessmentServiceImpl implements AssessmentService {
                 highRiskCount += riskLevelEnum == RiskLevelEnum.HIGH_RISK ? 1 : 0;
                 ir.setRiskTriggered(true);
                 ir.setRiskStatus(IndicatorRiskStatus.EVALUATED);
-                String indicatorName = ir.getIndicatorName();
-                Risk risk = Risk.builder()
-                        .projectId(projectId)
-                        .assessmentId(assessmentId)
-                        .name("指标风险-" + (indicatorName != null && !indicatorName.isEmpty() ? indicatorName : "未命名指标"))
-                        .dimension(ir.getDimension())
-                        .description("")
-                        .riskLevel(riskLevelEnum)
-                        .probability(0.0)
-                        .impact(0.0)
-                        .detectability(0.0)
-                        .status(RiskStatusEnum.TO_BE_DISPOSED)
-                        .processingStatus("成功")
-                        .responsibleParty("")
-                        .affectedObjects(new String[]{})
-                        .impactScope("")
-                        .countermeasures("")
-                        .relatedIndicators(ir.getCalculationDetails().getRelatedIndicators())
-                        .createdAt(LocalDateTime.now())
-                        .build();
+                Risk risk = buildRisk(projectId, assessmentId, analysisRunId, ir, riskLevelEnum);
                 risks.add(risk);
             }
         }
@@ -109,6 +95,7 @@ public class AssessmentServiceImpl implements AssessmentService {
                         b.operations(op -> op
                                 .index(idx -> idx
                                         .index(ElasticSearchConfig.RISK_INDEX)
+                                        .id(risk.getId())
                                         .document(risk)
                                 )
                         );
@@ -135,13 +122,46 @@ public class AssessmentServiceImpl implements AssessmentService {
         assessment.setStatus(AssessmentStatusEnum.ASSESSED);
         assessment.setDetails(JSON.toJSONString(new AssessmentGeneralDetails(
                 reportService.assembleGeneral(assessment, risks),
-                reportService.assembleIndicatorResult(assessment)
+                reportService.assembleIndicatorResult(assessment, analysisRunId)
         )));
         assessment.setAssessmentDate(LocalDateTime.now());
         assessmentRepository.save(assessment);
 
         // 发送通知消息，通知前端评估完成
         sendAssessmentCompletedNotification(userId, projectId, assessmentId, assessment);
+    }
+
+    static Risk buildRisk(Long projectId, Long assessmentId, String analysisRunId,
+                          IndicatorResult indicatorResult, RiskLevelEnum riskLevel) {
+        String indicatorName = indicatorResult.getIndicatorName();
+        String name = "指标风险-" + (indicatorName != null && !indicatorName.isEmpty()
+                ? indicatorName : "未命名指标");
+        return Risk.builder()
+                .id(stableRiskId(analysisRunId, assessmentId, indicatorResult.getIndicatorEsId(), name))
+                .projectId(projectId)
+                .assessmentId(assessmentId)
+                .analysisRunId(analysisRunId)
+                .name(name)
+                .dimension(indicatorResult.getDimension())
+                .description("")
+                .riskLevel(riskLevel)
+                .probability(0.0)
+                .impact(0.0)
+                .detectability(0.0)
+                .status(RiskStatusEnum.TO_BE_DISPOSED)
+                .processingStatus("成功")
+                .responsibleParty("")
+                .affectedObjects(new String[]{})
+                .impactScope("")
+                .countermeasures("")
+                .relatedIndicators(indicatorResult.getCalculationDetails().getRelatedIndicators())
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+    static String stableRiskId(String analysisRunId, Long assessmentId, String indicatorEsId, String name) {
+        return EvidenceChunk.sha256(analysisRunId + "|" + assessmentId + "|" + indicatorEsId + "|" + name)
+                .substring(0, 32);
     }
 
     /**

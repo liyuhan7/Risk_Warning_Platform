@@ -1,17 +1,20 @@
 package com.riskwarning.processing.task;
 
 
-import com.riskwarning.common.constants.Constants;
-import com.riskwarning.common.enums.indicator.IndicatorRiskStatus;
+import com.riskwarning.common.dto.analysis.AnalysisScope;
+import com.riskwarning.common.dto.analysis.SourceDocumentRef;
 import com.riskwarning.common.message.BehaviorProcessingTaskMessage;
 import com.riskwarning.common.message.IndicatorCalculationTaskMessage;
-import com.riskwarning.common.po.indicator.IndicatorResult;
-import com.riskwarning.common.utils.FileUtils;
+import com.riskwarning.common.message.Message;
 import com.riskwarning.common.utils.KafkaUtils;
 import com.riskwarning.common.utils.StringUtils;
-import com.riskwarning.processing.batch.BatchJob;
+import com.riskwarning.processing.entity.dto.ProcessedDocument;
+import com.riskwarning.processing.service.AnalysisRunFailureService;
 import com.riskwarning.processing.service.BehaviorProcessingService;
 import com.riskwarning.processing.service.DocumentProcessingService;
+import com.riskwarning.processing.service.EvidenceExtractionService;
+import com.riskwarning.processing.service.FactExtractionPipeline;
+import com.riskwarning.processing.service.SourceDocumentScopeValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,7 +22,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,13 +32,22 @@ import java.util.List;
 public class MessageTask {
 
     @Autowired
-    private BatchJob batchJob;
-
-    @Autowired
     private DocumentProcessingService documentProcessingService;
 
     @Autowired
     private BehaviorProcessingService behaviorProcessingService;
+
+    @Autowired
+    private SourceDocumentScopeValidator sourceDocumentScopeValidator;
+
+    @Autowired
+    private AnalysisRunFailureService analysisRunFailureService;
+
+    @Autowired
+    private EvidenceExtractionService evidenceExtractionService;
+
+    @Autowired
+    private FactExtractionPipeline factExtractionPipeline;
 
     @Autowired
     @Qualifier(value = "FileProcessTaskThreadPool")
@@ -50,6 +63,7 @@ public class MessageTask {
 
     @KafkaListener(topics = "behavior_processing_tasks", groupId = "test-consumer")
     public void onMessage(BehaviorProcessingTaskMessage message) {
+        AnalysisScope analysisScope = requireScope(message);
         log.info("========================================");
         log.info("[Kafka消息接收] topic=behavior_processing_tasks, messageId={}, projectId={}",
                 message.getMessageId(), message.getProjectId());
@@ -66,24 +80,26 @@ public class MessageTask {
 
                     fileThreadPoolExecutor.execute(() -> {
                         long startTime = System.currentTimeMillis();
+                        List<ProcessedDocument> internalFiles = new ArrayList<>();
 
                         try {
                             // 步骤1: 文档处理 - 提取行为
                             log.info("▶ 步骤 1/3: 开始文档处理和行为提取...");
-                            List<String> internalFiles = documentProcessingService.processDocument(
-                                    message.getProjectId(),
-                                    new ArrayList<>(),
-                                    message.getFilePaths()
-                            );
+                            sourceDocumentScopeValidator.validate(
+                                    analysisScope, requireDocuments(message));
+                            internalFiles = documentProcessingService.processDocuments(
+                                    analysisScope, message.getDocuments());
                             log.info("✓ 步骤 1/3 完成: 文档处理成功，生成内部文件数={}", internalFiles.size());
 
-                            // 步骤2: 批处理 - 将行为存入ES
-                            log.info("▶ 步骤 2/3: 开始批处理任务，将行为数据存入ES...");
-                            batchJob.runBatchJob(
-                                    message.getProjectId(),
-                                    internalFiles
-                            );
-                            log.info("✓ 步骤 2/3 完成: 批处理任务成功，行为数据已存入ES");
+                            evidenceExtractionService.extractAndPersist(analysisScope, internalFiles);
+                            log.info("✓ Evidence 持久化完成: analysisRunId={}",
+                                    analysisScope.getAnalysisRunId());
+
+                            // 步骤2: 从权威 Evidence 抽取结构化事实并写入 ES
+                            log.info("▶ 步骤 2/3: 开始事实抽取、分类、向量化和行为写入...");
+                            int behaviorCount = factExtractionPipeline.process(
+                                    analysisScope, requireDocuments(message)).size();
+                            log.info("✓ 步骤 2/3 完成: 结构化行为已写入ES，数量={}", behaviorCount);
 
                             // 步骤3: 发送消息到指标计算任务队列
                             log.info("▶ 步骤 3/3: 发送消息到指标计算任务队列...");
@@ -94,14 +110,7 @@ public class MessageTask {
                             }
 
                             // ✅ 创建指标计算任务消息
-                            IndicatorCalculationTaskMessage indicatorMessage = new IndicatorCalculationTaskMessage(
-                                    StringUtils.generateMessageId(),
-                                    String.valueOf(System.currentTimeMillis()),
-                                    message.getTraceId(),
-                                    message.getUserId(),
-                                    message.getProjectId(),
-                                    assessmentId
-                            );
+                            IndicatorCalculationTaskMessage indicatorMessage = createIndicatorMessage(message);
 
                             // ✅ 发送到 indicator_calculation_tasks topic
                             kafkaUtils.sendMessage(indicatorMessage);
@@ -118,16 +127,21 @@ public class MessageTask {
                             log.info("└─────────────────────────────────────────────────────────────┘");
 
                         } catch (Exception e) {
+                            markRunFailed(analysisScope, e);
                             log.error("✗ 处理文件上传任务失败: projectId={}, error={}",
                                     message.getProjectId(), e.getMessage(), e);
-                            throw new RuntimeException("处理失败", e);
                         } finally {
                             log.info("Finished processing file upload for projectId: {}", message.getProjectId());
-                            // 删除中间文件
-                            // 清理临时文件
-                            log.info("▶ 清理临时文件: projectId={}", message.getProjectId());
-                            String internalFilePath = Constants.getInternalDirPath(message.getProjectId());
-                            FileUtils.delDirectory(internalFilePath);
+                            log.info("▶ 清理本次运行的内部文件: analysisRunId={}",
+                                    analysisScope.getAnalysisRunId());
+                            for (ProcessedDocument internalFile : internalFiles) {
+                                try {
+                                    Files.deleteIfExists(Paths.get(internalFile.getInternalFilePath()));
+                                } catch (Exception cleanupException) {
+                                    log.warn("清理内部文件失败: path={}",
+                                            internalFile.getInternalFilePath(), cleanupException);
+                                }
+                            }
                             log.info("✓ 临时文件清理完成");
                         }
                     });
@@ -158,13 +172,11 @@ public class MessageTask {
     @KafkaListener(topics = "indicator_calculation_tasks", groupId = "indicator-calculation-consumer")
     public void onMessage(IndicatorCalculationTaskMessage message) {
 
+        AnalysisScope analysisScope = requireScope(message);
+
         log.info("========================================");
         log.info("[Kafka消息接收] topic=indicator_calculation_tasks, messageId={}, projectId={}, assessmentId={}",
                 message.getMessageId(), message.getProjectId(), message.getAssessmentId());
-        if (message == null || message.getProjectId() == null || message.getAssessmentId() == null) {
-            log.error("[CRITICAL] 消息参数不完整: message={}", message);
-            return;
-        }
         log.info("┌─────────────────────────────────────────────────────────────┐");
         log.info("│  开始指标计算任务                                           │");
         log.info("│  Project ID: {}", String.format("%-45s", message.getProjectId()) + "│");
@@ -177,14 +189,62 @@ public class MessageTask {
                 behaviorProcessingService.processProjectBehaviors(
                         message.getUserId(),
                         message.getProjectId(),
-                        message.getAssessmentId()
+                        message.getAssessmentId(),
+                        analysisScope.getAnalysisRunId()
                 );
             } catch (Exception e) {
                 log.error("✗ 指标计算任务失败: projectId={}, assessmentId={}, error={}",
                         message.getProjectId(), message.getAssessmentId(), e.getMessage(), e);
-
-                throw new RuntimeException("指标计算任务失败", e);
+                markRunFailed(analysisScope, e);
             }
         });
+    }
+
+    static AnalysisScope requireScope(Message message) {
+        if (message == null) {
+            throw new IllegalArgumentException("processing message must not be null");
+        }
+        return new AnalysisScope(
+                message.getProjectId(), message.getAssessmentId(), message.getAnalysisRunId());
+    }
+
+    static IndicatorCalculationTaskMessage createIndicatorMessage(BehaviorProcessingTaskMessage message) {
+        AnalysisScope scope = requireScope(message);
+        return new IndicatorCalculationTaskMessage(
+                StringUtils.generateMessageId(),
+                String.valueOf(System.currentTimeMillis()),
+                message.getTraceId(),
+                message.getUserId(),
+                scope.getProjectId(),
+                scope.getAssessmentId(),
+                scope.getAnalysisRunId()
+        );
+    }
+
+    static List<SourceDocumentRef> requireDocuments(
+            BehaviorProcessingTaskMessage message) {
+        if (message.getDocuments() == null || message.getDocuments().isEmpty()) {
+            throw new IllegalArgumentException("processing message must contain scoped documents");
+        }
+        for (SourceDocumentRef document : message.getDocuments()) {
+            if (document == null || document.getSourceDocumentId() == null
+                    || document.getSourceDocumentId() <= 0 || document.getFilePath() == null
+                    || document.getFilePath().trim().isEmpty()) {
+                throw new IllegalArgumentException("source document identity is invalid");
+            }
+        }
+        return message.getDocuments();
+    }
+
+    private void markRunFailed(AnalysisScope scope, Exception cause) {
+        try {
+            analysisRunFailureService.markFailed(scope, java.time.LocalDateTime.now());
+        } catch (Exception failureException) {
+            log.error("标记失败运行异常: analysisRunId={}", scope.getAnalysisRunId(),
+                    failureException);
+        }
+        if (cause != null) {
+            log.error("分析运行失败: analysisRunId={}", scope.getAnalysisRunId(), cause);
+        }
     }
 }

@@ -1,0 +1,130 @@
+[
+  {
+    "id": "S01-normal-quantity",
+    "category": "正常-数值与单位",
+    "allowedEvidenceIds": ["ev-001"],
+    "expectPass": true,
+    "expectCodes": [],
+    "rawResponse": "{\"facts\":[{\"subject\":\"本公司\",\"action\":\"完成一级供应商年度审查\",\"object\":\"12 家一级供应商\",\"status\":\"COMPLETED\",\"behaviorDate\":\"2025-11-30\",\"quantitativeData\":12,\"quantitativeUnit\":\"家\",\"description\":\"公司于 2025 年 11 月 30 日完成 12 家一级供应商年度审查。\",\"confidence\":0.95,\"evidenceIds\":[\"ev-001\"]}]}"
+  },
+  {
+    "id": "S02-normal-multiple-facts",
+    "category": "正常-一段多事实",
+    "allowedEvidenceIds": ["ev-001", "ev-002"],
+    "expectPass": true,
+    "expectCodes": [],
+    "rawResponse": "{\"facts\":[{\"subject\":\"本公司\",\"action\":\"完成供应商年度审查\",\"object\":\"一级供应商\",\"status\":\"COMPLETED\",\"description\":\"公司已完成一级供应商年度审查。\",\"confidence\":0.92,\"evidenceIds\":[\"ev-001\"]},{\"subject\":\"3 家供应商\",\"action\":\"补交环境许可证明\",\"object\":null,\"status\":\"IN_PROGRESS\",\"description\":\"3 家供应商仍在补交环境许可证明。\",\"confidence\":0.9,\"evidenceIds\":[\"ev-001\",\"ev-002\"]}]}"
+  },
+  {
+    "id": "S03-normal-unknown-status",
+    "category": "正常-状态证据不足",
+    "allowedEvidenceIds": ["ev-003"],
+    "expectPass": true,
+    "expectCodes": [],
+    "rawResponse": "{\"facts\":[{\"subject\":\"境外子公司\",\"action\":\"提交年度经营报告\",\"object\":\"集团总部\",\"status\":\"UNKNOWN\",\"description\":\"材料记载境外子公司提交年度经营报告，但未说明是否已经完成。\",\"confidence\":0.74,\"evidenceIds\":[\"ev-003\"]}]}"
+  },
+  {
+    "id": "S04-markdown-wrapper",
+    "category": "Markdown 包裹",
+    "allowedEvidenceIds": ["ev-001"],
+    "expectPass": false,
+    "expectCodes": ["EXTRA_TEXT_AROUND_JSON"],
+    "rawResponse": "```json\n{\"facts\":[{\"subject\":\"本公司\",\"action\":\"完成审查\",\"status\":\"COMPLETED\",\"description\":\"公司完成审查。\",\"confidence\":0.9,\"evidenceIds\":[\"ev-001\"]}]}\n```"
+  },
+  {
+    "id": "S05-missing-required",
+    "category": "缺必填字段",
+    "allowedEvidenceIds": ["ev-001"],
+    "expectPass": false,
+    "expectCodes": ["MISSING_FIELD"],
+    "rawResponse": "{\"facts\":[{\"subject\":\"本公司\",\"status\":\"COMPLETED\",\"description\":\"公司完成审查。\",\"confidence\":0.9,\"evidenceIds\":[\"ev-001\"]}]}"
+  },
+  {
+    "id": "S06-bad-status",
+    "category": "错枚举",
+    "allowedEvidenceIds": ["ev-001"],
+    "expectPass": false,
+    "expectCodes": ["BAD_ENUM"],
+    "rawResponse": "{\"facts\":[{\"subject\":\"本公司\",\"action\":\"完成审查\",\"status\":\"DONE\",\"description\":\"公司完成审查。\",\"confidence\":0.9,\"evidenceIds\":[\"ev-001\"]}]}"
+  },
+  {
+    "id": "S07-empty-status",
+    "category": "空串枚举",
+    "allowedEvidenceIds": ["ev-001"],
+    "expectPass": false,
+    "expectCodes": ["EMPTY_STRING_IN_ENUM"],
+    "rawResponse": "{\"facts\":[{\"subject\":\"本公司\",\"action\":\"完成审查\",\"status\":\"\",\"description\":\"公司完成审查。\",\"confidence\":0.9,\"evidenceIds\":[\"ev-001\"]}]}"
+  },
+  {
+    "id": "S08-confidence-out-of-range",
+    "category": "置信度越界",
+    "allowedEvidenceIds": ["ev-001"],
+    "expectPass": false,
+    "expectCodes": ["OUT_OF_RANGE"],
+    "rawResponse": "{\"facts\":[{\"subject\":\"本公司\",\"action\":\"完成审查\",\"status\":\"COMPLETED\",\"description\":\"公司完成审查。\",\"confidence\":1.2,\"evidenceIds\":[\"ev-001\"]}]}"
+  },
+  {
+    "id": "S09-unitless-quantity",
+    "category": "数值缺单位",
+    "allowedEvidenceIds": ["ev-001"],
+    "expectPass": false,
+    "expectCodes": ["CROSS_RULE_VIOLATION"],
+    "rawResponse": "{\"facts\":[{\"subject\":\"本公司\",\"action\":\"审查供应商\",\"status\":\"COMPLETED\",\"quantitativeData\":12,\"description\":\"公司审查了 12 家供应商。\",\"confidence\":0.9,\"evidenceIds\":[\"ev-001\"]}]}"
+  },
+  {
+    "id": "S10-hallucinated-evidence",
+    "category": "幻觉引用",
+    "allowedEvidenceIds": ["ev-001"],
+    "expectPass": false,
+    "expectCodes": ["UNKNOWN_REFERENCE"],
+    "rawResponse": "{\"facts\":[{\"subject\":\"本公司\",\"action\":\"完成审查\",\"status\":\"COMPLETED\",\"description\":\"公司完成审查。\",\"confidence\":0.9,\"evidenceIds\":[\"ev-999\"]}]}"
+  },
+  {
+    "id": "S11-prohibited-inference",
+    "category": "风险或法规结论",
+    "allowedEvidenceIds": ["ev-001"],
+    "expectPass": false,
+    "expectCodes": ["PROHIBITED_INFERENCE"],
+    "rawResponse": "{\"facts\":[{\"subject\":\"本公司\",\"action\":\"未提交材料\",\"status\":\"COMPLETED\",\"description\":\"公司未提交材料，违反相关法律规定，属于高风险。\",\"confidence\":0.9,\"evidenceIds\":[\"ev-001\"]}]}"
+  },
+  {
+    "id": "S12-invalid-json",
+    "category": "无效 JSON",
+    "allowedEvidenceIds": ["ev-001"],
+    "expectPass": false,
+    "expectCodes": ["INVALID_JSON"],
+    "rawResponse": "{\"facts\":[{\"subject\":\"本公司\"},"
+  },
+  {
+    "id": "S13-array-root",
+    "category": "数组而非对象",
+    "allowedEvidenceIds": ["ev-001"],
+    "expectPass": false,
+    "expectCodes": ["NOT_OBJECT"],
+    "rawResponse": "[]"
+  },
+  {
+    "id": "S14-empty-evidence-result",
+    "category": "无事实可抽取",
+    "allowedEvidenceIds": [],
+    "expectPass": true,
+    "expectCodes": [],
+    "rawResponse": "{\"facts\":[]}"
+  },
+  {
+    "id": "S15-system-field",
+    "category": "模型输出系统字段",
+    "allowedEvidenceIds": ["ev-001"],
+    "expectPass": false,
+    "expectCodes": ["UNEXPECTED_FIELD"],
+    "rawResponse": "{\"facts\":[{\"subject\":\"本公司\",\"action\":\"完成审查\",\"status\":\"COMPLETED\",\"description\":\"公司完成审查。\",\"confidence\":0.9,\"evidenceIds\":[\"ev-001\"],\"analysisRunId\":\"run-model-made\"}]}"
+  },
+  {
+    "id": "S16-invalid-date",
+    "category": "错误日期格式",
+    "allowedEvidenceIds": ["ev-001"],
+    "expectPass": false,
+    "expectCodes": ["BAD_FORMAT"],
+    "rawResponse": "{\"facts\":[{\"subject\":\"本公司\",\"action\":\"完成审查\",\"status\":\"COMPLETED\",\"behaviorDate\":\"2025年11月30日\",\"description\":\"公司完成审查。\",\"confidence\":0.9,\"evidenceIds\":[\"ev-001\"]}]}"
+  }
+]

@@ -155,6 +155,8 @@ CREATE TABLE IF NOT EXISTS public.t_indicator_result (
     project_id BIGINT NOT NULL REFERENCES public.t_project(id) ON DELETE CASCADE,
     -- 关联的评估ID
     assessment_id BIGINT NOT NULL REFERENCES public.t_assessment_result(id) ON DELETE CASCADE,
+    -- 产生本结果的独立分析运行；历史记录允许为空
+    analysis_run_id VARCHAR(64),
     -- ES中指标的ID
     indicator_es_id TEXT NOT NULL,
     -- 指标名称（冗余存储，便于查询）
@@ -187,6 +189,7 @@ CREATE TABLE IF NOT EXISTS public.t_indicator_result (
 COMMENT ON TABLE public.t_indicator_result IS '指标计算结果表';
 COMMENT ON COLUMN public.t_indicator_result.project_id IS '关联的项目ID';
 COMMENT ON COLUMN public.t_indicator_result.assessment_id IS '关联的评估结果ID';
+COMMENT ON COLUMN public.t_indicator_result.analysis_run_id IS '产生本指标结果的独立分析运行；历史记录为空';
 COMMENT ON COLUMN public.t_indicator_result.indicator_es_id IS 'Elasticsearch中指标的ID';
 COMMENT ON COLUMN public.t_indicator_result.indicator_name IS '指标名称（冗余存储）';
 COMMENT ON COLUMN public.t_indicator_result.calculated_score IS '计算得到的分数';

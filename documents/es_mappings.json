@@ -2,12 +2,19 @@
   "t_behavior": {
     "mappings": {
       "properties": {
+        "schemaVersion": { "type": "keyword" },
         "id": { "type": "keyword" },
         "projectId": { "type": "long" },
+        "assessmentId": { "type": "long" },
+        "analysisRunId": { "type": "keyword" },
+        "sourceDocumentId": { "type": "long" },
         "description": {
           "type": "text",
           "analyzer": "standard"
         },
+        "subject": { "type": "keyword" },
+        "action": { "type": "keyword" },
+        "object": { "type": "keyword" },
         "descriptionVector": {
           "type": "dense_vector",
           "dims": 768,
@@ -19,7 +26,12 @@
         "tags": { "type": "keyword" },
         "status": { "type": "keyword" },
         "quantitativeData": { "type": "double" },
+        "quantitativeUnit": { "type": "keyword" },
         "behaviorDate": { "type": "date" },
+        "confidence": { "type": "float" },
+        "evidenceIds": { "type": "keyword" },
+        "extractionModel": { "type": "keyword" },
+        "extractionPromptVersion": { "type": "keyword" },
         "createdAt": { "type": "date" }
       }
     }
@@ -191,9 +203,10 @@
     "mappings": {
       "properties": {
         "id": { "type": "keyword" },
-        "projectId": { "type": "long" },
-        "assessmentId": { "type": "long" },
-        "name": {
+          "projectId": { "type": "long" },
+          "assessmentId": { "type": "long" },
+          "analysisRunId": { "type": "keyword" },
+          "name": {
           "type": "text",
           "analyzer": "standard",
           "fields": { "keyword": { "type": "keyword" } }

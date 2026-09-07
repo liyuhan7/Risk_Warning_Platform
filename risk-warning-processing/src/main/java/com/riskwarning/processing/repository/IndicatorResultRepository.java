@@ -19,20 +19,15 @@ public interface IndicatorResultRepository extends JpaRepository<IndicatorResult
 
 
     /**
-     * 根据 assessmentId 和 indicatorEsId 查找记录
+     * 根据评估、运行与指标查找结果，避免不同运行互相覆盖。
      */
-    Optional<IndicatorResult> findByAssessmentIdAndIndicatorEsId(Long assessmentId, String indicatorEsId);
+    Optional<IndicatorResult> findByAssessmentIdAndAnalysisRunIdAndIndicatorEsId(
+            Long assessmentId, String analysisRunId, String indicatorEsId);
 
     /**
      * 统计指定 assessmentId 的记录数
      */
     long countByAssessmentId(Long assessmentId);
-
-    /*
-    * 根据indicatorEsI查找记录
-    * */
-    Optional<IndicatorResult> findByAssessmentId(Long assessmentId);
-
 
     /**
      * CAS更新，比较calculated_at字段进行乐观锁更新
@@ -47,6 +42,7 @@ public interface IndicatorResultRepository extends JpaRepository<IndicatorResult
     @Query(value = "UPDATE t_indicator_result SET " +
             "project_id = :#{#result.projectId}, " +
             "assessment_id = :#{#result.assessmentId}, " +
+            "analysis_run_id = :#{#result.analysisRunId}, " +
             "indicator_es_id = :#{#result.indicatorEsId}, " +
             "indicator_name = :#{#result.indicatorName}, " +
             "indicator_level = :#{#result.indicatorLevel}, " +
@@ -67,12 +63,5 @@ public interface IndicatorResultRepository extends JpaRepository<IndicatorResult
             @Param("riskStatus") String riskStatus,
             @Param("oldCalculatedAt") LocalDateTime oldCalculatedAt
     );
-
-    /**
-     * 删除指定 assessmentId 的所有记录，用于重新计算前清理
-     */
-    @Modifying
-    @Transactional
-    void deleteByAssessmentId(Long assessmentId);
 
 }

@@ -35,6 +35,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -66,6 +67,9 @@ public class BehaviorProcessingService {
 
     // 行为取数空结果重试间隔（毫秒），避免行为刚写入未刷新导致的偶发空结果
     private static final long BEHAVIOR_FETCH_RETRY_INTERVAL_MS = 1000L;
+
+    /** 单次 ES 查询上限；超过时记录告警，后续由 P1-06 评估分页或流式处理。 */
+    private static final int BEHAVIOR_FETCH_SIZE = 10000;
 
 
     // 新增：注入 ElasticsearchClient 与索引名配置
@@ -143,7 +147,7 @@ public class BehaviorProcessingService {
      * DTO：指标元数据
      * ✅ 纯数据类，不包含 JPA Entity
      */
-    private static class IndicatorMetadataDTO {
+    static class IndicatorMetadataDTO {
         final String indicatorEsId;
         final String name;
         final Integer indicatorLevel;
@@ -171,22 +175,21 @@ public class BehaviorProcessingService {
      * @param projectId 项目ID
      * @param assessmentId 评估ID（由调用方创建并传入）
      */
-    public void processProjectBehaviors(Long userId, Long projectId, Long assessmentId) {
+    public void processProjectBehaviors(Long userId, Long projectId, Long assessmentId, String analysisRunId) {
+        if (analysisRunId == null || analysisRunId.trim().isEmpty()) {
+            throw new IllegalArgumentException("analysisRunId must not be blank");
+        }
         if (userId == null || projectId == null || assessmentId == null) {
             throw new BusinessException("User ID, Project ID, and Assessment ID must be provided for behavior processing.");
         }
         updateAssessmentStatus(assessmentId, AssessmentStatusEnum.ASSESSING);
         log.info("[Process Project START] projectId={}, assessmentId={} (传入)", projectId, assessmentId);
 
-        // 清理旧的指标计算结果，防止重复数据导致 NonUniqueResultException
-        log.info("[Cleanup] 正在清理 assessmentId={} 的旧指标结果...", assessmentId);
-        indicatorResultRepository.deleteByAssessmentId(assessmentId);
-        log.info("[Cleanup] 清理完成");
-
-        // 1. 从 ES 获取该项目的所有 behaviors
-        List<Behavior> allBehaviors = fetchBehaviors(projectId); 
+        // 1. 只读取当前分析运行的行为；旧文档缺作用域字段时不会命中。
+        List<Behavior> allBehaviors = fetchBehaviors(projectId, assessmentId, analysisRunId);
         if (allBehaviors == null || allBehaviors.isEmpty()) {
-            throw new IllegalArgumentException("No behaviors found for projectId: " + projectId);
+            throw new IllegalArgumentException("No behaviors found for analysis scope: projectId=" + projectId
+                    + ", assessmentId=" + assessmentId + ", analysisRunId=" + analysisRunId);
         }
         int totalBehaviorCount = allBehaviors.size();
 
@@ -331,7 +334,8 @@ public class BehaviorProcessingService {
             if (!indicatorResultsMap.isEmpty()) {
                 int remainingCount = indicatorResultsMap.size();
                 log.info("[Final Batch Processing] 处理剩余 {} 个指标结果", remainingCount);
-                batchSaveIndicatorResults(indicatorResultsMap, indicatorMetadataMap, projectId, assessmentId);
+                batchSaveIndicatorResults(indicatorResultsMap, indicatorMetadataMap,
+                        projectId, assessmentId, analysisRunId);
                 log.info("[Final Batch Processing] 剩余结果处理完成");
             } else {
                 log.info("[Final Batch Processing] 无剩余结果需要处理");
@@ -339,7 +343,7 @@ public class BehaviorProcessingService {
             
             // 7. 完成评估
             log.info("[Assessment Completing] 开始完成评估流程");
-            completeAssessmentIfNeeded(userId, projectId, assessmentId);
+            completeAssessmentIfNeeded(userId, projectId, assessmentId, analysisRunId);
             log.info("[Assessment Completed] 评估流程已完成");
             
         } catch (InterruptedException e) {
@@ -351,9 +355,9 @@ public class BehaviorProcessingService {
     /**
      * 批量保存指标结果
      */
-    private void batchSaveIndicatorResults(Map<String, List<RelatedIndicator>> indicatorResultsMap,
-                                           Map<String, IndicatorMetadataDTO> indicatorMetadataMap,
-                                           Long projectId, Long assessmentId) {
+    void batchSaveIndicatorResults(Map<String, List<RelatedIndicator>> indicatorResultsMap,
+                                   Map<String, IndicatorMetadataDTO> indicatorMetadataMap,
+                                   Long projectId, Long assessmentId, String analysisRunId) {
         if (indicatorResultsMap.isEmpty()) {
             log.info("[Batch Save] 无指标结果需要保存");
             return;
@@ -394,53 +398,32 @@ public class BehaviorProcessingService {
                 
                 // 检查是否已存在
                 Optional<IndicatorResult> existingResult = indicatorResultRepository
-                        .findByAssessmentIdAndIndicatorEsId(assessmentId, indicatorId);
+                        .findByAssessmentIdAndAnalysisRunIdAndIndicatorEsId(
+                                assessmentId, analysisRunId, indicatorId);
                 
-                if (existingResult.isPresent()) {
-                    // 更新现有记录
-                    IndicatorResult existing = existingResult.get();
-                    IndicatorResultDetail detail = existing.getCalculationDetails();
-                    if (detail == null) {
-                        detail = IndicatorResultDetail.builder()
-                                .relatedIndicators(new ArrayList<>())
-                                .build();
-                    }
-                    
-                    // 合并相关指标
-                    int existingCount = detail.getRelatedIndicators().size();
-                    double existingScore = existing.getCalculatedScore();
-                    double newAvgScore = (existingScore * existingCount + absoluteScore) / (existingCount + relatedIndicators.size());
-                    
-                    existing.setCalculatedScore(newAvgScore);
-                    existing.setCalculatedAt(LocalDateTime.now());
-                    detail.getRelatedIndicators().addAll(relatedIndicators);
-                    existing.setCalculationDetails(detail);
-                    
-                    resultsToSave.add(existing);
-                } else {
-                    // 创建新记录
-                    IndicatorResult result = IndicatorResult.builder()
-                            .projectId(projectId)
-                            .assessmentId(assessmentId)
-                            .indicatorEsId(indicatorId)
-                            .indicatorName(metadata != null ? metadata.name : indicatorId)
-                            .indicatorLevel(metadata != null && metadata.indicatorLevel != null ? metadata.indicatorLevel : 0)
-                            .dimension(metadata != null ? metadata.dimension : null)
-                            .type(metadata != null ? metadata.type : null)
-                            .calculatedScore(absoluteScore)
-                            .maxPossibleScore(maxPossible)
-                            .usedCalculationRuleType("auto")
-                            .calculationDetails(IndicatorResultDetail.builder()
-                                    .relatedIndicators(new ArrayList<>(relatedIndicators))
-                                    .build())
-                            .riskTriggered(false)
-                            .riskStatus(IndicatorRiskStatus.fromCode("NOT_EVALUATED"))
-                            .calculatedAt(LocalDateTime.now())
-                            .createdAt(LocalDateTime.now())
-                            .build();
-                    
-                    resultsToSave.add(result);
+                IndicatorResult result = existingResult.orElseGet(IndicatorResult::new);
+                result.setProjectId(projectId);
+                result.setAssessmentId(assessmentId);
+                result.setAnalysisRunId(analysisRunId);
+                result.setIndicatorEsId(indicatorId);
+                result.setIndicatorName(metadata != null ? metadata.name : indicatorId);
+                result.setIndicatorLevel(metadata != null && metadata.indicatorLevel != null
+                        ? metadata.indicatorLevel : 0);
+                result.setDimension(metadata != null ? metadata.dimension : null);
+                result.setType(metadata != null ? metadata.type : null);
+                result.setCalculatedScore(absoluteScore);
+                result.setMaxPossibleScore(maxPossible);
+                result.setUsedCalculationRuleType("auto");
+                result.setCalculationDetails(IndicatorResultDetail.builder()
+                        .relatedIndicators(new ArrayList<>(relatedIndicators))
+                        .build());
+                result.setRiskTriggered(false);
+                result.setRiskStatus(IndicatorRiskStatus.fromCode("NOT_EVALUATED"));
+                result.setCalculatedAt(LocalDateTime.now());
+                if (result.getCreatedAt() == null) {
+                    result.setCreatedAt(LocalDateTime.now());
                 }
+                resultsToSave.add(result);
             }
             
             // 批量保存
@@ -470,7 +453,8 @@ public class BehaviorProcessingService {
         }
     }
 
-    private void saveIndicatorResult(BehaviorCalculationResult calcResult, Long projectId, Long assessmentId) {
+    private void saveIndicatorResult(BehaviorCalculationResult calcResult, Long projectId, Long assessmentId,
+                                     String analysisRunId) {
         String behaviorId = calcResult.behaviorId;
         Map<String, IndicatorMetadataDTO> indicatorMetadata = calcResult.indicatorMetadata;
         DocumentProcessingResult.MappingResult mr = calcResult.result;
@@ -499,8 +483,9 @@ public class BehaviorProcessingService {
             int retryTimes = 5;
             while(retryTimes > 0){
                 try{
-                    // t_indicator_result有assessment_id和indicator_es_id联合唯一索引，避免幻读插入覆盖，插入失败会重试后进入乐观锁更新逻辑
-                    Optional<IndicatorResult> alIndicatorResult = indicatorResultRepository.findByAssessmentIdAndIndicatorEsId(assessmentId, indicatorEsId);
+                    Optional<IndicatorResult> alIndicatorResult = indicatorResultRepository
+                            .findByAssessmentIdAndAnalysisRunIdAndIndicatorEsId(
+                                    assessmentId, analysisRunId, indicatorEsId);
 
                     if (alIndicatorResult.isPresent()) {
                         IndicatorResult existing = alIndicatorResult.get();
@@ -543,6 +528,7 @@ public class BehaviorProcessingService {
                         IndicatorResult ir = IndicatorResult.builder()
                                 .projectId(projectId)
                                 .assessmentId(assessmentId)
+                                .analysisRunId(analysisRunId)
                                 .indicatorEsId(indicatorEsId)
                                 .indicatorName(metadata != null ? metadata.name : indicatorEsId)
                                 .indicatorLevel(metadata != null && metadata.indicatorLevel != null ? metadata.indicatorLevel : 0)
@@ -574,14 +560,16 @@ public class BehaviorProcessingService {
         }
     }
 
-    private void completeAssessmentIfNeeded(Long userId, Long projectId, Long assessmentId) {
+    private void completeAssessmentIfNeeded(Long userId, Long projectId, Long assessmentId,
+                                            String analysisRunId) {
         AssessmentCompletedEventMessage assessmentCompletedEventMessage = new AssessmentCompletedEventMessage(
                 StringUtils.generateMessageId(),
                 String.valueOf(System.currentTimeMillis()),
                 StringUtils.generateTraceId(),
                 userId,
                 projectId,
-                assessmentId
+                assessmentId,
+                analysisRunId
         );
         kafkaUtils.sendMessage(assessmentCompletedEventMessage);
         log.info("[Assessment Completed] projectId={}, assessmentId={}", projectId, assessmentId);
@@ -794,10 +782,12 @@ public class BehaviorProcessingService {
     }
 
     /**
-     * 从 ES 中获取指定 projectId 的所有 behaviors
+     * 从 ES 中获取指定项目、评估和运行的行为。
+     * 旧文档没有 assessmentId 或 analysisRunId 时天然不命中，禁止回退到项目级查询。
      * 加固：查询前显式刷新索引，空结果时带间隔重试，避免行为刚写入尚未可见导致的偶发空结果
      */
-    private List<Behavior> fetchBehaviors(Long projectId) {
+    private List<Behavior> fetchBehaviors(Long projectId, Long assessmentId, String analysisRunId) {
+        buildBehaviorScopeQuery(projectId, assessmentId, analysisRunId);
         // 查询前先触发一次索引刷新，确保刚写入的行为立即可见（刷新失败不阻断查询）
         try {
             esClient.indices().refresh(r -> r.index(ElasticSearchConfig.BEHAVIOR_INDEX));
@@ -808,13 +798,13 @@ public class BehaviorProcessingService {
         int maxAttempts = 5;
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
-                List<Behavior> result = doFetchBehaviors(projectId);
+                List<Behavior> result = doFetchBehaviors(projectId, assessmentId, analysisRunId);
                 if (!result.isEmpty()) {
                     return result;
                 }
                 if (attempt < maxAttempts) {
-                    log.info("[Fetch Behaviors] projectId={} 第 {} 次查询为空，{}ms 后重试",
-                            projectId, attempt, BEHAVIOR_FETCH_RETRY_INTERVAL_MS);
+                    log.info("[Fetch Behaviors] projectId={}, assessmentId={}, analysisRunId={} 第 {} 次查询为空，{}ms 后重试",
+                            projectId, assessmentId, analysisRunId, attempt, BEHAVIOR_FETCH_RETRY_INTERVAL_MS);
                     Thread.sleep(BEHAVIOR_FETCH_RETRY_INTERVAL_MS);
                 }
             } catch (InterruptedException e) {
@@ -837,16 +827,21 @@ public class BehaviorProcessingService {
         return Collections.emptyList();
     }
 
-    private List<Behavior> doFetchBehaviors(Long projectId) throws IOException {
-        // 使用较大的 size 获取所有行为（大项目可改用 scroll API）
-        int fetchSize = 10000;
-
+    private List<Behavior> doFetchBehaviors(Long projectId, Long assessmentId, String analysisRunId) throws IOException {
         SearchResponse<Behavior> resp = esClient.search(s -> s
                         .index(ElasticSearchConfig.BEHAVIOR_INDEX)
-                        .size(fetchSize)
-                        .query(q -> q.bool(ma -> ma.must(m1 -> m1.term(t -> t.field("projectId").value(projectId))))),
+                        .size(BEHAVIOR_FETCH_SIZE)
+                        .trackTotalHits(t -> t.enabled(true))
+                        .query(buildBehaviorScopeQuery(projectId, assessmentId, analysisRunId)),
                 Behavior.class
         );
+
+        if (resp != null && resp.hits() != null && resp.hits().total() != null
+                && resp.hits().total().value() > BEHAVIOR_FETCH_SIZE) {
+            log.warn("[Fetch Behaviors] projectId={}, assessmentId={}, analysisRunId={} 命中 {} 条，"
+                            + "单次查询上限为 {}，结果可能被截断",
+                    projectId, assessmentId, analysisRunId, resp.hits().total().value(), BEHAVIOR_FETCH_SIZE);
+        }
 
         List<Behavior> allBehaviors = new ArrayList<>();
         if (resp != null && resp.hits() != null && resp.hits().hits() != null) {
@@ -858,19 +853,22 @@ public class BehaviorProcessingService {
             }
         }
 
-        // 处理所有行为，不再随机选择
-        List<Behavior> selectedBehaviors = new ArrayList<>();
-        if (!allBehaviors.isEmpty()) {
-            for (Behavior behavior : allBehaviors) {
-                behavior.setProjectId(projectId);
-                selectedBehaviors.add(behavior);
-            }
+        log.info("[Fetch Behaviors] projectId={}, assessmentId={}, analysisRunId={}, totalCount={}",
+                projectId, assessmentId, analysisRunId, allBehaviors.size());
+
+        return allBehaviors;
+    }
+
+    /** 构建行为作用域的唯一查询条件，避免任一调用方退化为项目级读取。 */
+    static Query buildBehaviorScopeQuery(Long projectId, Long assessmentId, String analysisRunId) {
+        if (projectId == null || projectId <= 0 || assessmentId == null || assessmentId <= 0
+                || analysisRunId == null || analysisRunId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Behavior 查询缺少完整分析作用域");
         }
-
-        log.info("[Fetch Behaviors] projectId={}, totalCount={}, selectedCount={}",
-                projectId, allBehaviors.size(), selectedBehaviors.size());
-
-        return selectedBehaviors;
+        return Query.of(q -> q.bool(b -> b
+                .must(m -> m.term(t -> t.field("projectId").value(projectId)))
+                .must(m -> m.term(t -> t.field("assessmentId").value(assessmentId)))
+                .must(m -> m.term(t -> t.field("analysisRunId").value(analysisRunId)))));
     }
 
 

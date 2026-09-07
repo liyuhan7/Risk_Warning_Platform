@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://riskwarning.local/schemas/fact-extraction-v1.0.json",
+  "title": "Fact Extraction Response v1.0",
+  "description": "LLM 事实抽取响应。系统作用域、标识、版本、时间戳和向量字段不属于模型输出。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["facts"],
+  "properties": {
+    "facts": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/fact"}
+    }
+  },
+  "$defs": {
+    "nonBlankString": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subject",
+        "action",
+        "status",
+        "description",
+        "confidence",
+        "evidenceIds"
+      ],
+      "properties": {
+        "subject": {"$ref": "#/$defs/nonBlankString"},
+        "action": {"$ref": "#/$defs/nonBlankString"},
+        "object": {
+          "oneOf": [
+            {"$ref": "#/$defs/nonBlankString"},
+            {"type": "null"}
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["COMPLETED", "IN_PROGRESS", "PAUSED", "TERMINATED", "UNKNOWN"]
+        },
+        "behaviorDate": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-([0-2][0-9]|3[01])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9])?$"
+        },
+        "quantitativeData": {
+          "type": "number"
+        },
+        "quantitativeUnit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "\\S"
+        },
+        "description": {"$ref": "#/$defs/nonBlankString"},
+        "confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "evidenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/nonBlankString"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {"required": ["quantitativeData"]},
+          "then": {"required": ["quantitativeUnit"]}
+        }
+      ]
+    }
+  }
+}

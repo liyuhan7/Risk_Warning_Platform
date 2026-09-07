@@ -94,7 +94,12 @@ public final class RegWeightCalculator {
     }
 
     public static double getTimelinessWeight(Regulation reg, Behavior behavior) {
-        if (reg == null || reg.getCreatedAt() == null) return 0.5;
+        // 法规发布时间缺失时无法判断时效；行为日期是可选字段（事实抽取在原文无明确日期时省略），
+        // 任一日期缺失都返回中性权重，避免 Duration.between 收到 null 参数抛 NPE。
+        if (reg == null || reg.getCreatedAt() == null
+                || behavior == null || behavior.getBehaviorDate() == null) {
+            return 0.5;
+        }
         LocalDateTime created = reg.getCreatedAt();
         long years = Duration.between(created, behavior.getBehaviorDate()).toDays() / 365;
         return years <= 2 ? 0.7 : 0.3;

@@ -21,6 +21,9 @@ vectorization:
 
 # Elasticsearch配置
 spring:
+  # 本地开发密钥统一放仓库根 .env（已 gitignore）；无该文件的环境自动跳过
+  config:
+    import: optional:file:.env[.properties]
   elasticsearch:
     # uris: http://172.29.7.168:30920 先使用本地ES测试
     uris: http://localhost:9200
@@ -34,6 +37,9 @@ llm:
   model: ${LLM_MODEL:}
   api-key: ${LLM_API_KEY:}
   temperature: 0.0
+  # 附加请求体字段（JSON 字符串）：携带供应商可选参数，如关闭思考模式
+  # {"thinking":{"type":"disabled"}}；凭据类字段禁止放入
+  extra-body: ${LLM_EXTRA_BODY:}
   connect-timeout-seconds: 30
   read-timeout-seconds: 60
   write-timeout-seconds: 30

@@ -2,7 +2,8 @@
 
 > 建立日期：2026-08-27
 > 仓库基线：`main`，提交 `a851e09`
-> 覆盖范围：计划 0 执行至 `P0-04` 期间发现的全部缺陷
+> 覆盖范围：计划 0 至迁移窗口业务回归发现的缺陷；状态同步日期：2026-09-06
+> 历史现象、行号和实测数保留作溯源；当前进度以各项状态及第七节为准。优先级 P0/P1/P2 与开发计划阶段编号是两套概念。
 > 维护约定：后续阶段发现新缺陷时追加条目，编号只增不复用；状态变更须同步修改「状态」列与验证方式
 
 ## 状态图例
@@ -12,6 +13,7 @@
 | 未开始 | 已确认存在，尚未动手 |
 | 部分完成 | 已修一部分，仍有残留 |
 | 已修复 | 已改并有测试或实测证据 |
+| 已定方案 | 决策完成，实施或验证尚未闭环 |
 | 待决策 | 需团队决策后才能动工 |
 
 ## 优先级说明
@@ -40,8 +42,8 @@
 - 后果：`indicatorLevel`、`maxScore`、`calculationRule`、`riskRule` 全部反序列化为 null。821 条规则全部读不出来，且无任何错误日志。
 - 关联：`p0-02-baseline.md` 根因 1；与 D-02 叠加导致三案例命中金标准指标 0/8、0/8、0/6
 - 根因修正（P0-09 实测）：命名分裂的源头是初始数据文件本身，而非配置项。`documents/data/indicator.json` 为 camelCase，`regulation.json` 与 `behavior.json` 为 snake_case，`test/init_es.py` 原样导入不做改名。`ElasticSearchConfig.java:61` 是放大器：它使 `t_behavior` / `t_regulation` / `t_risk` 的读写恰好对齐 snake_case 存量数据，却与 `t_indicator` 的 camelCase 存量完全错位。因此 `p0-05-core-schemas.md:27` 所记「必须移除 SNAKE_CASE」的结论需修正——单独移除会立刻破坏另外三个索引，须与数据迁移同批实施。
-- 状态：**已定方案**（`P0-11` 决议：全系统统一 camelCase，一次性切换，四索引存量与配置项移除同窗口完成。前置为 ES snapshot 全量快照；`SNAKE_CASE` 须在存量核对通过后才移除。见 `p0-11-review-record.md` 1.1 与 5.2）
-- 验证：修复后按 `indicatorLevel` 查询应返回 1144 条，且三级指标的 `calculationRule` 非空；同时须回归 `t_behavior` / `t_regulation` / `t_risk` 的字段覆盖数不下降
+- 状态：**已修复 / 已验证**。2026-09-04 迁移窗口四索引 camelCase 与配置同步完成；用户于 2026-09-05 确认真实业务链通过。
+- 验证：迁移窗口字段覆盖核对通过；用户确认上传至报告链正常。本次文档对齐未重跑在线验证。
 
 ### D-02 `behavior.status` 恒为空串
 
@@ -51,8 +53,9 @@
 - 实证矛盾：生产侧与消费侧对 `status` 的假设相反。`LineRangeItemWriter` 的既有注释明确说明分类服务不返回 `status`，而 `QualitativeCalculator` 把 `status` 当作必有输入来分支。三案例实测 `t_behavior` 全部 9 条 `status=''`、`quantitative_data=0.0`，即消费侧的 6 个有效分支从未被执行过，`return 0.5` 是唯一实际路径。
 - 后果：定性分恒为 0.5。这意味着「评分」实际不含任何合规性判断——分数差异只可能来自向量相似度噪声，与 `p0-02-baseline.md` 实测「违规 32.34 分反而低于合规 38.77 分」互为印证。
 - 关联：`p0-02-baseline.md` 根因 2；D-14 的 `condition` 无输入亦源于此
-- 状态：未开始
-- 验证：三案例的 `t_behavior` 中 `status` 应有非空值且分布与案例合规性一致
+- 状态：**基础实现完成 / 真实链待验证**。P1-05 已由事实抽取 Schema 生成 `status`、数量与单位字段，UNKNOWN 表达无法判断的状态；生产链已切换到新抽取服务。真实 Provider、专用 PG/ES/BERT 切片和评分消费效果尚未验证。
+- 归属：P1-04 / P1-05 事实抽取；不继续修旧分类器。
+- 验证：status 必须受原文支持；未知用 Schema 冻结的 UNKNOWN/null/insufficientEvidence 表达，不填空串或默认 COMPLIANT；缺失值不得伪装为正常评分输入。
 
 ### D-03 `Behavior` 缺作用域字段
 
@@ -62,8 +65,8 @@
 - 实证矛盾：同一条数据链上的上下游对象作用域粒度不对称——下游 `IndicatorResult.java:47` 与 `Risk.java:24` 都有 `assessmentId` 并据此隔离（`ReportServiceImpl.java:282` 按 `assessment_id` 过滤），唯独作为它们输入源的 `Behavior` 没有。结果是「结果按评估隔离，输入按项目混取」，下游的隔离建立在上游未隔离的数据之上，隔离性是假的。
 - 后果：存储层无字段，查询层无论怎么改都无法按本次评估隔离。
 - 关联：`p0-03-isolation.md` ISO-02；依赖 D-01 的命名决策，否则会再增一处命名不一致
-- 状态：**已定方案**（`P0-11` 已定 D-01 为 camelCase，命名争议消除，字段按 camelCase 新增。见 `p0-11-review-record.md` 1.1）
-- 验证：mapping 与 Java 字段一致，且实际写入的文档含非空 `assessmentId`
+- 状态：**已修复 / 专用 ES 已验证**。P1-03 已为 `Behavior` 增加 `assessmentId`、`analysisRunId`、`sourceDocumentId`，并在 Batch 写入侧透传；`documents/es_mappings.json` 同步为 camelCase 增量字段。Elasticsearch 8.11 专用测试索引已确认 Mapping 与实际写入字段。
+- 验证：代码侧序列化兼容、Mapping JSON、LineProcessor 作用域测试和专用 ES 写入均通过；业务 `t_behavior` 部署前仍须执行仅新增字段的 PUT mapping。
 
 ---
 
@@ -84,7 +87,7 @@
 - 后果：`vector` 是无人写入的孤儿字段，而文档 mapping 记录的恰好是这个字段。以文档为准做迁移会写错目标。PLAN.md:77 预警的「文档 Mapping 与 Java 向量字段命名不一致」由此确证。
 - P0-09 补充实测：问题比命名不一致更严重。文档声明为 `{"type":"dense_vector","dims":768}`，缺少 `index: true` 与 `similarity`；ES 8.x 中 `dense_vector` 默认 `index: false`，按该文件重建索引会使 kNN 检索直接不可用。运行时权威值为 `{"type":"dense_vector","dims":768,"index":true,"similarity":"cosine"}`。此外承载全部数据的 `*_vector` 字段在任何版本控制的可执行产物中都未声明，仅见于运行时与 `系统设计.md`，即运行时状态无法从仓库重建（另立 F-10）。
 - 关联：`P0-09` 已冻结字段名、维度与检索参数（见 `p0-09-field-contract.md` 第 5 节）；计划 2 新增检索向量字段时须避免再造第三套命名
-- 状态：**已定方案**（`P0-11` 决议：保留 `vector` 字段，仅在文档标注废弃。ES 不支持删除已声明字段，reindex 8611 条的代价与收益不成比例；该字段无数据、不占存储、不影响检索。见 `p0-11-review-record.md` 1.2）
+- 状态：**部分完成**。当前 mapping 已声明 descriptionVector/nameVector/fullTextVector 及检索参数，迁移窗口核对通过；孤儿字段的废弃说明与初始化复建验收仍待专项核对。
 - 验证：文档 mapping 与运行时一致，且每个向量字段都有明确写入方
 
 ### D-27 `t_behavior` 实际文档数与 Baseline 记录不符
@@ -105,7 +108,7 @@
 - 实证矛盾：枚举定义维度名为 `国际化经营风险`，而 `t_indicator` 实际存量取值是 `企业国际合作风险`（P0-04 实测该维度 184 条）。`fromValue` 在 `:44-47` 加了一段特例判断：先检查自身 description 是否等于 `国际化经营风险`，再把 `企业国际合作风险` 映射过去。**这段代码的存在本身就是矛盾的证据——它在运行时校验一个编译期常量，只为兜住枚举与数据不一致。**
 - 后果：维度名有两个事实来源。任何按维度分组、过滤或聚合的新代码若直接用 `getDescription()` 与 ES 值比对，都会漏掉整个维度的 184 条指标；且 `fromValue` 对未知维度抛 `IllegalArgumentException`，一旦再出现第三种写法即运行时异常。
 - 关联：P0-05 未决项 U-06；与 D-01 同属「同一概念两套命名」
-- 状态：已定方案（P0-05 决议：以 ES 取值为权威，改枚举为 `企业国际合作风险` 并删除 `:44-47` 特例，不动 184 条数据）
+- 状态：**部分完成**。当前枚举已采用企业国际合作风险并移除旧特例；全量维度取值回归待补证据。
 - 验证：统一权威取值后，遍历 `t_indicator` 全部 dimension 值均能通过 `fromValue` 且不触发特例分支
 
 ### D-29 `IndustryEnum` 名为行业实为合规领域
@@ -115,7 +118,7 @@
 - 实证矛盾：枚举成员是 `供应链管理`、`市场营销与广告`、`人力资源与劳动关系`、`跨境交易与支付`、`数据隐私与网络安全`、`反垄断与不正当竞争`、`知识产权`、`财务与税务`——这是**合规领域**分类，不是行业分类（制造业、金融业之类）。但字段名为 `industry`，PLAN.md:430 又要求检索过滤支持「行业」维度。
 - 后果：Query Builder 按 `industry` 过滤时，语义究竟是「企业所处行业」还是「合规议题领域」不明确。若 Regulation 与 Project 两侧对该字段理解不同，过滤会静默筛掉正确候选——这类错误不会报错，只会表现为召回率低，与 D-14 的现象难以区分。
 - 关联：P0-05 未决项 U-09；影响 `P2-04` Metadata Filter
-- 状态：已定方案（P0-05 决议：`IndustryEnum` → `ComplianceDomainEnum`，字段 `industry` → `complianceDomain`；ES 侧改名属 `P0-09`，须新字段写入不覆盖）
+- 状态：**部分完成**。Java/ES 与 Milvus 字段语义改名已实施；取值域混杂清理归 P2，完整跨端验收待补证据。
 - 验证：明确字段语义后，检查 Project 与 Regulation 两侧取值是否落在同一枚举域
 
 ### D-04 `fetchBehaviors` 按项目全量取数
@@ -126,8 +129,8 @@
 - 实证矛盾：`processProjectBehaviors` 在 `:174` 已接收 `assessmentId`，并在 `:183` 用它清理旧结果、在 `:424` 用它写入结果，却在 `:187` 取数时改用 `projectId`。**同一方法内同一个变量，写入时用它、读取时弃它。** 另 `size=10000` 是硬上限，超出即静默截断，无告警。
 - 后果：同一项目的历史上传材料混入本次评估，违反 PLAN.md:42 的质量门槛。
 - 关联：`p0-03-isolation.md` ISO-04；依赖 D-03
-- 状态：未开始
-- 验证：同 projectId 两个 assessmentId，第二次查询不得返回第一次的行为
+- 状态：**已修复 / 专用 ES 已验证**。P1-03 已将行为取数改为 `projectId + assessmentId + analysisRunId` 三个 term 的 bool 查询，旧文档缺字段不会命中，且命中超过 10,000 条会记录截断告警。Elasticsearch 8.11 专用测试索引已验证 Assessment/Run 隔离。
+- 验证：查询构造单元测试已锁定三项 term 与禁止项目级回退；专用测试索引中同 projectId 的两个 assessmentId、同 assessmentId 的两个 run 与无作用域历史文档均不混入。
 
 ### D-05 Batch 链路丢弃 `assessmentId`
 
@@ -181,7 +184,7 @@
 - 实证矛盾：`getByScoreRatio`（`:56-64`）的 `else` 分支承担双重语义——既表示「比例低于 0.2」，也兜住了 `NaN`。两种输入语义相反（一个是最差，一个是无数据），却导向同一结果。**最好的情况（零风险）与最坏的情况（高风险）在此处不可区分。**
 - 后果：零风险集合被判为高风险。
 - 关联：`P0-08` 点名待修项；`p0-04-riskrule-design.md` 1.2 节
-- 状态：**已修复**（`P0-08`）。`getByRiskCount` 在加权计算前先判 `totalRiskCount == 0` 并返回 `LOW_RISK`；`getByScoreRatio` 入口对 `NaN` 抛 `IllegalArgumentException`，消除 `else` 分支的双重语义。选 `LOW_RISK` 而非新增 `NO_RISK` 或返回 `null`，理由见 `p0-08-deterministic-bugfix.md` 第 3 节
+- 状态：**已修复**。P0-08 已修零风险计数与 NaN 边界；后续 P0-11 实施增加 NO_RISK，当前 getByRiskCount 在 totalRiskCount == 0 时返回 NO_RISK。P0-08 的 LOW_RISK 为当时过渡决策，不再是当前返回值。
 - 验证：`RiskLevelEnumTest` 5 个用例，修复前 2 条失败（`expected: <LOW_RISK> but was: <HIGH_RISK>`、NaN 未抛异常）、3 条回归用例通过；修复后 5/5 通过，全模块 `mvn clean package` BUILD SUCCESS
 
 ### D-10 绝对阈值致 89 条指标恒触发风险
@@ -328,7 +331,7 @@
 - 实证矛盾：仓库已具备外部化配置能力（Nacos 接入、`bert.python.path` 已改为 `${BERT_PYTHON_PATH:py -3.9}` 形式的占位符写法），同一仓库内既有正确做法的先例，LLM 凭据却仍以 `private static final String` 明文常量存在。并非缺少手段，而是未应用。
 - 后果：凭据泄露。仅从源码删除不够，**必须先在百度云控制台吊销该 Key**，因为它已存在于 git 历史中，删除源码行不能使其失效。
 - 关联：`P0-07`；PLAN.md:171 要求仓库、配置样例和日志均不得再出现有效凭据
-- 状态：**代码侧已处理，供应商侧吊销待用户执行**。`P0-07` 已移除明文常量，凭据改由 `${LLM_API_KEY:}` 注入，全仓 `grep ALTAK|bce-v3` 0 命中。P0-06 实测该 Key 返回 403 `account_overdue` 而非 `invalid_token`，说明身份仍被服务端接受、欠费只是账户状态，充值后立即恢复可用，因此**控制台吊销仍是必须动作**。git 历史清除须用户决定是否重写历史。详见 `p0-07-provider-boundary.md`
+- 状态：**代码侧已处理，供应商侧吊销待用户执行**。`P0-07` 已移除明文常量，凭据改由 `${LLM_API_KEY:}` 注入，全仓 `grep ALTAK|bce-v3` 0 命中；承载该凭据的旧工具类已在 2026-09-06 清理中删除。P0-06 实测该 Key 返回 403 `account_overdue` 而非 `invalid_token`，说明身份仍被服务端接受、欠费只是账户状态，充值后立即恢复可用，因此**控制台吊销仍是必须动作**。git 历史清除须用户决定是否重写历史。详见 `p0-07-provider-boundary.md`
 - 验证：旧 Key 已吊销失效；新凭据经环境变量或 Nacos 注入；`grep` 全仓库无明文 Key
 
 ### D-31 LLM 调用无重试与退避
@@ -384,8 +387,8 @@
 - 实证矛盾：清理前后总分逐位相同（`32.3364626851702`），27 条重复行为与 9 条产生完全一致的结果。这暴露了一个比重复本身更重要的设计矛盾——同指标下多行为取平均（`BehaviorProcessingService.java:412`），意味着**系统不做违规事实的累计聚合**：同一指标下发现 1 次违规与发现 10 次违规，得分相同。对合规风险评估而言，违规频次本应是加重因素。
 - 后果：重复行为不影响评分（故不属 `P0-08` 范围），但放大存储与计算开销，且每次采集 Baseline 前须手工清零。上述「取平均」的聚合语义需在计划 3 单独决策。
 - 关联：`p0-03-isolation.md` ISO-06；因不污染评分结果，不属 `P0-08` 范围
-- 状态：未开始。幂等键定为 `(analysisRunId, sourceDocumentId, textHash)`——不能用 `assessmentId`，否则同一 assessment 的两次运行会被误判为重复而互相覆盖（P0-05 允许重复分析）
-- 验证：同一文档重复处理不产生等价重复记录；同一 assessment 的两次运行各自产出完整行为集且不互相去重
+- 状态：**已实施 / 单元验证**。`LineProcessor` 按 `(analysisRunId, sourceDocumentId, textHash)` 生成 32 位稳定 `Behavior.id`，`LineRangeItemWriter` 将其作为 ES `_id`；不能用 `assessmentId`，否则同一 assessment 的两次运行会被误判为重复而互相覆盖。处理单测已覆盖等价文本和跨 Run 的 ID 语义。
+- 待验证：专用 ES 环境中同 `_id` 连续写两次的实际文档数为 1；同一 assessment 的两次运行各自产出完整行为集且不互相去重。
 
 ### D-23 `sourceDocumentId` 存储粒度不足
 
@@ -395,9 +398,9 @@
 - 实证矛盾：`ExecuteQueueTask.java:75-88` 在循环中逐个处理文件，却在循环内反复对同一个 `projectFile` 对象 `setUserId` 并向其 `filePaths` 追加路径，循环结束后只 `save` 一次（`:89`）。逐文件处理与单行落库的粒度不匹配——多个文件的身份在落库时被合并丢失。
 - 后果：无法为单个源文档分配持久标识，证据回溯定位缺少锚点。
 - 关联：`p0-03-isolation.md` ISO-01；P0-05 未决项 U-01
-- 状态：已定方案（P0-05 决议：`t_project_file` 改一文件一行，拆除 `filePaths` 与 `StringListJsonConverter`，批次概念另设 `uploadBatchId`；`sourceDocumentId` 即改造后的 `ProjectFile.id`。`P0-11` 确认实施窗口：与 D-01 命名迁移同批，作为迁移顺序第 1 步执行——该步向后兼容，失败无需还原。见 `p0-11-review-record.md` 3.1 与 5.2）
+- 状态：**已修复 / 已验证**。PG 已改为一文件一行，ProjectFile.id 为单文件锚点、filePath 为单路径；迁移核对与用户真实链验证完成。Behavior 回指由 D-03 / P1-03 实现，不再作为文件粒度缺陷重复开发。
 - 优先级调整：P2 → **P1**（`EvidenceChunk` 与 `StructuredBehavior` 均以它为必填锚点，Plan 1 前必须完成）
-- 验证：每个源文档有唯一持久 ID，且 Behavior 可回指
+- 验证：ProjectFile 模型与迁移记录已核对；用户确认真实上传链通过。
 
 ### D-30 重复分析会销毁上一次运行的结果
 
@@ -406,8 +409,8 @@
 - 实证矛盾：P0-05 已决议**允许同一 assessment 重复分析**，但现有实现在每次分析开始时按 `assessmentId` 清空旧结果后重写。两者直接冲突：第二次运行会把第一次的 IndicatorResult 与 Risk 全部删除。此外 `assessmentId` 在允许重复运行后不再能唯一标识一次运行，而全链路目前只有这一个作用域字段（`analysisRunId` 尚未实现）。
 - 后果：历史运行结果不可保留、不可比对，与 PLAN.md:114 要求的新旧结果可比性冲突。修改规则或阈值后无法验证改动效果——这恰是 Plan 3 规则改造的验收前提。
 - 关联：D-03、D-04、U-07、U-10；`analysisRunId` 实现（`P1-01`）为其前置
-- 状态：已定方案（P0-05 决议：只保留最近一次运行结果，但替换顺序必须改为「写新 → 校验成功 → 删旧」。现状是「先删后写」，新运行中途失败即导致该 assessment 无任何有效结果且不可恢复——P0-02 已记录本链路存在多个失败点，真实 LLM 接入后失败概率上升）
-- 验证：同一 assessmentId 连续跑两次，第二次结果完整替换第一次；人为使第二次中途失败，第一次结果仍完好可查
+- 状态：**已实施 / 单元验证**。`IndicatorResult` 已按 `(assessmentId, analysisRunId, indicatorEsId)` 查询和覆盖写入，计算开始时不再删除整个 assessment；`Risk` 与报告查询均携带 `analysisRunId`。报告仅在 Run 成功持久化后删除同 assessment 的非当前 Run 指标结果、Risk 与 Behavior；汇总或指标阶段异常会将该 Run 标为 FAILED，保留上次成功结果。
+- 待验证：在专用 PG/ES 环境执行 005 迁移后，验证 A2 运行期间 A1 可查、A2 失败仍保留 A1、A2 成功后只保留 A2，以及同 Run 重投计数不增长。
 
 ### D-24 测试含 macOS 硬编码路径
 
@@ -415,8 +418,8 @@
 - 位置：`risk-warning-processing/src/test/java/com/riskwarning/common/BatchTest.java:39-40`
 - 现象：`/Users/huayecai/Desktop/bach_01/...` 绝对路径，另 `:42` 调用 `runBatchJob` 时也只传 `projectId` 与 `filePaths`，未传 `assessmentId`（与 D-05 同源）。
 - 后果：其他机器上执行全量 `mvn test` 会失败。仓库主要开发环境为 Windows，该测试在本机必然失败。
-- 状态：**已定方案**（`P0-11` 决议：删除该测试。它需 PostgreSQL、Kafka、ES 与 Spring Batch 元数据表齐备，仅替换路径不能使其通过。删除后留下 Batch 链路测试空洞，登记 F-13 由 `P1-07` 补不依赖基础设施的单元测试。见 `p0-11-review-record.md` 4.4）
-- 验证：删除后全量 `mvn test` 在 Windows 上可跑；`P1-07` 补充的单元测试覆盖 `LineProcessor` / `LineRangeItemWriter`
+- 状态：**已修复**。旧 BatchTest 已删除，当前仓库无该文件；F-13 回归空洞由 P1-07（重定义）补齐——旧 Batch 类已随主链路移除，P1-07 改为核查新事实抽取链的测试覆盖并清理残留引用。
+- 验证：静态确认 BatchTest 已删除；不据此宣称全量 Maven 测试通过。
 
 ### D-25 分类模型检查点未随仓库分发
 
@@ -425,41 +428,59 @@
 - 现象：他人 clone 后缺失，分类服务无法启动。
 - 实证矛盾：向量化与分类是两条独立路径且易被误认为同一服务——knowledge 走 Docker `bert-service` 容器的 `:8000/encode`，分类走本机 bert 微服务拉起 Python 到 `:8002`，Python 依赖装在系统 Python 3.9。缺少检查点时，向量化仍正常而分类失败，故障表现为部分功能异常而非启动报错，难以定位。
 - 后果：新成员无法复现完整链路。
+- 状态：**说明已补，分发未实现**。P1-07 已在 `risk-warning-bert/README.md` 记录默认路径、`CLASSIFIER_MODEL_PATH` 覆盖方式、缺 checkpoint 时的实际降级行为和测试 Stub 约定；不分发或提交私有 checkpoint。
+- 验证：提供与 `MultiTaskClassifier` 兼容的训练权重后，设置 `CLASSIFIER_MODEL_PATH`，启动服务并确认 `/classify/health` 的 `model_loaded=true`，再以已知样本核验分类结果；单元测试继续使用 Stub，不以私有 checkpoint 作为前置。
+
+### D-35 消费端未配置 ErrorHandlingDeserializer，单条损坏消息卡死整个分区
+
+- 优先级：P1
+- 位置：Nacos `common-dev.yaml` `spring.kafka.consumer.value-deserializer`（直接使用 `JsonDeserializer`）；影响共用 `test-consumer` 组的全部服务（processing、report 等）
+- 实测（2026-09-06 S1 重放验证）：`behavior_processing_tasks-2` offset 3 一条格式损坏的消息（重放工具写入时 header 文本混入 payload）触发 `RecordDeserializationException`，`DefaultErrorHandler.handleOtherException` 抛 `IllegalStateException: This error handler cannot process 'SerializationException's directly`。反序列化发生在 poll 层，错误处理器无法推进位点，消费者对同一条消息无限重试——处理日志刷屏、CPU 空转、HTTP 探活超时，最终须以成员身份加入消费组手工把位点前移才恢复。
+- 后果：单条毒丸消息使整个消费组停滞，且恢复必须运维介入（reset offset）；消息损坏可能来自任何非标准生产方，与 D-36 同源。
+- 关联：D-31 的重试覆盖 Provider 请求层，本条是消费入口层；P1-05 的 S1 同 run 重投场景依赖消息可安全重放
 - 状态：未开始
-- 验证：明确分发方式并写入环境搭建说明
+- 验证：`value-deserializer` 改为 `ErrorHandlingDeserializer`（delegate 指向 `JsonDeserializer`）后，写入一条格式损坏消息，消费组 lag 正常前进、错误仅留日志、业务链无感知
+
+### D-36 手工或跨语言生产的消息缺 `__TypeId__` header 时被静默跳过
+
+- 优先级：P2
+- 位置：Nacos `common-dev.yaml` `spring.json.value.default.type: com.riskwarning.common.message.Message`（基类兜底）；listener 方法参数为具体子类（如 `MessageTask.onMessage(BehaviorProcessingTaskMessage)`）
+- 实测（2026-09-06 S1 重放验证）：用 `kafka-console-producer` 原样重投消息（无 `__TypeId__` header），消费位点前进、lag 归零，但 `onMessage` 从未执行且无任何业务日志——`JsonDeserializer` 缺 header 时 fallback 反序列化为基类 `Message`，与 listener 期望的子类不匹配，被错误处理器静默丢弃。同一 payload 改由 kafka-python 附带 `__TypeId__: com.riskwarning.common.message.BehaviorProcessingTaskMessage` header 后被正常消费。另一次重放失败源于 PS 5.1 写文件默认 UTF-8 BOM，BOM 前缀使 JSON 解析失败——非标准生产方的编码问题与 header 缺失叠加，均无日志可查。
+- 后果：所有不经 Spring `JsonSerializer` 的消息（手工重放、kafka-ui、测试工具、跨语言生产者）静默丢失，无错误日志可检索——与 D-01 的 Jackson 静默赋 null 同属静默失败模式，且直接阻塞 S1 类消息重放验收。
+- 关联：D-35；P1-05 的 S1 验收依赖重放通道
+- 状态：未开始。候选方案：① 消费端改 `ByteArrayDeserializer` + 容器级 `JsonMessageConverter`，listener 参数类型自动推断，不再依赖 header；② 短期约定：任何手工重放必须附带 `__TypeId__` header
+- 验证：无 header 的合法消息能被对应 listener 正常消费，或至少产生可检索的解析错误日志
+
+### D-37 已终态 run 重放成功不刷新 finished_at，重放操作无留痕
+
+- 优先级：P2
+- 实测（2026-09-06 S1 重放验证）：同 run 重投全链成功后，`t_analysis_run.finished_at` 仍为首次终态值（2026-09-06 21:21:45.573），重放执行时间无处可查；本次仅能凭 ES 行为的 `createdAt` 全量刷新间接推断发生过重放。
+- 后果：不影响数据正确性（先清后抽保证结果自洽），但重放类运维操作缺审计锚点，排查「数据何时被改写」时只能靠下游表的时间戳倒推。
+- 关联：D-30 的同 run 重投语义；D-35/D-36 修复后重放将成为常规验收手段，此问题出现频次随之上升
+- 状态：未开始。候选方案：① run 表增加 lastReplayedAt 类字段；② 允许 finished_at 在同 run 二次成功时刷新；③ 接受现状并写入运维说明
+- 验证：重放后能从 PG 直接判断该 run 发生过重放及其时间
+
+### D-38 mvn spring-boot:run 启动拉取不到 Nacos 配置，非 IDE 启动路径不可用
+
+- 优先级：P2
+- 位置：仓库根目录 `run-processing.ps1`（两步构建：先 `install` common，再单模块 `spring-boot:run`）；processing 的 `bootstrap.yml`
+- 实测（2026-09-06）：脚本拉起的 JVM 报 `Failed to configure a DataSource ... profiles common are currently active`，`common-dev.yaml` 未取到；同一 profile 组合下 VSCode Spring Boot Dashboard 启动正常。脚本已内置 `.env` 加载与 JDK 8 切换，排除了凭据与版本因素。
+- 后果：无 IDE 场景（CI、他人环境）无法用命令行启动服务；当前以 VSCode 启动为准，脚本保留待查。
+- 关联：P1-05 切片验收采用 VSCode 启动路径，本条为该决策的遗留债
+- 状态：未开始
+- 验证：`mvn spring-boot:run` 启动的 processing 完成 Nacos 配置拉取并正常连接 PG，与 IDE 启动行为一致
 
 ---
 
 ## 五、按修复顺序的建议路径
 
-依赖关系决定顺序，不可乱序：
+当前顺序以 [PLAN](../../PLAN.md) 与 [P1 对接说明](../../plan1/p1-handoff.md) 为准：
 
-```text
-第一层（无依赖，可并行）
-  D-21 吊销凭据          ← 安全，越早越好
-  D-01 命名策略决策      ← 全部规则工作的前置
-  D-09 零风险除零        ← 独立，可立即写测试并修
-  D-24 测试路径          ← 独立
-
-第二层（依赖 D-01）
-  D-03 Behavior 加作用域字段
-  D-11 统一风险等级口径
-  D-16 RiskRule 结构变更
-
-第三层（依赖 D-03）
-  D-05 Batch 透传 → D-04 按 assessment 查询 → D-22 幂等键
-  D-23 sourceDocumentId 粒度
-
-第四层（依赖第二三层）
-  D-02 status 有值 → D-14 condition 有判定输入
-  D-13 RANGE 求值方案
-  D-10 / D-15 比例语义与分组阈值 → D-06 riskTriggered 由规则决定
-  D-07 召回改造
-  D-08 法规引用
-
-第五层
-  D-17 / D-18 / D-19 / D-20 规则引擎实现细节
-```
+1. 已闭环：D-01、D-23、D-24、D-09、D-31、D-32；F-07/F-09 和 Milvus 迁移补数不进入 P1 重复开发。
+2. P1 Entry Gate：P1-01 运行模型与 ID 透传（D-05），P1-02 文档 Evidence，P1-03 Behavior 作用域与查询（D-03/D-04）；P1-06 的幂等和安全替换基础工作（D-22/D-30）前置至 Prompt 开始前。
+3. P1-04/05 事实抽取解决 D-02，复用已有 Provider；随后复验 P1-06（2026-09-06 三场景通过），P1-07（重定义）补齐新链回归空洞，P1-08/09/10 完成追溯与真实材料验收。
+4. P2 处理 D-07/D-08、领域取值与 D-33/D-34；P3 处理 D-06/D-10/D-11/D-13 至 D-18 的推理和规则问题，D-13 仍待 P3-05 决策。
+5. D-21 保留供应商吊销待办；D-25 保留模型分发问题，P1 单元测试使用 Stub，不要求私有 checkpoint。
 
 ## 六、矛盾类型索引
 
@@ -484,15 +505,24 @@
 | Prompt 假设与调用参数矛盾 | Prompt 要求确定性输出，未设 `temperature` 允许随机 | D-32 |
 | 字段名与实际语义不符 | `industry` 承载的是合规领域分类而非行业分类 | D-29 |
 | 靠硬编码特例兜住不一致 | 运行时校验编译期常量，只为映射两个维度名 | D-28 |
+| 非标准消息被静默丢弃或卡死 | 缺 `__TypeId__` header 的消息位点前进但业务无感知；反序列化失败的消息使消费组无限重试 | D-35、D-36 |
 
 ## 七、统计
 
-| 优先级 | 条数 | 其中待决策 | 已修复 |
-| --- | --- | --- | --- |
-| P0 | 8（D-01、D-02、D-03、D-04、D-05、D-21、D-26、D-30） | 0 | 0（D-21 代码侧已处理，供应商侧吊销待用户执行） |
-| P1 | 15（D-23 由 P2 上调；含 D-28、D-31、D-32） | 1（D-13） | 3（D-09、D-31、D-32） |
-| P2 | 11（含 D-33、D-34，2026-09-04 业务回归实测发现） | 0 | 0 |
-| 合计 | 34 | 1 | 3 |
+统计保留全部 34 条历史登记；“未闭环”包括未开始、已定方案和部分完成，不等于待决策。F 系列不重复计入 D 系列总数。
+
+| 优先级 | 登记总数 | 已修复 | 未闭环 | 其中待决策 |
+| --- | --- | --- | --- | --- |
+| P0 | 8 | 1（D-01） | 7（含 D-21、D-26 部分完成） | 0 |
+| P1 | 16 | 4（D-09、D-23、D-31、D-32） | 12（含 D-28 部分完成） | 1（D-13） |
+| P2 | 14 | 1（D-24） | 13（含 D-29 部分完成） | 0 |
+| 合计 | 38 | 6 | 32 | 1 |
+
+2026-09-06 追加 D-35 至 D-38 共 4 条（P1×1、P2×3），来源为 P1-05 切片场景与 S1 同 run 重投验收：消费链两条（D-35 毒丸消息卡死分区、D-36 缺 `__TypeId__` header 静默跳过）、审计与启动路径各一条（D-37 重放无留痕、D-38 mvn 启动无 Nacos 配置）。
+
+D-26/D-28/D-29 已有实施变化，但本次不扩大已验证结论，保留专项核对项。D-21 未取得吊销证据，不关闭。
+
+以下为历史推进记录，迁移后的当前状态见上表及各条目：
 
 P0-05 的九条决议消掉了 3 条待决策（D-23 存储粒度、D-28 维度取值、D-29 字段语义），同时「允许重复分析」这一决议引出 D-30，净减 2 条。
 
@@ -506,7 +536,7 @@ P0-09 不关闭任何缺陷（属对账与冻结任务，未改代码），但�
 
 `P0-11` 完成 15 项决策，关闭上述全部 9 条待决策及 D-24，详见 `p0-11-review-record.md`。待决策由 9 条降至 1 条——仅剩 D-13（RANGE 规则的 JavaScript 表达式处置），因 110 条规则去重后有 98 种不同表达式，须结合真实表达式分布在 `P3-05` 决定。评审另实测补齐 F-12：Milvus `regulation_vectors` 确有 `industry` 存量且被 `VectorSearchService.java:128` 精确匹配过滤使用，故 `complianceDomain` 改名须同步 Milvus，否则检索过滤静默失效——与 D-01 的 Jackson 静默赋 null 属同类失败模式。`indicator_vectors` 当前未 load，存量条数待迁移前确认。新增 F-13：删除 `BatchTest` 后 Batch 链路失去回归依据，须在 `P1-07` 补不依赖基础设施的单元测试。
 
-**全部破坏性变更均未执行。** `P0-11` 只作决策，实施须先完成四索引 ES snapshot 备份，再按记录第五节的窗口顺序执行。
+**P0-11 评审当日全部破坏性变更均未执行（历史状态，已被下述迁移记录更新）。** `P0-11` 只作决策，实施须先完成四索引 ES snapshot 备份，再按记录第五节的窗口顺序执行。
 
 > 迁移窗口执行记录（2026-09-04）：5.2 七步全部完成并核对通过；ES 快照 `pre_camelcase_migration` 保留待业务回归后清理。窗口后补做：`t_risk` 孤儿 96 条清理（assessment 29/30/31 已删，级联缺失遗留）、`createdAt` 按 PG 评估时间回填 2500 条、Milvus 差集补齐 100 条（发现 D-34）、种子文件 camelCase 转换（备份于 `documents/data/backup_snake_case/`）、F-09 Java 侧修正（`Risk.java`/`RiskVO.java`/`AssessmentServiceImpl`）。补数过程中发现 D-33（领域过滤精确匹配对多值串恒空）。
 
@@ -519,3 +549,7 @@ P0-09 不关闭任何缺陷（属对账与冻结任务，未改代码），但�
 - **Baseline 记录**：D-02 / D-06 / D-07 / D-08 的运行时现象引自 `p0-02-baseline.md`，该文档记录了三案例（assessment 32/33/34）的实际执行结果
 
 尚未取得实测证据的部分已在对应条目注明，例如 D-12 的异常仅为按 Spring Data 语义的推断，因当前每个 project 只有一次评估而未实际触发。
+
+## 九、P1 开工状态同步（2026-09-05）
+
+用户确认上传 → 行为 → 指标 → 风险 → 报告真实链路、新 Risk.createdAt、文本风险等级、Report 查询及 Nacos 注册通过。此为用户提供的验证结论，本次仅核对代码与文档，未重新运行服务或测试。F-07/F-09 与 Milvus 迁移补数已闭环；D-33/D-34 独立保留。单链可运行不证明跨 Assessment/Run 隔离正确。详见 [P1 开发对接说明](../../plan1/p1-handoff.md)。

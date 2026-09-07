@@ -6,7 +6,7 @@
 
 本次评审对 15 项议题作出决策，关闭 `defect-backlog.md` 中全部 9 条待决策，并解决 `p0-03-isolation.md`、`p0-05-core-schemas.md` 的拟冻结状态。本文件为上述文档的最终冻结依据。
 
-本记录只记载决策，不含实施。所有破坏性变更须按第五节的窗口顺序单独执行，执行前须完成 5.1 的备份。
+本记录第一至八节保留评审时的决策与历史状态；迁移实施后的状态补充见第九节。所有破坏性变更须按第五节的窗口顺序单独执行，执行前须完成 5.1 的备份。
 
 ## 一、已冻结项：ES 字段契约
 
@@ -198,7 +198,7 @@ Milvus 侧无快照方案，`indicator_vectors` 须先 load 并记录条数，`r
 - ES：`build/docker-compose-elasticsearch.yml` 增加 `path.repo=/usr/share/elasticsearch/data/snapshots` 后重建容器，注册仓库 `p0_backup`，快照 `pre_camelcase_migration` 状态 SUCCESS，覆盖四索引 4/4 分片、70 个文件、约 115.9MB。失败回滚路径：删索引 → `restore` 该快照。
 - ES 基线条数：`t_risk` 444,373 / `t_regulation` 4,865 / `t_indicator` 1,144 / `t_behavior` 2,146。
 - Milvus 基线条数：`regulation_vectors` 4,765（IVF_FLAT/COSINE 索引在位）；`indicator_vectors` 1,144（**无向量索引**，load 报 error 700，建索引随迁移窗口第 5 步一并执行）。
-- Milvus 实测发现 `regulation_vectors` 较 ES `t_regulation` **缺 100 条**：全部为 2025-12-04 批、id 前缀均匀散落、无孤儿记录。根因是 `test/sync_to_milvus.py` 用 `from/size` 深分页翻页，同步过程中写入导致页偏移跳过文档。处理决定：**修复脚本并补齐 100 条列入迁移窗口第 5 步**，不单独提前执行。
+- Milvus 实测发现 `regulation_vectors` 较 ES `t_regulation` **缺 100 条**：全部为 2025-12-04 批、id 前缀均匀散落、无孤儿记录。根因是当时同步程序使用 `from/size` 深分页翻页，同步过程中写入导致页偏移跳过文档。处理决定为在迁移窗口第 5 步修正同步逻辑并补齐 100 条；该步骤于 2026-09-04 完成验收后，一次性脚本已移除。
 
 ### 5.2 窗口内执行顺序
 
@@ -213,7 +213,7 @@ Milvus 侧无快照方案，`indicator_vectors` 须先 load 并记录条数，`r
         + complianceDomain 回填（3.2），同批完成
 5. Milvus：industry → compliance_domain 同步改名（1.5）
         + indicator_vectors 建 IVF_FLAT/COSINE 索引并 load
-        + 修复 sync_to_milvus.py 后补齐缺失的 100 条 regulation 向量
+        + 修复 历史深分页同步逻辑 后补齐缺失的 100 条 regulation 向量
 6. 移除 ElasticSearchConfig.java:61 的 SNAKE_CASE（1.1）
 7. 核对：四索引字段覆盖数不下降，Milvus 条数与 5.1 基准一致
         （regulation_vectors 核对基准为 4865 —— 含补齐后的 100 条）
@@ -260,7 +260,7 @@ F 系列：F-01 已完成，F-02 至 F-10、F-12 本次决策完毕，F-11（汇
 | — | `industry` 取值域清理（53 个取值混杂行业与适用范围） | 计划 2 | 定义取值域时 |
 | D-13 | RANGE 规则 JavaScript 表达式处置 | `P3-05` | 计划 3 启动前 |
 | — | ~~`indicator_vectors` collection 未 load，存量条数未确认~~ 已实测：1,144 条、无向量索引，建索引随迁移窗口第 5 步 | 迁移窗口第 5 步 | 第 7 步核对前 |
-| — | `sync_to_milvus.py` 的 `from/size` 深分页缺陷修复 + `regulation_vectors` 补齐 100 条 | 迁移窗口第 5 步 | 第 7 步核对前 |
+| — | `regulation_vectors` 的历史深分页同步缺陷修正与 100 条补数 | 已完成（2026-09-04 迁移窗口） | 已验收；一次性脚本已移除 |
 | — | `P0-10` 已跳过，Evidence / AnalysisResult 前端类型须补做 | 计划 4 前 | 前端联调前 |
 | D-21 | 旧 LLM Key 的供应商侧吊销与 git 历史清除 | 用户执行 | 越早越好 |
 | — | `P0-06` 连续 10 次真实 LLM 调用 | 用户提供新凭据后 | 计划 3 启动前 |
@@ -279,3 +279,11 @@ D-21 须特别说明：工作区已无明文凭据（全仓 grep 0 命中），�
 | 最晚决策日期 | 第七节「最晚期限」列 |
 
 本记录的回写已执行：`p0-03-isolation.md`（6.3 改为已冻结）、`p0-05-core-schemas.md`（文档状态改为已冻结，12.2 节 F-02 至 F-05 更新为已决策）、`defect-backlog.md`（9 条待决策及 D-24 按第六节更新，统计表待决策降为 1 条）、`p0-09-field-contract.md`（6.2 并存策略废止、6.3 Milvus 实测结论、第九节遗留事项）、`p0-07-provider-boundary.md`（第七节补 gateway 环境变量警示）、`p0-08-deterministic-bugfix.md`（D-01 行）、`PLAN.md`（`P0-11` 勾选）。
+
+## 九、实施状态补充（2026-09-05）
+
+2026-09-04 迁移窗口第 5.2 节七步已全部执行并核对通过，实施记录见 [缺陷清单第七节](defect-backlog.md)。第七节的 Milvus 建索引/load、同步脚本修复与缺失 100 条补数已完成，不再作为 P1 前置待办。D-24 对应 BatchTest 已删除，F-13 测试空洞仍由 P1-07 补齐。
+
+用户确认真实上传 → 行为 → 指标 → 风险 → 报告链及 Nacos 注册恢复，F-07 文本枚举持久化、F-09 createdAt 写入/查询正常。本次仅静态核对文档和代码，没有重新执行在线验证。P0 的数据契约与可运行基线已支撑 P1 开工；隔离、幂等、失败保护仍须实现，原有其他遗留项不因此自动关闭。
+
+计划 1 以第四节冻结的“Evidence 为文档资产、Behavior 为运行事实”和独立 AnalysisRun 为依据；运行安全执行顺序明确为“写新 → 完整性校验 → SUCCEEDED 并切换当前有效结果 → 清理旧结果”。P1-06 基础能力前置到 P1-04，后续接入真实抽取再复验。详见 [P1 开发对接说明](../../plan1/p1-handoff.md) 与 [PLAN](../../PLAN.md)。

@@ -13,9 +13,11 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class StructuredBehaviorWriterTest {
@@ -56,6 +58,36 @@ class StructuredBehaviorWriterTest {
 
         assertNull(behavior.getDescriptionVector());
         verify(repository).writeAll(Collections.singletonList(behavior));
+    }
+
+    @Test
+    void classificationEmptyResponseBlocksBehaviorWrite() {
+        BehaviorDocumentRepository repository = mock(BehaviorDocumentRepository.class);
+        ClassifierClient classifier = mock(ClassifierClient.class);
+        VectorizationClient vectorization = mock(VectorizationClient.class);
+        Behavior behavior = Behavior.builder().id("stable-id").description("企业完成审查").build();
+        when(classifier.classifyBatch(any())).thenReturn(null);
+
+        assertThrows(IllegalStateException.class, () -> new StructuredBehaviorWriter(
+                repository, classifier, vectorization).enrichAndWrite(
+                Collections.singletonList(behavior)));
+
+        verifyNoInteractions(vectorization, repository);
+    }
+
+    @Test
+    void classificationResultCountMismatchBlocksBehaviorWrite() {
+        BehaviorDocumentRepository repository = mock(BehaviorDocumentRepository.class);
+        ClassifierClient classifier = mock(ClassifierClient.class);
+        VectorizationClient vectorization = mock(VectorizationClient.class);
+        Behavior first = Behavior.builder().id("stable-id-1").description("企业完成审查").build();
+        Behavior second = Behavior.builder().id("stable-id-2").description("企业提交报告").build();
+        when(classifier.classifyBatch(any())).thenReturn(classification("定性", "治理"));
+
+        assertThrows(IllegalStateException.class, () -> new StructuredBehaviorWriter(
+                repository, classifier, vectorization).enrichAndWrite(Arrays.asList(first, second)));
+
+        verifyNoInteractions(vectorization, repository);
     }
 
     private Map<String, Object> classification(String type, String dimension) {

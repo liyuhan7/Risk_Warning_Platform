@@ -174,7 +174,7 @@ F-05 由 `p0-05-core-schemas.md:561` 指派至本任务。U-09 决议将 `Indust
 
 `MilvusRepository.java:78` 的 collection schema 含 `dimension` 字段，`:230` / `:268` 的 `withOutFields` 列出 `id`、`es_id`、`name`、`dimension`、`industry`、`region`。
 
-**Milvus 存量已由 `P0-11` 实测**：`indicator_vectors` 与 `regulation_vectors` 两个 collection 均存在；`regulation_vectors` 有数据（4,765 条，`industry` 字段含真实值如「征信业,金融业,综合类」，IVF_FLAT/COSINE 索引在位）但较 ES `t_regulation` 缺 100 条，根因是 `test/sync_to_milvus.py` 的 `from/size` 深分页缺陷，修复脚本并补数已列入迁移窗口第 5 步；`indicator_vectors` 1,144 条、无向量索引（load 报 error 700），建索引随迁移窗口第 5 步执行。`VectorSearchService.java:128` 以 `industry == "%s"` 精确匹配过滤，因此改名须同步 Milvus collection 结构，否则过滤静默失效——不再视为独立迁移，已并入 `p0-11-review-record.md` 5.2 的同窗口顺序第 5 步。
+**Milvus 存量已由 `P0-11` 实测**：`indicator_vectors` 与 `regulation_vectors` 两个 collection 均存在；迁移窗口前 `regulation_vectors` 有 4,765 条，较 ES `t_regulation` 缺 100 条，根因是当时同步程序使用 `from/size` 深分页，写入并发时页偏移跳过文档。该同步逻辑已在 2026-09-04 迁移窗口修正并完成补数；一次性迁移脚本在窗口验收后移除。`indicator_vectors` 迁移前有 1,144 条且无向量索引（load 报 error 700），索引创建与 collection 字段改名均在同一窗口完成。`VectorSearchService.java:128` 以 `industry == "%s"` 精确匹配过滤，因此改名须同步 Milvus collection 结构，否则过滤静默失效——不再视为独立迁移，已并入 `p0-11-review-record.md` 5.2 的同窗口顺序第 5 步。
 
 ## 7. 本次未做的修改
 

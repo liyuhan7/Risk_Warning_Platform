@@ -203,6 +203,8 @@ Document → EvidenceChunk → Fact Extraction → Structured Behavior
 
 ### 2. 当前现状
 
+截至 2026-09-05，P0 数据契约与真实链路可运行基线已收尾，P1 可以开工；这不表示多评估隔离、运行幂等或规则正确性已经通过。迁移证据与用户确认范围见 [P1 开发对接说明](plan1/p1-handoff.md)。P0-11 冻结决策优先于早期模型描述。
+
 - `DocumentProcessingService` 已能调用 `ContentExtractor` 获取 `TextSegment`，后者已经包含 `pageNumber`。
 - `DocumentProcessingService` 随后把内容写入 `.txt` 中间文件，页码、文件标识和段落位置没有进入后续 Batch。
 - `LineProcessor` 创建的 Behavior 包含空标签、空状态等默认值。
@@ -210,14 +212,27 @@ Document → EvidenceChunk → Fact Extraction → Structured Behavior
 - `Behavior` 当前只有 `projectId` 和事实描述等基础字段，没有 Assessment、源文件和 Evidence 关联。
 - 现有 Spring Batch 和 Kafka 链可运行，适合保留作兼容路径，不适合继续承载新事实抽取职责。
 
+### 2.1 现状更新（2026-09-06，P1-01~06 完成后）
+
+P1-01~06 的代码实现与真实环境切片验证已全部完成（执行记录见 `plan1/p1-01~06-execution.md`），本节为编写后续任务（P1-07~10）时的现状基线：
+
+- 旧 Spring Batch 链路（`LineProcessor`/`LineRangeItemWriter`/`BatchJob`）已整体移除，事实抽取新链成为 FILE_UPLOAD 唯一生产路径；新行为以 `schemaVersion="1.0"` 标识结构契约，并以 `extractionPromptVersion="fact-extract-v1.0"` 标识抽取来源版本。
+- `AnalysisRun` 持久化与 `AnalysisScope` 贯通 Kafka、文档处理、指标计算、风险与报告；上传确认创建 RUNNING 运行，数据库部分唯一索引防并发在途。
+- `EvidenceChunk` 以稳定 ID 在 PostgreSQL 权威存储，回指文件、页码、段序号和原文；`t_project_file` 已承载 `original_file_name`。
+- `Behavior` 携带完整作用域（projectId/assessmentId/analysisRunId/sourceDocumentId）、证据引用（evidenceIds）和抽取元数据（schemaVersion/extractionModel/extractionPromptVersion），ES 查询按三作用域字段隔离。
+- 事实抽取契约 `fact-extraction-v1.0` 已冻结，L1/L2/L3 校验为生产代码，16 组离线样本全部通过；`FactExtractionService` 稳定分批（≤40 条/20,000 字符）并以 temperature=0 调用 Provider。
+- 运行隔离三场景（S1 同 Run 重投不累加、S2 新 Run 失败保留旧结果、S3 新 Run 成功切换并清理）于 2026-09-06 在真实环境（真实 Provider + 本地 PG/ES 8.11/Kafka/BERT）全部通过。
+- 遗留 P1 级缺陷：D-35（Kafka 毒丸消息卡死分区）、D-36（缺 `__TypeId__` header 静默跳过）仍开放，消费链加固未实施。
+
 ### 3. 本次范围
 
 - 定义并持久化 `EvidenceChunk`，保留文件、页码、段序号、原文和稳定 ID。
-- 将 `assessmentId`、源文件或上传批次标识贯穿文档处理、事实抽取、Behavior 持久化和查询。
+- 建立独立 `AnalysisRun` 持久化记录与 `AnalysisScope(projectId, assessmentId, analysisRunId)`，贯穿 Kafka、文档处理、Batch、Behavior、IndicatorResult 和 Risk；逐文件传递 `sourceDocumentId = ProjectFile.id`，不得以上传批次代替。
+- 实现运行隔离、同一 Run 重试幂等和失败保护，再接入真实 Fact Extraction。
 - 建立 `EvidenceExtractionService` 与 `FactExtractionService`，通过 Provider 获取结构化事实。
 - 对 LLM 输出做 Schema 校验、枚举归一化、数值/单位校验、重试和明确降级。
 - 将 Structured Behavior 映射到演进后的 Behavior 存储，并保存 `evidenceIds`、置信度和抽取版本。
-- 保留旧 `LineProcessor / LineRangeItemWriter` 作为兼容链，避免在新链稳定前直接删除。
+- ~~保留旧 `LineProcessor / LineRangeItemWriter` 作为兼容链，避免在新链稳定前直接删除。~~（旧 Batch 已随新链稳定移除，本条不再适用；回归空洞由 P1-07 补齐）
 - 提供 Evidence 和 Structured Behavior 的查询接口或可供前端 Mock 的 DTO。
 - 增加针对文档定位、事实抽取、数据隔离和 ES 实际写入的测试。
 
@@ -226,15 +241,16 @@ Document → EvidenceChunk → Fact Extraction → Structured Behavior
 - 不做 Indicator/Regulation 检索和 RAG 评测。
 - 不让 LLM 判断风险、分数或法规是否适用。
 - 不实现 Rule Engine。
-- 不删除 Spring Batch、旧 Behavior 分类链或旧 ES 字段。
+- 不删除旧 Behavior 分类链或旧 ES 字段（Spring Batch 已随新链稳定移除，不在保留范围）。
 - 不重做 OCR、复杂表格识别和多模态材料理解；只复用现有文档解析能力。
-- 不修改 Report、Notification 和完整风险页面。
+- Report 仅做读取当前成功运行结果所必需的适配；不重构 Notification 和完整风险页面。
+- 不重复实施已完成的 ES camelCase、PG 文件粒度/风险枚举、Milvus 存量迁移、createdAt 回填和 Nacos 收尾。
 
 ### 5. 方案概述
 
 ```text
 BehaviorProcessingTaskMessage
-  projectId + assessmentId + filePaths
+  projectId + assessmentId + analysisRunId + documents(sourceDocumentId, filePath)
                 ↓
 DocumentProcessingService
                 ↓
@@ -254,7 +270,7 @@ Structured Behavior
 Behavior 持久化并回指 Evidence
 ```
 
-同一文档重复处理时，使用由任务作用域、源文件和文本哈希组成的幂等键，避免重复生成 Behavior。旧 Batch 路径保留，但新路径的数据必须带完整作用域。
+Evidence 是可复用的文档资产，稳定 ID 为 `hash(sourceDocumentId, pageNumber, segmentIndex, textHash)`，不含 `analysisRunId`。Behavior 是运行级事实，幂等键为 `(analysisRunId, sourceDocumentId, textHash)`；文件上传去重使用文件内容哈希，二者不可混用。新运行按「写新 → 完整性校验 → 标记 SUCCEEDED 并切换当前有效结果 → 清理旧结果」替换；失败保持上次成功结果可查，不要求永久保留全部历史结果。
 
 ### 6. 涉及模块
 
@@ -267,12 +283,16 @@ Behavior 持久化并回指 Evidence
 
 ### 7. 核心数据 / 接口变化
 
+#### AnalysisScope / AnalysisRun
+
+`AnalysisScope` 包含 `Long projectId`、`Long assessmentId`、`String analysisRunId`。独立运行表以 `analysisRunId` 为主键，至少持久化 `assessmentId/projectId/status/startedAt/finishedAt`，状态为 `RUNNING/SUCCEEDED/FAILED`。Assessment 与 Run 为一对多，当前有效结果的切换须有明确持久化依据及并发保护。
+
 #### EvidenceChunk
 
 | 字段 | 说明 |
 | --- | --- |
 | `id` | 稳定证据 ID |
-| `analysisRunId/projectId/assessmentId` | 本次分析作用域 |
+| 文档归属 | 通过 `sourceDocumentId` 校验上传文档与评估的关联；Evidence 不承担运行身份 |
 | `sourceDocumentId/sourceFileName` | 来源文件定位 |
 | `pageNumber/segmentIndex` | 页码和页内段序号 |
 | `charStart/charEnd` | 能可靠获得时保存；无法获得时允许为空 |
@@ -290,28 +310,41 @@ Behavior 持久化并回指 Evidence
 | `confidence` | 抽取置信度 |
 | `evidenceIds` | 至少一个 Evidence 引用 |
 | `extractionModel/extractionPromptVersion` | 可审计版本 |
-| `assessmentId/sourceDocumentId` | 隔离本次分析输入 |
+| `projectId/assessmentId/analysisRunId/sourceDocumentId` | 项目、评估、运行与单文件作用域 |
+| `createdAt` | 事实生成时间 |
+| `schemaVersion` / `extractionPromptVersion` | 结构契约版本（`"1.0"`）与抽取来源版本（`"fact-extract-v1.0"`），可审计地分辨新旧行为 |
 
 #### 服务接口
 
 - `EvidenceExtractionService.extract(scope, document)`：返回 Evidence 列表和解析错误。
 - `FactExtractionService.extract(scope, evidenceChunks)`：返回 Structured Behavior 列表、失败项和调用元数据。
-- Behavior 查询接口必须接收 `assessmentId` 或 `analysisRunId`，不得仅按 `projectId` 查询本次分析输入。
+- Behavior 查询接口必须按 `assessmentId + analysisRunId` 过滤并校验所属项目；面向评估的读取先解析当前成功运行，不得仅按 `projectId` 查询本次分析输入。
 
 ### 8. 开发任务拆分
 
-- [ ] `P1-01`（B）为 `DocumentProcessingService` 增加任务作用域，保留 `TextSegment.pageNumber` 和源文件身份。
-- [ ] `P1-02`（B）实现 `EvidenceChunk` 对象、ID/哈希策略、持久化和查询。
-- [ ] `P1-03`（B）更新 Behavior 模型、ES Mapping 和 Repository，使其保存 Assessment、证据引用和抽取元数据。
-- [ ] `P1-04`（A）设计 Fact Extraction Prompt 和 JSON Schema，只抽取事实，不输出风险判断。
-- [ ] `P1-05`（A、B）实现 `FactExtractionService`、Provider 适配、校验、重试、错误分类和显式降级。
-- [ ] `P1-06`（B）实现幂等写入和同一 Project 下不同 Assessment/文件的隔离查询。
-- [ ] `P1-07`（B）保留旧 Batch 兼容入口，明确新旧 Behavior 的版本或来源标识。
+- [x] `P1-01`（B）建立 `AnalysisRun` 表/模型、`AnalysisScope` 和运行状态；贯通 Message、MessageTask、DocumentProcessingService、BatchJob、LineProcessor 至风险结果的消息链路运行 ID，保留页码与单文件身份。运行 ID 的存储落库分属后续：Behavior 随 P1-03，IndicatorResult/Risk 随 P1-06（2026-09-05 评审决策）。→ `documents/plan1/p1-01-execution.md`（旧 Batch 已随 P1-05 移除，新链 ID 透传由 MessageTask/FactExtractionPipeline 承载）
+- [x] `P1-02`（B）实现 `EvidenceChunk` 对象、ID/哈希策略、持久化和查询。→ `documents/plan1/p1-02-execution.md`
+- [x] `P1-03`（B）更新 Behavior、ES Mapping、Repository、DTO 与查询，保存完整作用域、证据引用和抽取元数据，禁止只按项目取本次行为。→ `documents/plan1/p1-03-execution.md`
+- [x] `P1-04`（A）设计 Fact Extraction Prompt 和 JSON Schema，只抽取事实，不输出风险判断。→ `documents/plan1/p1-04-execution.md`
+- [x] `P1-05`（A、B）实现 `FactExtractionService`、Provider 适配、校验、重试、错误分类和显式降级。基础代码、16 组契约样本单测、主链切换与显式 ES `_id` 已完成；真实 Provider、专用 PG/ES/BERT 切片随 P1-06 三场景于 2026-09-06 复验通过。→ `documents/plan1/p1-05-execution.md`
+- [x] `P1-06`（B）实现运行隔离、Behavior 幂等、并发保护及安全替换；含 IndicatorResult/Risk 的 `analysisRunId` 落库与"当前有效结果"切换（P1-03 评审 2026-09-05 决策）。真实环境三场景（S1 同 Run 重投、S2 新 Run 失败保留、S3 新 Run 成功切换）于 2026-09-06 全部通过。→ `documents/plan1/p1-06-execution.md`
+- [x] `P1-07`（B，重定义）旧 Batch 已移除，已补齐新链回归空洞：核查事实抽取链测试覆盖（F-13 方向），确认 `schemaVersion="1.0"` 与 `extractionPromptVersion="fact-extract-v1.0"` 的来源/版本契约，清理当前文档中的旧 Batch 表述，并说明分类服务模型获取方式。→ `documents/plan1/p1-07-execution.md`
 - [ ] `P1-08`（C）完成 Evidence 原文、文件名、页码、Evidence ID 和 Behavior 结果的 Mock 页面。
 - [ ] `P1-09`（C、A）标注固定材料的期望事实，用于字段级抽取验证。
 - [ ] `P1-10`（全员）用一份真实 PDF 完成上传到 Structured Behavior 的阶段验收。
 
 ### 9. 依赖关系
+
+实际顺序：`P1-01 → P1-02 → P1-03 → P1-06 基础隔离/幂等/失败保护 → Entry Gate → P1-04 → P1-05 → P1-06 真实链复验 → P1-07 → P1-08/09/10`。编号保留，不表示按编号执行；旧 Batch 已移除，其回归空洞由 P1-07 以新链测试补齐。
+
+进入 P1-04 前必须全部满足（2026-09-06 真实环境切片验证全部达成）：
+
+- [x] AnalysisRun 已持久化，Kafka 至风险结果的运行 ID 一致。
+- [x] ProjectFile.id 进入文档处理，Behavior 三个作用域字段非空且真实落库。
+- [x] Behavior 查询按评估与运行隔离，同项目两个 Assessment、同 Assessment 两个 Run 不串数据。
+- [x] 同 Run 重试不重复，新 Run 失败不破坏旧成功结果。
+- [x] P0 上传 → 行为 → 指标 → 风险 → 报告基线保持通过。
+
 
 - 依赖计划 0 的任务作用域、EvidenceChunk、StructuredBehavior、Provider 和 JSON Schema 冻结。
 - 依赖现有文档解析可读取固定 PDF。
@@ -327,14 +360,17 @@ Behavior 持久化并回指 Evidence
 5. 同一 Project 下两个 Assessment 的 Behavior 查询结果互不混入。
 6. LLM 返回无效 JSON、错枚举或错误单位时，系统会校验失败、重试或标记降级，不会把无效数据写成正常事实。
 7. ES Mapping 更新后，通过实际查询确认新增字段已经持久化；测试不仅检查接口 `200`。
-8. 旧 Batch 入口仍可运行，且新旧记录可以通过来源/版本字段区分。
+8. 新旧记录可以通过来源/版本字段区分（`schemaVersion`/`extractionPromptVersion`）。
+9. 同一 Assessment 的两次 Run 在切换前互不覆盖；第二次失败时第一次结果可查，成功并校验后才切换、清理。
+10. 真实 PDF 经上传、Evidence、事实抽取、查询接口到前端原文定位全链通过，P0 业务链无回归。
 
 ### 11. 测试方式
 
 - 单元测试：页码保留、Evidence ID/哈希、Schema 校验、状态枚举、数值和单位归一化、幂等逻辑。
 - Provider 契约测试：正常 JSON、Markdown 包裹、缺字段、错类型、超时、限流和空响应。
-- ES 集成测试：创建测试索引、写入 Evidence/Behavior、按 `assessmentId` 查询、检查新增字段和引用完整性。
+- ES 集成测试：创建测试索引、写入 Evidence/Behavior、按 `assessmentId + analysisRunId` 查询、检查新增字段和引用完整性。
 - 数据隔离测试：对同一 Project 连续上传两份文件并创建两个 Assessment，确认第二次分析不读取第一次 Behavior。
+- 运行回归：同 Assessment 两个 Run、同 Run 重试、并发重复提交、新 Run 中途失败及成功切换；日志追踪与实际存储查询共同验证。
 - 人工抽查：对固定 PDF 每页抽查 Evidence，并将 Structured Behavior 与原文逐项核对。
 - 前端 Mock：点击 Behavior 可以定位并高亮对应文件页码和 Evidence 文本。
 

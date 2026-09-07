@@ -151,6 +151,8 @@ P0-02 已记录本链路存在多个失败点（召回为空、regulation 挂载
 
 `textHash` = SHA-256(归一化文本)。归一化仅做三步：去首尾空白、连续空白折叠为单个半角空格、统一换行为 `\n`。不做大小写转换，不删标点。
 
+> 2026-09-05 澄清（P1-02 审批）：此处"连续空白"包含换行——`\r\n`/`\r` 先统一为 `\n`，再与空格、Tab 等一并折叠为单个半角空格；净效果是归一化文本**不保留任何换行**，段内断行被拼为单句。`normalizeText` 已按此语义实现并由 `EvidenceChunkTest` golden 固化，不得再恢复换行保留行为。
+
 `id` = `sha256(sourceDocumentId + "|" + pageNumber + "|" + segmentIndex + "|" + textHash)` 取前 32 位十六进制字符。`sourceDocumentId` 为 Long，参与拼接时取十进制字符串形式；`pageNumber` 为空时以空串参与。
 
 选择确定性 ID 而非随机 UUID 的原因：**同一源文档被重复解析时必须产出相同 `id`**，使写入可幂等。当前上传链路无任何幂等控制，N 次重复处理产生 N 倍 `t_behavior` 数据（也是 `t_behavior` 实际 2146 条与 Baseline 记录 2121 条差异无法追溯的原因）。确定性 ID 让重复写入退化为覆盖而非累加。
@@ -236,7 +238,7 @@ P0-02 已记录本链路存在多个失败点（召回为空、regulation 挂载
 | 字段 | 必填 | 类型 | 说明 |
 | --- | --- | --- | --- |
 | `schemaVersion` | `M` | String | 固定 `1.0` |
-| `id` | `M` | String | 行为唯一标识 |
+| `id` | `M` | String | 行为唯一标识：`sha256(analysisRunId + "|" + sourceDocumentId + "|" + textHash)` 前 32 位小写十六进制；同值同时作为 ES `_id` |
 | `analysisRunId` | `M` | String | 见第三节 |
 | `projectId` | `M` | Long | |
 | `assessmentId` | `M` | Long | 隔离本次分析输入，现有 `Behavior` 缺失此字段（D-03） |
@@ -299,7 +301,7 @@ P0-02 已记录本链路存在多个失败点（召回为空、regulation 挂载
 3. `confidence` 在 `[0.0, 1.0]` 内。
 4. `quantitativeData` 非空时 `quantitativeUnit` 必填，防止无单位裸数值参与规则计算。
 5. `status` 必须是 5.1 中的枚举码，空串直接判失败。
-6. 同一 `assessmentId` 下重复写入需幂等，禁止累加。
+6. 同一 `analysisRunId + sourceDocumentId + textHash` 重复写入需幂等，禁止累加；不同 Run 不得互相覆盖。
 
 ### 5.4 生产者与消费者
 

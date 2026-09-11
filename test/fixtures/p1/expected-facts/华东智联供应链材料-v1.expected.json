@@ -1,0 +1,207 @@
+{
+  "meta": {
+    "schema": "fact-extraction-expected-v1",
+    "material": "documents/华东智联供应链有限公司_2026年度业务合规事实材料_基线演示样例.docx",
+    "segmentCount": 26,
+    "expectedFactCount": 34,
+    "statusCount": {
+      "COMPLETED": 31,
+      "IN_PROGRESS": 3,
+      "UNKNOWN": 0
+    },
+    "rules": "p1-09-annotation-segments.md（标注规则 R1-R9，原 p1-09-plan.md 已归档至 documents/local）",
+    "note": "草案约36条按逐段清单精确化为34条；段3补充‘完成12家一级供应商年度资质审查’本体（与plan示范一致）；无UNKNOWN。"
+  },
+  "segments": [
+    {
+      "segmentIndex": 0,
+      "sourceSummary": "公司现有员工212人，其中正式187人、劳务派遣及临时用工25人",
+      "expectedFacts": [
+        {"subject": "公司", "action": "现有正式员工", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 187, "quantitativeUnit": "人", "description": "公司现有正式员工187人。", "evidenceRef": "segment:0", "note": "属性存在性事实，状态COMPLETED"},
+        {"subject": "公司", "action": "现有劳务派遣及临时用工", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 25, "quantitativeUnit": "人", "description": "公司现有劳务派遣及临时用工25人。", "evidenceRef": "segment:0", "note": "属性存在性事实"}
+      ]
+    },
+    {
+      "segmentIndex": 1,
+      "sourceSummary": "2026年1-6月营业收入8600万元，采购代理占58%、仓储配送占27%、线上营销及跨境服务占15%",
+      "expectedFacts": [
+        {"subject": "公司", "action": "实现营业收入", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 8600, "quantitativeUnit": "万元", "description": "公司2026年1月至6月实现营业收入8600万元，其中供应链采购代理收入占比58%、仓储配送收入占比27%、线上营销及跨境客户服务收入占比15%。", "evidenceRef": "segment:1", "note": "占比结构并入description，不拆分；区间时间不填behaviorDate"}
+      ]
+    },
+    {
+      "segmentIndex": 2,
+      "sourceSummary": "与78家供应商长期合作，一级12家、二级66家",
+      "expectedFacts": [
+        {"subject": "公司", "action": "保持长期合作", "object": "78家供应商", "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 78, "quantitativeUnit": "家", "description": "公司与78家供应商保持长期合作，其中一级供应商12家、二级供应商66家。", "evidenceRef": "segment:2", "note": "层级构成并入description"}
+      ]
+    },
+    {
+      "segmentIndex": 3,
+      "sourceSummary": "2026年5月完成12家一级供应商年度资质审查，10家通过续签，2家因资质不完整被暂停合作并要求三个月内补齐",
+      "expectedFacts": [
+        {"subject": "采购部门", "action": "完成一级供应商年度资质审查", "object": "12家一级供应商", "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 12, "quantitativeUnit": "家", "description": "采购部门于2026年5月完成12家一级供应商年度资质审查。", "evidenceRef": "segment:3", "note": "审查动作本体；月粒度时间不填behaviorDate"},
+        {"subject": "10家一级供应商", "action": "通过审查并续签年度框架合同", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 10, "quantitativeUnit": "家", "description": "10家供应商通过审查并续签年度框架合同。", "evidenceRef": "segment:3"},
+        {"subject": "2家一级供应商", "action": "因资质证明不完整被暂停合作", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 2, "quantitativeUnit": "家", "description": "2家供应商因资质证明不完整被暂停合作，并要求三个月内补齐材料。", "evidenceRef": "segment:3", "note": "暂停合作是已生效决定"}
+      ]
+    },
+    {
+      "segmentIndex": 4,
+      "sourceSummary": "2026年3月与供应商A签订120万元仓储设备采购合同，履行比价程序并留存3家报价单和集体决策记录",
+      "expectedFacts": [
+        {"subject": "公司", "action": "签订仓储设备采购合同", "object": "供应商A", "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 120, "quantitativeUnit": "万元", "description": "公司于2026年3月与供应商A签订金额120万元的仓储设备采购合同，采购过程履行了比价程序并留存3家报价单和集体决策记录。", "evidenceRef": "segment:4", "note": "比价程序并入description"}
+      ]
+    },
+    {
+      "segmentIndex": 5,
+      "sourceSummary": "上半年完成2笔单一来源采购，均履行例外审批，合计35万元",
+      "expectedFacts": [
+        {"subject": "公司", "action": "完成单一来源采购", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 2, "quantitativeUnit": "笔", "description": "2026年上半年公司完成2笔单一来源采购，均履行例外审批并留存书面审批意见，两笔合计金额35万元。", "evidenceRef": "segment:5", "note": "主数值取笔数；金额并入description"}
+      ]
+    },
+    {
+      "segmentIndex": 6,
+      "sourceSummary": "全部78家供应商合同已于4月前完成条款更新，补充反商业贿赂与审计配合条款",
+      "expectedFacts": [
+        {"subject": "公司", "action": "完成采购合同条款更新", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 78, "quantitativeUnit": "家", "description": "公司与全部78家合作供应商的采购合同已于2026年4月前完成条款更新，全部补充了反商业贿赂与审计配合条款。", "evidenceRef": "segment:6"}
+      ]
+    },
+    {
+      "segmentIndex": 7,
+      "sourceSummary": "采购经理2026年6月完成全部12家一级供应商年度评价，结果已报管理层审批归档",
+      "expectedFacts": [
+        {"subject": "采购经理", "action": "完成一级供应商年度评价", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 12, "quantitativeUnit": "家", "description": "采购经理于2026年6月完成全部12家一级供应商的年度评价，评价结果已报管理层审批并归档。", "evidenceRef": "segment:7"}
+      ]
+    },
+    {
+      "segmentIndex": 8,
+      "sourceSummary": "市场部门2026年5月完成官网及宣传材料合规复核，删除绝对化表述，复核记录已归档",
+      "expectedFacts": [
+        {"subject": "市场部门", "action": "完成官网及宣传材料合规复核", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": null, "quantitativeUnit": null, "description": "市场部门于2026年5月完成官网及宣传材料的合规复核，删除“行业领先”“零风险保障”等绝对化表述，复核记录已归档。", "evidenceRef": "segment:8", "note": "删除行为并入description"}
+      ]
+    },
+    {
+      "segmentIndex": 9,
+      "sourceSummary": "2026年6月促销有奖销售已披露中奖概率、兑奖条件和有效期限；收到消费者投诉6起全部3个工作日内处理完毕",
+      "expectedFacts": [
+        {"subject": "公司", "action": "完成有奖销售信息披露", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": null, "quantitativeUnit": null, "description": "公司在2026年6月促销活动中的有奖销售公布并披露了中奖概率、兑奖条件和有效期限。", "evidenceRef": "segment:9"},
+        {"subject": "公司", "action": "处理消费者投诉", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 6, "quantitativeUnit": "起", "description": "促销活动期间收到消费者投诉6起，全部于3个工作日内处理完毕。", "evidenceRef": "segment:9"}
+      ]
+    },
+    {
+      "segmentIndex": 10,
+      "sourceSummary": "2026年3月完成某批次智能仓储设备召回评估，召回设备45台，维修及回访后全部关闭",
+      "expectedFacts": [
+        {"subject": "公司", "action": "完成智能仓储设备召回", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 45, "quantitativeUnit": "台", "description": "公司于2026年3月完成某批次智能仓储设备的召回评估，共召回设备45台，完成维修及客户回访后全部售后问题关闭。", "evidenceRef": "segment:10"}
+      ]
+    },
+    {
+      "segmentIndex": 11,
+      "sourceSummary": "2026年1月与25名临时用工人员签订书面劳动合同；23人按实际工资基数足额缴纳社保，2人按约定基数并留存说明",
+      "expectedFacts": [
+        {"subject": "公司", "action": "签订书面劳动合同", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 25, "quantitativeUnit": "人", "description": "公司于2026年1月与全部25名临时用工人员签订书面劳动合同。", "evidenceRef": "segment:11"},
+        {"subject": "公司", "action": "足额缴纳社会保险", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 23, "quantitativeUnit": "人", "description": "23名临时用工人员按实际工资基数足额缴纳社会保险，2人按约定基数缴纳并留存书面说明档案。", "evidenceRef": "segment:11", "note": "2人按约定基数并入description"}
+      ]
+    },
+    {
+      "segmentIndex": 12,
+      "sourceSummary": "仓储中心5月业务高峰期安排12名员工月加班46小时，低于法定上限，留存同意与调休记录",
+      "expectedFacts": [
+        {"subject": "仓储中心", "action": "安排员工月加班", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 46, "quantitativeUnit": "小时", "description": "仓储中心2026年5月业务高峰期共安排12名员工月加班46小时，留存员工书面同意与调休安排记录。", "evidenceRef": "segment:12", "note": "主数值取时长；‘低于法定上限’为合规判断不抽取，员工数并入description"}
+      ]
+    },
+    {
+      "segmentIndex": 13,
+      "sourceSummary": "向实际控制人亲属经营的运输企业采购运输服务，上半年交易240万元，已履行关联申报与价格公允比较",
+      "expectedFacts": [
+        {"subject": "公司", "action": "向关联运输企业采购运输服务", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 240, "quantitativeUnit": "万元", "description": "公司向实际控制人亲属经营的运输企业采购运输服务，2026年上半年交易金额240万元。", "evidenceRef": "segment:13"},
+        {"subject": "公司", "action": "完成关联关系申报与价格公允比较", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": null, "quantitativeUnit": null, "description": "上述关联采购已履行关联关系申报与价格公允性比较，比较记录留存备查。", "evidenceRef": "segment:13"}
+      ]
+    },
+    {
+      "segmentIndex": 14,
+      "sourceSummary": "2026年4月补缴2025年四季度税款32万元，已结清并取得完税凭证",
+      "expectedFacts": [
+        {"subject": "公司", "action": "补缴税款", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 32, "quantitativeUnit": "万元", "description": "公司于2026年4月补缴2025年第四季度税款32万元，税款已结清并取得税务机关完税凭证。", "evidenceRef": "segment:14"}
+      ]
+    },
+    {
+      "segmentIndex": 15,
+      "sourceSummary": "客户系统2026年6月完成隐私政策与授权流程更新，个人信息收集改为单独勾选并说明保存期限与删除渠道",
+      "expectedFacts": [
+        {"subject": "线上客户系统", "action": "完成隐私政策与授权流程更新", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": null, "quantitativeUnit": null, "description": "线上客户系统于2026年6月完成隐私政策与授权流程更新，个人信息收集改为单独勾选取得授权，并明确说明保存期限与删除渠道。", "evidenceRef": "segment:15"}
+      ]
+    },
+    {
+      "segmentIndex": 16,
+      "sourceSummary": "2026年7月完成1.8万条个人信息单独授权补登记；剩余1.2万条补登记进行中，预计9月完成",
+      "expectedFacts": [
+        {"subject": "公司", "action": "完成个人信息单独授权补登记", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 18000, "quantitativeUnit": "条", "description": "公司于2026年7月完成1.8万条客户个人信息的单独授权补登记。", "evidenceRef": "segment:16"},
+        {"subject": "公司", "action": "进行历史信息补登记", "object": null, "status": "IN_PROGRESS", "behaviorDate": null, "quantitativeData": 12000, "quantitativeUnit": "条", "description": "剩余1.2万条历史信息的补登记正在进行，预计2026年9月完成。", "evidenceRef": "segment:16"}
+      ]
+    },
+    {
+      "segmentIndex": 17,
+      "sourceSummary": "2026年6月将3万条境内客户信息同步给境外客户服务商，同步前完成数据出境风险评估并通过评审",
+      "expectedFacts": [
+        {"subject": "公司", "action": "同步客户信息给境外客户服务商", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 30000, "quantitativeUnit": "条", "description": "公司2026年6月将3万条境内客户联系信息同步给境外客户服务商用于工单处理。", "evidenceRef": "segment:17"},
+        {"subject": "公司", "action": "完成数据出境风险评估", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": null, "quantitativeUnit": null, "description": "同步前完成了数据出境风险评估并通过合规评审。", "evidenceRef": "segment:17"}
+      ]
+    },
+    {
+      "segmentIndex": 18,
+      "sourceSummary": "权限检查2026年6月完成，禁用5名离职员工账号，核查登录记录未发现异常访问",
+      "expectedFacts": [
+        {"subject": "信息系统权限检查", "action": "完成权限检查并禁用离职账号", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 5, "quantitativeUnit": "个", "description": "信息系统权限检查于2026年6月完成，检查发现并禁用5名离职员工账号，核查离职后登录记录后未发现异常数据访问。", "evidenceRef": "segment:18"}
+      ]
+    },
+    {
+      "segmentIndex": 19,
+      "sourceSummary": "2026年7月成立合规整改工作组，每周例会跟进整改事项",
+      "expectedFacts": [
+        {"subject": "公司", "action": "成立合规整改工作组", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": null, "quantitativeUnit": null, "description": "公司于2026年7月成立合规整改工作组，工作组每周召开例会，跟进各领域合规整改事项。", "evidenceRef": "segment:19"}
+      ]
+    },
+    {
+      "segmentIndex": 20,
+      "sourceSummary": "供应商尽调档案补全进行中，已完成11家，剩余1家预计8月完成",
+      "expectedFacts": [
+        {"subject": "公司", "action": "供应商尽调档案补全进行中", "object": null, "status": "IN_PROGRESS", "behaviorDate": null, "quantitativeData": 11, "quantitativeUnit": "家", "description": "供应商尽调档案补全正在进行，已完成11家一级供应商的尽调档案，剩余1家预计于2026年8月完成。", "evidenceRef": "segment:20"}
+      ]
+    },
+    {
+      "segmentIndex": 21,
+      "sourceSummary": "数据出境风险评估进行中，已完成评估范围70%，预计11月完成",
+      "expectedFacts": [
+        {"subject": "公司", "action": "数据出境风险评估进行中", "object": null, "status": "IN_PROGRESS", "behaviorDate": null, "quantitativeData": 70, "quantitativeUnit": "%", "description": "数据出境风险评估正在进行，已完成评估范围的70%，预计2026年11月完成全部评估。", "evidenceRef": "segment:21"}
+      ]
+    },
+    {
+      "segmentIndex": 22,
+      "sourceSummary": "上半年新增2笔关联交易合计85万元，均履行审批程序并向管理层披露",
+      "expectedFacts": [
+        {"subject": "公司", "action": "新增关联交易", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 2, "quantitativeUnit": "笔", "description": "公司2026年上半年新增2笔关联交易，金额合计85万元，均履行审批程序并向管理层披露。", "evidenceRef": "segment:22", "note": "主数值取笔数；金额并入description"}
+      ]
+    },
+    {
+      "segmentIndex": 23,
+      "sourceSummary": "2025年度经营审计于2026年4月出具无保留意见审计报告",
+      "expectedFacts": [
+        {"subject": "公司", "action": "完成年度经营审计", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": null, "quantitativeUnit": null, "description": "公司2025年度经营审计于2026年4月出具无保留意见审计报告。", "evidenceRef": "segment:23"}
+      ]
+    },
+    {
+      "segmentIndex": 24,
+      "sourceSummary": "投诉台账显示上半年新增投诉23起，全部3个工作日内响应，关闭率100%",
+      "expectedFacts": [
+        {"subject": "客户投诉台账", "action": "新增投诉", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 23, "quantitativeUnit": "起", "description": "客户投诉台账显示2026年上半年新增投诉23起，全部在3个工作日内响应，处理关闭率100%。", "evidenceRef": "segment:24"}
+      ]
+    },
+    {
+      "segmentIndex": 25,
+      "sourceSummary": "上半年完成全员合规培训2次，覆盖187名正式员工，培训记录已归档",
+      "expectedFacts": [
+        {"subject": "公司", "action": "完成全员合规培训", "object": null, "status": "COMPLETED", "behaviorDate": null, "quantitativeData": 2, "quantitativeUnit": "次", "description": "公司2026年上半年完成全员合规培训2次，培训覆盖全部187名正式员工，培训记录已归档。", "evidenceRef": "segment:25"}
+      ]
+    }
+  ]
+}

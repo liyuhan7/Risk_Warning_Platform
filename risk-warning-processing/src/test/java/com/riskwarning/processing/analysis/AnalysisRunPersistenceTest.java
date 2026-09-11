@@ -90,4 +90,57 @@ class AnalysisRunPersistenceTest {
             factory.destroy();
         }
     }
+
+    /** 验证 P1-08 新增的"最近成功运行"解析在真实 SQL 下的排序与状态过滤。 */
+    @Test
+    void resolvesMostRecentSuccessfulRunIgnoringFailedOnes() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setUrl(System.getenv("P1_TEST_DATABASE_URL"));
+        dataSource.setUsername(System.getenv("P1_TEST_DATABASE_USER"));
+        dataSource.setPassword(System.getenv("P1_TEST_DATABASE_PASSWORD"));
+        LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
+        factory.setDataSource(dataSource);
+        factory.setPackagesToScan("com.riskwarning.common.po.analysis");
+        factory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        Properties properties = new Properties();
+        properties.setProperty("hibernate.hbm2ddl.auto", "validate");
+        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQL10Dialect");
+        factory.setJpaProperties(properties);
+        factory.afterPropertiesSet();
+        EntityManagerFactory emf = factory.getObject();
+        EntityManager entityManager = emf.createEntityManager();
+        try {
+            LocalDateTime now = LocalDateTime.of(2026, 9, 5, 12, 0);
+            entityManager.getTransaction().begin();
+            entityManager.createNativeQuery("DELETE FROM t_analysis_run WHERE assessment_id = 4")
+                    .executeUpdate();
+            entityManager.createNativeQuery("INSERT INTO t_assessment_result (id, project_id) VALUES (4, 10) "
+                    + "ON CONFLICT (id) DO NOTHING")
+                    .executeUpdate();
+            AnalysisRunRepository repository = new JpaRepositoryFactory(entityManager)
+                    .getRepository(AnalysisRunRepository.class);
+            AnalysisRun older = AnalysisRun.start(new AnalysisScope(10L, 4L, "success-older"), now);
+            older.succeed(now.plusMinutes(1));
+            repository.saveAndFlush(older);
+            AnalysisRun failed = AnalysisRun.start(new AnalysisScope(10L, 4L, "failed-run"), now.plusMinutes(2));
+            failed.fail(now.plusMinutes(3));
+            repository.saveAndFlush(failed);
+            AnalysisRun newer = AnalysisRun.start(new AnalysisScope(10L, 4L, "success-newer"), now.plusMinutes(4));
+            newer.succeed(now.plusMinutes(5));
+            repository.saveAndFlush(newer);
+            entityManager.getTransaction().commit();
+            entityManager.clear();
+
+            AnalysisRun resolved = repository
+                    .findFirstByAssessmentIdAndStatusOrderByFinishedAtDesc(4L, AnalysisRunStatus.SUCCEEDED)
+                    .orElseThrow(() -> new AssertionError("未解析到最近成功运行"));
+            assertEquals("success-newer", resolved.getAnalysisRunId());
+        } finally {
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            entityManager.close();
+            factory.destroy();
+        }
+    }
 }

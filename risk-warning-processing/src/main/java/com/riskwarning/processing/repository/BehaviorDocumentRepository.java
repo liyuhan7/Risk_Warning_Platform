@@ -4,10 +4,18 @@ import com.riskwarning.common.po.behavior.Behavior;
 
 import java.util.List;
 
-/** Structured Behavior 的 Elasticsearch 写入与清理边界。 */
+/** Structured Behavior 的 Elasticsearch 读写边界。 */
 public interface BehaviorDocumentRepository {
 
     void writeAll(List<Behavior> behaviors);
+
+    /**
+     * 按项目、评估、运行三作用域读取行为，供页面证据回溯与指标计算共用。
+     *
+     * 查询条件由 {@link BehaviorScopeQuery} 唯一构建，不允许退化为项目级读取；
+     * 旧文档缺少评估或运行字段时天然不命中，不回退、不补默认值。
+     */
+    List<Behavior> findByScope(Long projectId, Long assessmentId, String analysisRunId);
 
     /**
      * 删除某运行下指定源文件已落库的行为文档。

@@ -20,6 +20,7 @@ import com.riskwarning.common.utils.RedisUtil;
 import com.riskwarning.common.utils.StringUtils;
 import com.riskwarning.processing.entity.dto.DocumentProcessingResult;
 import com.riskwarning.processing.repository.AssessmentRepository;
+import com.riskwarning.processing.repository.BehaviorScopeQuery;
 import com.riskwarning.processing.repository.IndicatorResultRepository;
 import com.riskwarning.processing.util.behavior.FallbackCalculator;
 import com.riskwarning.processing.util.behavior.QualitativeCalculator;
@@ -861,14 +862,7 @@ public class BehaviorProcessingService {
 
     /** 构建行为作用域的唯一查询条件，避免任一调用方退化为项目级读取。 */
     static Query buildBehaviorScopeQuery(Long projectId, Long assessmentId, String analysisRunId) {
-        if (projectId == null || projectId <= 0 || assessmentId == null || assessmentId <= 0
-                || analysisRunId == null || analysisRunId.trim().isEmpty()) {
-            throw new IllegalArgumentException("Behavior 查询缺少完整分析作用域");
-        }
-        return Query.of(q -> q.bool(b -> b
-                .must(m -> m.term(t -> t.field("projectId").value(projectId)))
-                .must(m -> m.term(t -> t.field("assessmentId").value(assessmentId)))
-                .must(m -> m.term(t -> t.field("analysisRunId").value(analysisRunId)))));
+        return BehaviorScopeQuery.build(projectId, assessmentId, analysisRunId);
     }
 
 

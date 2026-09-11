@@ -1,20 +1,32 @@
 package com.riskwarning.processing.repository;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.DeleteByQueryRequest;
 import co.elastic.clients.elasticsearch.core.DeleteByQueryResponse;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.riskwarning.common.po.behavior.Behavior;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /** 使用 Behavior 稳定 ID 作为 Elasticsearch 文档 _id。 */
+@Slf4j
 @Repository
 public class ElasticsearchBehaviorDocumentRepository implements BehaviorDocumentRepository {
 
     private static final String BEHAVIOR_INDEX = "t_behavior";
+
+    /** 单次作用域查询的返回上限；命中超过时记录告警，不静默截断。 */
+    private static final int MAX_SCOPE_RESULT_SIZE = 10000;
 
     private final ElasticsearchClient elasticsearchClient;
 
@@ -40,6 +52,32 @@ public class ElasticsearchBehaviorDocumentRepository implements BehaviorDocument
                 throw (IllegalStateException) exception;
             }
             throw new IllegalStateException("Structured Behavior 写入 Elasticsearch 失败", exception);
+        }
+    }
+
+    @Override
+    public List<Behavior> findByScope(Long projectId, Long assessmentId, String analysisRunId) {
+        try {
+            SearchResponse<Behavior> response = elasticsearchClient.search(
+                    buildScopeSearchRequest(projectId, assessmentId, analysisRunId), Behavior.class);
+            if (response == null || response.hits() == null || response.hits().hits() == null) {
+                return Collections.emptyList();
+            }
+            if (response.hits().total() != null && response.hits().total().value() > MAX_SCOPE_RESULT_SIZE) {
+                log.warn("[Behavior Query] projectId={}, assessmentId={}, analysisRunId={} 命中 {} 条，"
+                                + "单次查询上限为 {}，结果可能被截断",
+                        projectId, assessmentId, analysisRunId,
+                        response.hits().total().value(), MAX_SCOPE_RESULT_SIZE);
+            }
+            List<Behavior> behaviors = new ArrayList<>();
+            for (Hit<Behavior> hit : response.hits().hits()) {
+                if (hit.source() != null) {
+                    behaviors.add(hit.source());
+                }
+            }
+            return behaviors;
+        } catch (IOException exception) {
+            throw new IllegalStateException("查询 Structured Behavior 失败", exception);
         }
     }
 
@@ -76,6 +114,15 @@ public class ElasticsearchBehaviorDocumentRepository implements BehaviorDocument
                     .document(behavior)));
         }
         return builder.build();
+    }
+
+    static SearchRequest buildScopeSearchRequest(Long projectId, Long assessmentId, String analysisRunId) {
+        Query query = BehaviorScopeQuery.build(projectId, assessmentId, analysisRunId);
+        return SearchRequest.of(builder -> builder
+                .index(BEHAVIOR_INDEX)
+                .size(MAX_SCOPE_RESULT_SIZE)
+                .trackTotalHits(total -> total.enabled(true))
+                .query(query));
     }
 
     static DeleteByQueryRequest buildDeleteRequest(String analysisRunId, Long sourceDocumentId) {

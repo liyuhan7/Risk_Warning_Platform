@@ -15,4 +15,8 @@ public interface AnalysisRunRepository extends JpaRepository<AnalysisRun, String
             String analysisRunId, Long assessmentId, Long projectId);
 
     boolean existsByAssessmentIdAndStatus(Long assessmentId, AnalysisRunStatus status);
+
+    /** 最近一次按指定状态结束的运行；用于解析"当前有效结果"的读取依据。 */
+    Optional<AnalysisRun> findFirstByAssessmentIdAndStatusOrderByFinishedAtDesc(
+            Long assessmentId, AnalysisRunStatus status);
 }

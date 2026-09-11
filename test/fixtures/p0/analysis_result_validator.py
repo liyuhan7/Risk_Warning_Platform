@@ -1,6 +1,6 @@
-"""AnalysisResult 输出校验器。
+﻿"""AnalysisResult 输出校验器。
 
-实现 documents/plan0/baseline/p0-05-core-schemas.md 第 8 节的字段约束与 8.4 交叉校验规则。
+实现 documents/local/plan0/baseline/p0-05-core-schemas.md 第 8 节的字段约束与 8.4 交叉校验规则。
 本模块只做校验，不发起网络请求，可独立单元测试。P3-02 落地 Java 版校验时以本文件为口径基准。
 
 校验分三层，逐层短路：
@@ -375,3 +375,4 @@ def validate(response_text, context):
         )
 
     return result
+

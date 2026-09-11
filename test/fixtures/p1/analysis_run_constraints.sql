@@ -1,4 +1,4 @@
--- 仅在专用空测试数据库执行；fixture 表名与业务一致，不得用于业务数据库。
+﻿-- 仅在专用空测试数据库执行；fixture 表名与业务一致，不得用于业务数据库。
 \set ON_ERROR_STOP on
 CREATE TABLE public.t_assessment_result (id BIGINT PRIMARY KEY, project_id BIGINT NOT NULL);
 INSERT INTO public.t_assessment_result VALUES (1, 10), (2, 10), (3, 20);
@@ -9,10 +9,10 @@ CREATE TABLE public.t_project_file (
     file_path TEXT NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE
 );
-\ir ../../../documents/plan1/migrations/001_analysis_run.sql
-\ir ../../../documents/plan1/migrations/002_project_file_assessment.sql
-\ir ../../../documents/plan1/migrations/003_evidence_chunk.sql
-\ir ../../../documents/plan1/migrations/004_project_file_original_name.sql
+\ir ../../../documents/local/plan1/migrations/001_analysis_run.sql
+\ir ../../../documents/local/plan1/migrations/002_project_file_assessment.sql
+\ir ../../../documents/local/plan1/migrations/003_evidence_chunk.sql
+\ir ../../../documents/local/plan1/migrations/004_project_file_original_name.sql
 
 INSERT INTO public.t_project_file (id, project_id, user_id, assessment_id, file_path, original_file_name)
 VALUES (101, 10, 1, 1, 'assessment-a.pdf', '企业管理制度.pdf'),
@@ -121,3 +121,4 @@ BEGIN
 END $$;
 SELECT analysis_run_id, assessment_id, project_id, status, version FROM public.t_analysis_run
 ORDER BY analysis_run_id;
+

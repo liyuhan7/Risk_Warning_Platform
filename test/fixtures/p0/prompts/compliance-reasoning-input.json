@@ -1,5 +1,5 @@
-{
-  "_comment": "P0-06 固定 Prompt 的固定输入。与 documents/plan0/baseline/p0-05-schema-examples.json 同一案例，便于对照。修改本文件等同于更换测试基线，须同步提升 promptVersion。",
+﻿{
+  "_comment": "P0-06 固定 Prompt 的固定输入。与 documents/local/plan0/baseline/p0-05-schema-examples.json 同一案例，便于对照。修改本文件等同于更换测试基线，须同步提升 promptVersion。",
 
   "caseId": "P0-06-CASE-A",
   "promptVersion": "compliance-reasoning-v1.0",
@@ -57,3 +57,4 @@
     "reason": "第二条法规是干扰项——环境保护税与供应商资质审查无关，若模型把它列入 regulationIds 说明未做适用性判断"
   }
 }
+

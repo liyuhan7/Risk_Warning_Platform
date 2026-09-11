@@ -3,7 +3,7 @@
 
 迁移窗口各步执行后的核对工具：逐索引统计关键字段的非空覆盖数，
 不接受 HTTP 200 作为验证依据，输出实测覆盖值供与基准比对。
-基准（2026-08 实测，见 documents/plan0/baseline/p0-09-field-contract.md）：
+基准（2026-08 实测，见 documents/local/plan0/baseline/p0-09-field-contract.md）：
   t_risk 2596 / t_regulation 4865 / t_indicator 1144 / t_behavior 2146
 迁移后期望：
   向量字段 coverage 与迁移前一致（descriptionVector/nameVector/fullTextVector）

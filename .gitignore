@@ -151,3 +151,4 @@ __pycache__/
 
 risk-warning-bert/classify-service/checkpoints/
 AGENTS.md
+documents/local

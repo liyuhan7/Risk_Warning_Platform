@@ -37,7 +37,7 @@ class StructuredBehaviorAssemblerTest {
         assertEquals(LocalDateTime.of(2025, 11, 30, 0, 0), behavior.getBehaviorDate());
         assertEquals("家", behavior.getQuantitativeUnit());
         assertEquals("model-a", behavior.getExtractionModel());
-        assertEquals("fact-extract-v1.0", behavior.getExtractionPromptVersion());
+        assertEquals("fact-extract-v1.1", behavior.getExtractionPromptVersion());
         assertEquals(createdAt, behavior.getCreatedAt());
     }
 }

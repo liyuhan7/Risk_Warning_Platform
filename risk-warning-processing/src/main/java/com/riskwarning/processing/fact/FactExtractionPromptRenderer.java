@@ -46,7 +46,7 @@ public class FactExtractionPromptRenderer {
 
     private String readTemplate() {
         ClassPathResource resource = new ClassPathResource(
-                "fact-extraction/fact-extraction-v1.0.txt");
+                "fact-extraction/fact-extraction-v1.1.txt");
         try (InputStream input = resource.getInputStream();
              ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[4096];

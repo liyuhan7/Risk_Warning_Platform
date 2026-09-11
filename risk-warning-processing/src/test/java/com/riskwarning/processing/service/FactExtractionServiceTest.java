@@ -41,7 +41,7 @@ class FactExtractionServiceTest {
         assertEquals(2, result.getMetadata().getBatchCount());
         assertEquals(2, result.getMetadata().getProviderCallCount());
         assertEquals("stub-model", result.getMetadata().getModelId());
-        assertEquals("fact-extract-v1.0", result.getMetadata().getPromptVersion());
+        assertEquals("fact-extract-v1.1", result.getMetadata().getPromptVersion());
         assertTrue(result.getFailures().isEmpty());
         assertEquals(Long.valueOf(101L), result.getBehaviors().get(0).getSourceDocumentId());
         assertEquals("1.0", result.getBehaviors().get(0).getSchemaVersion());

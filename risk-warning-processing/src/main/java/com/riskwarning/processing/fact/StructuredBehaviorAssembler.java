@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class StructuredBehaviorAssembler {
 
     public static final String SCHEMA_VERSION = "1.0";
-    public static final String PROMPT_VERSION = "fact-extract-v1.0";
+    public static final String PROMPT_VERSION = "fact-extract-v1.1";
 
     public Behavior assemble(AnalysisScope scope, Long sourceDocumentId, ExtractedFact fact,
                              String modelId, LocalDateTime createdAt) {

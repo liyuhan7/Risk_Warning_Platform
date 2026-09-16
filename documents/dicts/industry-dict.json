@@ -1,0 +1,741 @@
+{
+  "version": "1.0",
+  "status": "draft-pending-scope-mapping-confirmation",
+  "description": "行业代码表：labelToCode/aliasToCode 提供旧值归一，codes 提供 parent 层级；过滤时企业代码沿 parent 展开为标签集合后与 complianceDomain 求交集。",
+  "decisions": {
+    "date": "2026-09-15",
+    "hierarchyClosure": "企业代码沿 parent 闭包展开后与 complianceDomain 求交集",
+    "synonymMerges": "15 组同义归并全部认可",
+    "entityTypeValues": "登记 UNKNOWN，硬过滤不排除",
+    "genericLabel": "「综合类」不进字典，由过滤表达式单独处理（仅含综合类=全行业适用）"
+  },
+  "codes": {
+    "BANKING": {
+      "label": "银行业",
+      "parent": "FINANCE"
+    },
+    "SECURITIES": {
+      "label": "证券业",
+      "parent": "FINANCE"
+    },
+    "CONSULTING": {
+      "label": "咨询服务",
+      "parent": "SERVICES"
+    },
+    "LEGAL_SERVICES": {
+      "label": "法律服务",
+      "parent": "SERVICES"
+    },
+    "INSURANCE": {
+      "label": "保险业",
+      "parent": "FINANCE"
+    },
+    "DATA_SERVICES": {
+      "label": "数据服务",
+      "parent": "SERVICES"
+    },
+    "INTERNET": {
+      "label": "互联网",
+      "parent": "TECH"
+    },
+    "SOFTWARE": {
+      "label": "软件开发",
+      "parent": "TECH"
+    },
+    "LOGISTICS": {
+      "label": "物流仓储",
+      "parent": null
+    },
+    "ENVIRONMENTAL_SERVICES": {
+      "label": "环保服务",
+      "parent": "SERVICES"
+    },
+    "CHEMICALS": {
+      "label": "化工制造",
+      "parent": "MANUFACTURING"
+    },
+    "AUTOMOTIVE": {
+      "label": "汽车制造",
+      "parent": "MANUFACTURING"
+    },
+    "ACCOUNTING": {
+      "label": "会计服务",
+      "parent": "SERVICES"
+    },
+    "ELECTRONICS": {
+      "label": "电子制造",
+      "parent": "MANUFACTURING"
+    },
+    "TRUST": {
+      "label": "信托业",
+      "parent": "FINANCE"
+    },
+    "UTILITIES": {
+      "label": "公共事业",
+      "parent": null
+    },
+    "PHARMA": {
+      "label": "医药制造",
+      "parent": "MANUFACTURING"
+    },
+    "MACHINERY": {
+      "label": "机械制造",
+      "parent": "MANUFACTURING"
+    },
+    "WHOLESALE": {
+      "label": "批发业",
+      "parent": null
+    },
+    "CULTURE_MEDIA": {
+      "label": "文化传媒",
+      "parent": null
+    },
+    "CLOUD": {
+      "label": "云计算",
+      "parent": "TECH"
+    },
+    "ECOMMERCE": {
+      "label": "电子商务",
+      "parent": null
+    },
+    "ADVERTISING": {
+      "label": "广告营销",
+      "parent": null
+    },
+    "WATER_TRANSPORT": {
+      "label": "水路运输",
+      "parent": "TRANSPORTATION"
+    },
+    "RETAIL": {
+      "label": "零售业",
+      "parent": null
+    },
+    "FOOD": {
+      "label": "食品制造",
+      "parent": "MANUFACTURING"
+    },
+    "AI": {
+      "label": "人工智能",
+      "parent": "TECH"
+    },
+    "ROAD_TRANSPORT": {
+      "label": "公路运输",
+      "parent": "TRANSPORTATION"
+    },
+    "STEEL": {
+      "label": "钢铁制造",
+      "parent": "MANUFACTURING"
+    },
+    "FUND": {
+      "label": "基金业",
+      "parent": "FINANCE"
+    },
+    "CONSTRUCTION": {
+      "label": "建筑工程",
+      "parent": null
+    },
+    "FINANCIAL_LEASING": {
+      "label": "金融租赁",
+      "parent": "FINANCE"
+    },
+    "PROPERTY_MANAGEMENT": {
+      "label": "物业管理",
+      "parent": null
+    },
+    "POWER": {
+      "label": "电力",
+      "parent": "ENERGY"
+    },
+    "PUBLISHING": {
+      "label": "出版印刷",
+      "parent": null
+    },
+    "TEXTILE": {
+      "label": "纺织制造",
+      "parent": "MANUFACTURING"
+    },
+    "COAL": {
+      "label": "煤炭",
+      "parent": "ENERGY"
+    },
+    "BUILDING_MATERIALS": {
+      "label": "建材制造",
+      "parent": "MANUFACTURING"
+    },
+    "OIL_GAS": {
+      "label": "石油天然气",
+      "parent": "ENERGY"
+    },
+    "MEDICAL_DEVICES": {
+      "label": "医疗器械",
+      "parent": "MANUFACTURING"
+    },
+    "FUTURES": {
+      "label": "期货业",
+      "parent": "FINANCE"
+    },
+    "AIR_TRANSPORT": {
+      "label": "航空运输",
+      "parent": "TRANSPORTATION"
+    },
+    "MEDICAL_SERVICES": {
+      "label": "医疗服务",
+      "parent": "SERVICES"
+    },
+    "NONFERROUS_METALS": {
+      "label": "有色金属",
+      "parent": null
+    },
+    "NUCLEAR": {
+      "label": "核能",
+      "parent": "ENERGY"
+    },
+    "CHAIN_OPERATIONS": {
+      "label": "连锁经营",
+      "parent": null
+    },
+    "TELECOM": {
+      "label": "电信运营",
+      "parent": "TECH"
+    },
+    "HEALTH_MANAGEMENT": {
+      "label": "健康管理",
+      "parent": "SERVICES"
+    },
+    "REAL_ESTATE": {
+      "label": "房地产",
+      "parent": null
+    },
+    "DECORATION": {
+      "label": "装饰装修",
+      "parent": null
+    },
+    "AGRICULTURE": {
+      "label": "农业",
+      "parent": null
+    },
+    "AGRI_PROCESSING": {
+      "label": "农产品加工",
+      "parent": "AGRICULTURE"
+    },
+    "FINANCE": {
+      "label": "金融业",
+      "parent": null
+    },
+    "MANUFACTURING": {
+      "label": "制造业",
+      "parent": null
+    },
+    "SERVICES": {
+      "label": "服务业",
+      "parent": null
+    },
+    "TECH": {
+      "label": "科技行业",
+      "parent": null
+    },
+    "TRANSPORTATION": {
+      "label": "交通运输",
+      "parent": null
+    },
+    "ENERGY": {
+      "label": "能源",
+      "parent": null
+    },
+    "PAYMENT": {
+      "label": "支付服务",
+      "parent": "FINANCE"
+    },
+    "DAILY_CHEMICALS": {
+      "label": "日化",
+      "parent": null
+    },
+    "MINING": {
+      "label": "采矿业",
+      "parent": null
+    },
+    "SEMICONDUCTOR": {
+      "label": "半导体",
+      "parent": "MANUFACTURING"
+    },
+    "APPLIANCES": {
+      "label": "家用电器",
+      "parent": "MANUFACTURING"
+    },
+    "APPAREL": {
+      "label": "服装",
+      "parent": "MANUFACTURING"
+    },
+    "PAPERMAKING": {
+      "label": "造纸",
+      "parent": "MANUFACTURING"
+    },
+    "EXPRESS": {
+      "label": "快递业",
+      "parent": "TRANSPORTATION"
+    },
+    "RAIL_TRANSPORT": {
+      "label": "铁路运输",
+      "parent": "TRANSPORTATION"
+    },
+    "TRADE": {
+      "label": "贸易",
+      "parent": null
+    },
+    "IMPORT_EXPORT_TRADE": {
+      "label": "进出口贸易",
+      "parent": null
+    },
+    "INTERNATIONAL_ENGINEERING": {
+      "label": "国际工程",
+      "parent": "CONSTRUCTION"
+    },
+    "CATERING": {
+      "label": "餐饮服务",
+      "parent": "SERVICES"
+    },
+    "EDUCATION_SERVICES": {
+      "label": "教育服务",
+      "parent": "SERVICES"
+    },
+    "HOTELS": {
+      "label": "酒店业",
+      "parent": "SERVICES"
+    },
+    "ACCOMMODATION": {
+      "label": "住宿业",
+      "parent": "SERVICES"
+    },
+    "TOURISM": {
+      "label": "旅游业",
+      "parent": "SERVICES"
+    },
+    "ENTERTAINMENT": {
+      "label": "娱乐业",
+      "parent": "SERVICES"
+    },
+    "AUCTION": {
+      "label": "拍卖业",
+      "parent": "SERVICES"
+    },
+    "SPORTS": {
+      "label": "体育",
+      "parent": "SERVICES"
+    },
+    "HEALTH_SUPPLEMENTS": {
+      "label": "保健品",
+      "parent": "PHARMA"
+    },
+    "BIOTECH": {
+      "label": "生物技术",
+      "parent": "PHARMA"
+    },
+    "TELECOM_INFRA": {
+      "label": "通信",
+      "parent": "TECH"
+    },
+    "TELECOM_EQUIPMENT": {
+      "label": "通信设备",
+      "parent": "MANUFACTURING"
+    },
+    "SOCIAL_MEDIA": {
+      "label": "社交媒体",
+      "parent": "INTERNET"
+    },
+    "MOBILE_APPS": {
+      "label": "移动应用",
+      "parent": "INTERNET"
+    },
+    "GAMING": {
+      "label": "游戏产业",
+      "parent": "INTERNET"
+    },
+    "INTERNET_FINANCE": {
+      "label": "互联网金融",
+      "parent": "FINANCE"
+    },
+    "INVESTMENT_SERVICES": {
+      "label": "投资服务",
+      "parent": "FINANCE"
+    },
+    "INVESTMENT": {
+      "label": "投资",
+      "parent": "FINANCE"
+    },
+    "ASSET_MANAGEMENT": {
+      "label": "资产管理",
+      "parent": "FINANCE"
+    },
+    "AUTO_FINANCE": {
+      "label": "汽车金融",
+      "parent": "FINANCE"
+    },
+    "WEALTH_MANAGEMENT_SUB": {
+      "label": "理财子公司",
+      "parent": "FINANCE"
+    },
+    "GUARANTEE": {
+      "label": "融资担保",
+      "parent": "FINANCE"
+    },
+    "CREDIT_REPORTING": {
+      "label": "征信业",
+      "parent": "FINANCE"
+    },
+    "AUTO_PARTS": {
+      "label": "汽车零部件",
+      "parent": "AUTOMOTIVE"
+    },
+    "EV_MANUFACTURING": {
+      "label": "电动车制造",
+      "parent": "AUTOMOTIVE"
+    },
+    "RUBBER_PRODUCTS": {
+      "label": "橡胶制品",
+      "parent": "MANUFACTURING"
+    },
+    "LIGHT_INDUSTRY": {
+      "label": "轻工制造",
+      "parent": "MANUFACTURING"
+    },
+    "INSTRUMENTS": {
+      "label": "仪器仪表",
+      "parent": "MANUFACTURING"
+    },
+    "PRECISION_INSTRUMENTS": {
+      "label": "精密仪器",
+      "parent": "MANUFACTURING"
+    },
+    "ELECTROMECHANICAL": {
+      "label": "机电产品",
+      "parent": "MANUFACTURING"
+    },
+    "ELECTROPLATING": {
+      "label": "电镀",
+      "parent": "MANUFACTURING"
+    },
+    "AEROSPACE": {
+      "label": "航空航天",
+      "parent": "MANUFACTURING"
+    },
+    "DEFENSE": {
+      "label": "军工",
+      "parent": "MANUFACTURING"
+    },
+    "CEMENT": {
+      "label": "水泥制造",
+      "parent": "BUILDING_MATERIALS"
+    },
+    "TOYS": {
+      "label": "玩具制造",
+      "parent": "MANUFACTURING"
+    },
+    "TOBACCO": {
+      "label": "烟草制品",
+      "parent": "MANUFACTURING"
+    },
+    "RAW_MATERIALS": {
+      "label": "原材料",
+      "parent": null
+    },
+    "CONSUMER_GOODS": {
+      "label": "消费品",
+      "parent": null
+    },
+    "INFRASTRUCTURE": {
+      "label": "基础设施",
+      "parent": "CONSTRUCTION"
+    },
+    "MUNICIPAL_PUBLIC": {
+      "label": "市政公用",
+      "parent": "UTILITIES"
+    },
+    "CIVIL_EXPLOSIVES": {
+      "label": "民爆行业",
+      "parent": null
+    },
+    "FIREWORKS": {
+      "label": "烟花爆竹",
+      "parent": null
+    },
+    "FORESTRY": {
+      "label": "林业",
+      "parent": "AGRICULTURE"
+    },
+    "FISHERIES": {
+      "label": "渔业",
+      "parent": "AGRICULTURE"
+    },
+    "HUSBANDRY": {
+      "label": "牧业",
+      "parent": "AGRICULTURE"
+    },
+    "LIVESTOCK": {
+      "label": "畜牧业",
+      "parent": "AGRICULTURE"
+    },
+    "AQUACULTURE": {
+      "label": "养殖业",
+      "parent": "AGRICULTURE"
+    },
+    "SLAUGHTERING": {
+      "label": "屠宰业",
+      "parent": "AGRICULTURE"
+    },
+    "GRAIN": {
+      "label": "粮食",
+      "parent": "AGRICULTURE"
+    },
+    "NEW_ENERGY": {
+      "label": "新能源",
+      "parent": "ENERGY"
+    },
+    "SOLAR": {
+      "label": "光伏",
+      "parent": "ENERGY"
+    },
+    "HYDROPOWER": {
+      "label": "水电",
+      "parent": "ENERGY"
+    },
+    "RECYCLING": {
+      "label": "再生资源",
+      "parent": "ENERGY"
+    },
+    "HR_SERVICES": {
+      "label": "人力资源",
+      "parent": null
+    },
+    "LEASING_BUSINESS_SERVICES": {
+      "label": "租赁和商务服务业",
+      "parent": null
+    },
+    "METAL_SMELTING": {
+      "label": "金属冶炼",
+      "parent": null
+    }
+  },
+  "labelToCode": {
+    "银行业": "BANKING",
+    "证券业": "SECURITIES",
+    "咨询服务": "CONSULTING",
+    "法律服务": "LEGAL_SERVICES",
+    "保险业": "INSURANCE",
+    "数据服务": "DATA_SERVICES",
+    "互联网": "INTERNET",
+    "软件开发": "SOFTWARE",
+    "物流仓储": "LOGISTICS",
+    "环保服务": "ENVIRONMENTAL_SERVICES",
+    "化工制造": "CHEMICALS",
+    "汽车制造": "AUTOMOTIVE",
+    "会计服务": "ACCOUNTING",
+    "电子制造": "ELECTRONICS",
+    "信托业": "TRUST",
+    "公共事业": "UTILITIES",
+    "医药制造": "PHARMA",
+    "机械制造": "MACHINERY",
+    "批发业": "WHOLESALE",
+    "文化传媒": "CULTURE_MEDIA",
+    "云计算": "CLOUD",
+    "电子商务": "ECOMMERCE",
+    "广告营销": "ADVERTISING",
+    "水路运输": "WATER_TRANSPORT",
+    "零售业": "RETAIL",
+    "食品制造": "FOOD",
+    "人工智能": "AI",
+    "公路运输": "ROAD_TRANSPORT",
+    "钢铁制造": "STEEL",
+    "基金业": "FUND",
+    "建筑工程": "CONSTRUCTION",
+    "金融租赁": "FINANCIAL_LEASING",
+    "物业管理": "PROPERTY_MANAGEMENT",
+    "电力": "POWER",
+    "出版印刷": "PUBLISHING",
+    "纺织制造": "TEXTILE",
+    "煤炭": "COAL",
+    "建材制造": "BUILDING_MATERIALS",
+    "石油天然气": "OIL_GAS",
+    "医疗器械": "MEDICAL_DEVICES",
+    "期货业": "FUTURES",
+    "航空运输": "AIR_TRANSPORT",
+    "医疗服务": "MEDICAL_SERVICES",
+    "有色金属": "NONFERROUS_METALS",
+    "核能": "NUCLEAR",
+    "连锁经营": "CHAIN_OPERATIONS",
+    "电信运营": "TELECOM",
+    "健康管理": "HEALTH_MANAGEMENT",
+    "房地产": "REAL_ESTATE",
+    "装饰装修": "DECORATION",
+    "农业": "AGRICULTURE",
+    "农产品加工": "AGRI_PROCESSING",
+    "金融业": "FINANCE",
+    "制造业": "MANUFACTURING",
+    "服务业": "SERVICES",
+    "科技行业": "TECH",
+    "交通运输": "TRANSPORTATION",
+    "能源": "ENERGY",
+    "支付服务": "PAYMENT",
+    "日化": "DAILY_CHEMICALS",
+    "采矿业": "MINING",
+    "半导体": "SEMICONDUCTOR",
+    "家用电器": "APPLIANCES",
+    "服装": "APPAREL",
+    "造纸": "PAPERMAKING",
+    "快递业": "EXPRESS",
+    "铁路运输": "RAIL_TRANSPORT",
+    "贸易": "TRADE",
+    "进出口贸易": "IMPORT_EXPORT_TRADE",
+    "国际工程": "INTERNATIONAL_ENGINEERING",
+    "餐饮服务": "CATERING",
+    "教育服务": "EDUCATION_SERVICES",
+    "酒店业": "HOTELS",
+    "住宿业": "ACCOMMODATION",
+    "旅游业": "TOURISM",
+    "娱乐业": "ENTERTAINMENT",
+    "拍卖业": "AUCTION",
+    "体育": "SPORTS",
+    "保健品": "HEALTH_SUPPLEMENTS",
+    "生物技术": "BIOTECH",
+    "通信": "TELECOM_INFRA",
+    "通信设备": "TELECOM_EQUIPMENT",
+    "社交媒体": "SOCIAL_MEDIA",
+    "移动应用": "MOBILE_APPS",
+    "游戏产业": "GAMING",
+    "互联网金融": "INTERNET_FINANCE",
+    "投资服务": "INVESTMENT_SERVICES",
+    "投资": "INVESTMENT",
+    "资产管理": "ASSET_MANAGEMENT",
+    "汽车金融": "AUTO_FINANCE",
+    "理财子公司": "WEALTH_MANAGEMENT_SUB",
+    "融资担保": "GUARANTEE",
+    "征信业": "CREDIT_REPORTING",
+    "汽车零部件": "AUTO_PARTS",
+    "电动车制造": "EV_MANUFACTURING",
+    "橡胶制品": "RUBBER_PRODUCTS",
+    "轻工制造": "LIGHT_INDUSTRY",
+    "仪器仪表": "INSTRUMENTS",
+    "精密仪器": "PRECISION_INSTRUMENTS",
+    "机电产品": "ELECTROMECHANICAL",
+    "电镀": "ELECTROPLATING",
+    "航空航天": "AEROSPACE",
+    "军工": "DEFENSE",
+    "水泥制造": "CEMENT",
+    "玩具制造": "TOYS",
+    "烟草制品": "TOBACCO",
+    "原材料": "RAW_MATERIALS",
+    "消费品": "CONSUMER_GOODS",
+    "基础设施": "INFRASTRUCTURE",
+    "市政公用": "MUNICIPAL_PUBLIC",
+    "民爆行业": "CIVIL_EXPLOSIVES",
+    "烟花爆竹": "FIREWORKS",
+    "林业": "FORESTRY",
+    "渔业": "FISHERIES",
+    "牧业": "HUSBANDRY",
+    "畜牧业": "LIVESTOCK",
+    "养殖业": "AQUACULTURE",
+    "屠宰业": "SLAUGHTERING",
+    "粮食": "GRAIN",
+    "新能源": "NEW_ENERGY",
+    "光伏": "SOLAR",
+    "水电": "HYDROPOWER",
+    "再生资源": "RECYCLING",
+    "人力资源": "HR_SERVICES",
+    "租赁和商务服务业": "LEASING_BUSINESS_SERVICES",
+    "金属冶炼": "METAL_SMELTING"
+  },
+  "aliasToCode": {
+    "银行": "BANKING",
+    "房地产业": "REAL_ESTATE",
+    "烟草": "TOBACCO",
+    "烟草行业": "TOBACCO",
+    "光伏产业": "SOLAR",
+    "支付机构": "PAYMENT",
+    "家电制造": "APPLIANCES",
+    "玩具": "TOYS",
+    "印刷业": "PUBLISHING",
+    "矿业": "MINING",
+    "投资银行": "SECURITIES",
+    "人力资源服务": "HR_SERVICES",
+    "科技": "TECH",
+    "高科技": "TECH",
+    "高新技术": "TECH",
+    "日化行业": "DAILY_CHEMICALS"
+  },
+  "unknownValues": [
+    {
+      "value": "上市公司",
+      "reason": "资本市场属性，非行业",
+      "occurrences": 17
+    },
+    {
+      "value": "国有企业",
+      "reason": "所有制属性，非行业",
+      "occurrences": 6
+    },
+    {
+      "value": "外商投资",
+      "reason": "资本来源属性，非行业",
+      "occurrences": 2
+    },
+    {
+      "value": "政府采购",
+      "reason": "采购场景，非行业",
+      "occurrences": 4
+    },
+    {
+      "value": "政府部门",
+      "reason": "主体类型，非行业",
+      "occurrences": 1
+    },
+    {
+      "value": "非营利组织",
+      "reason": "主体类型，非行业",
+      "occurrences": 1
+    },
+    {
+      "value": "社会组织",
+      "reason": "主体类型，非行业",
+      "occurrences": 1
+    },
+    {
+      "value": "科研机构",
+      "reason": "主体类型，非行业",
+      "occurrences": 1
+    },
+    {
+      "value": "研发机构",
+      "reason": "主体类型，非行业",
+      "occurrences": 1
+    },
+    {
+      "value": "劳务派遣",
+      "reason": "用工模式，非行业",
+      "occurrences": 1
+    },
+    {
+      "value": "直销",
+      "reason": "销售模式，非行业",
+      "occurrences": 1
+    },
+    {
+      "value": "跨国企业",
+      "reason": "经营布局属性，非行业",
+      "occurrences": 12
+    },
+    {
+      "value": "集团企业",
+      "reason": "组织形态，非行业",
+      "occurrences": 1
+    },
+    {
+      "value": "新三板",
+      "reason": "挂牌市场属性，非行业",
+      "occurrences": 1
+    },
+    {
+      "value": "室外作业",
+      "reason": "作业环境属性，非行业",
+      "occurrences": 1
+    }
+  ]
+}

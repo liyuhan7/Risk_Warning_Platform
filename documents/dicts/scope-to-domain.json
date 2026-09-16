@@ -1,0 +1,61 @@
+{
+  "version": "1.0",
+  "status": "confirmed",
+  "createdAt": "2026-09-15",
+  "confirmedAt": "2026-09-15",
+  "confirmedBy": "用户（对话确认，指令「采纳草案」）",
+  "description": "评估范围(t_project.industry) → 合规领域(t_indicator/t_regulation.dimension) 映射。目标域限于 6 个实测 dimension 值。每条已确认映射均记录确认人与日期；未确认的枚举值显式登记待确认，不得由代码推断补齐。",
+  "domainVocabulary": [
+    "企业国际合作风险",
+    "企业信用风险",
+    "劳务合规风险",
+    "企业关联方风险",
+    "供应链风险",
+    "产品合规风险"
+  ],
+  "scopeToDomains": {
+    "供应链管理": {
+      "domains": ["供应链风险", "企业信用风险"],
+      "confirmedBy": "用户",
+      "confirmedAt": "2026-09-15",
+      "note": "评估范围名称与领域字面直接对应；供应链行为同时产生交易对手信用风险，纳入企业信用风险"
+    },
+    "跨境交易与支付": {
+      "domains": ["企业国际合作风险", "企业信用风险", "企业关联方风险"],
+      "confirmedBy": "用户",
+      "confirmedAt": "2026-09-15",
+      "note": "P0 三案例（CASE-001/002/003）评估范围；金标准覆盖多领域，字面映射不完整，集合以消融数据与业务复核为准"
+    },
+    "MARKETING": {
+      "domains": [],
+      "status": "待确认",
+      "note": "枚举中尚未使用；按用户决策暂不映射，保持登记，不得由代码推断"
+    },
+    "HR": {
+      "domains": [],
+      "status": "待确认",
+      "note": "枚举中尚未使用；按用户决策暂不映射，保持登记"
+    },
+    "DATA_PRIVACY": {
+      "domains": [],
+      "status": "待确认",
+      "note": "枚举中尚未使用；按用户决策暂不映射，保持登记"
+    },
+    "ANTI_TRUST": {
+      "domains": [],
+      "status": "待确认",
+      "note": "枚举中尚未使用；按用户决策暂不映射，保持登记"
+    },
+    "IP": {
+      "domains": [],
+      "status": "待确认",
+      "note": "枚举中尚未使用；按用户决策暂不映射，保持登记"
+    },
+    "FINANCE_TAX": {
+      "domains": [],
+      "status": "待确认",
+      "note": "枚举中尚未使用；按用户决策暂不映射，保持登记"
+    }
+  },
+  "usageNote": "2026-09-15 P2-07 离线消融结论：行业/地域硬过滤不启用（Gold 留存率过低，见 documents/plan2/data/d07_filter_retention_ablation.json）；本映射仅服务评估配置展示与后续软过滤设计，不用于硬排除。数据实测 PG 中实际入库的评估范围标签为「供应链管理」「跨境交易与支付」，其余枚举值未见存储实例。"
+}

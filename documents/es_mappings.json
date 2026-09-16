@@ -189,6 +189,7 @@
         "tags": { "type": "keyword" },
         "region": { "type": "keyword" },
         "applicableSubject": { "type": "keyword" },
+        "regionCodes": { "type": "keyword" },
         "fullText": {
           "type": "text",
           "analyzer": "standard"

@@ -2,7 +2,10 @@
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    build:
+      context: ./elasticsearch
+      dockerfile: Dockerfile
+    image: risk-warning-elasticsearch:8.11.0
     container_name: elasticsearch
     environment:
       - node.name=elasticsearch

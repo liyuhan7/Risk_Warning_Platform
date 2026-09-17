@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -71,10 +72,12 @@ public class AssessmentServiceImpl implements AssessmentService {
             double calculatedScore = ir.getCalculatedScore().doubleValue();
             double maxScore = ir.getMaxPossibleScore().doubleValue() == 0.0 ? calculatedScore : ir.getMaxPossibleScore().doubleValue();
             totalScore += calculatedScore;
+            boolean mockFixture = "p2_mock_fixture_v1".equals(ir.getUsedCalculationRuleType());
             double scoreRatio = calculatedScore / maxScore;
-            if(scoreRatio < THRESHOLD_RATIO) {
+            boolean triggered = mockFixture ? Boolean.TRUE.equals(ir.getRiskTriggered()) : scoreRatio < THRESHOLD_RATIO;
+            if(triggered) {
                 totalRiskCount++;
-                RiskLevelEnum riskLevelEnum = RiskLevelEnum.getByScoreRatio(scoreRatio);
+                RiskLevelEnum riskLevelEnum = mockFixture ? fixtureRiskLevel(ir) : RiskLevelEnum.getByScoreRatio(scoreRatio);
                 lowRiskCount += riskLevelEnum == RiskLevelEnum.LOW_RISK ? 1 : 0;
                 mediumRiskCount += riskLevelEnum == RiskLevelEnum.MEDIUM_RISK ? 1 : 0;
                 highRiskCount += riskLevelEnum == RiskLevelEnum.HIGH_RISK ? 1 : 0;
@@ -82,6 +85,9 @@ public class AssessmentServiceImpl implements AssessmentService {
                 ir.setRiskStatus(IndicatorRiskStatus.EVALUATED);
                 Risk risk = buildRisk(projectId, assessmentId, analysisRunId, ir, riskLevelEnum);
                 risks.add(risk);
+            } else if (mockFixture) {
+                ir.setRiskTriggered(false);
+                ir.setRiskStatus(IndicatorRiskStatus.EVALUATED);
             }
         }
 
@@ -157,6 +163,19 @@ public class AssessmentServiceImpl implements AssessmentService {
                 .relatedIndicators(indicatorResult.getCalculationDetails().getRelatedIndicators())
                 .createdAt(LocalDateTime.now())
                 .build();
+    }
+
+    /** P2 固定规则已在 processing 决策，Report 只读取结果，禁止按统一阈值重算。 */
+    static RiskLevelEnum fixtureRiskLevel(IndicatorResult indicatorResult) {
+        if (indicatorResult.getCalculationDetails() == null
+                || indicatorResult.getCalculationDetails().getTraces() == null) {
+            throw new IllegalStateException("P2 指标结果缺少规则追踪");
+        }
+        return indicatorResult.getCalculationDetails().getTraces().stream()
+                .filter(trace -> trace.getRuleEvaluation() != null
+                        && Boolean.TRUE.equals(trace.getRuleEvaluation().getRiskTriggered()))
+                .map(trace -> trace.getRuleEvaluation().getRiskLevel()).filter(Objects::nonNull)
+                .findFirst().orElseThrow(() -> new IllegalStateException("P2 风险缺少固定 riskLevel"));
     }
 
     static String stableRiskId(String analysisRunId, Long assessmentId, String indicatorEsId, String name) {

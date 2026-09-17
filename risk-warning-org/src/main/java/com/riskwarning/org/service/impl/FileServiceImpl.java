@@ -113,16 +113,25 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void deleteTempFile(Long projectId, String uploadId) {
+        String uploadInfoKey = String.format(RedisKey.REDIS_KEY_FILE_UPLOAD_INFO, projectId);
+        String chunksKey = String.format(RedisKey.REDIS_KEY_UPLOAD_CHUNKS, uploadId);
         try {
             // 删除Redis缓存
             String redisFileKey = String.format(RedisKey.REDIS_KEY_FILE, projectId);
-            UploadFileDto uploadFileDto = (UploadFileDto) redisUtil.hget(String.format(RedisKey.REDIS_KEY_FILE_UPLOAD_INFO, projectId), uploadId);
-            if(!redisUtil.sHasKey(redisFileKey, uploadId) || uploadFileDto == null){
+            UploadFileDto uploadFileDto = (UploadFileDto) redisUtil.hget(uploadInfoKey, uploadId);
+            if (uploadFileDto == null || uploadFileDto.getFileHash() == null
+                    || uploadFileDto.getFileHash().trim().isEmpty()) {
                 throw new BusinessException("上传任务不存在或已过期");
             }
-            redisUtil.setRemove(redisFileKey, uploadFileDto.getFileHash());
-            redisUtil.hdel(String.format(RedisKey.REDIS_KEY_FILE_UPLOAD_INFO, projectId), uploadId);
+            // file:hash 集合保存的是 fileHash，不是上传任务的 uploadId。
+            // Set 可能先于上传元数据过期，元数据仍存在时也应完成幂等清理。
+            if (redisUtil.sHasKey(redisFileKey, uploadFileDto.getFileHash())) {
+                redisUtil.setRemove(redisFileKey, uploadFileDto.getFileHash());
+            }
+            redisUtil.hdel(uploadInfoKey, uploadId);
         } finally {
+            // 分片索引与本地分片目录都属于一次上传任务，失败或重复删除也必须清理。
+            redisUtil.del(chunksKey);
             FileUtils.delDirectory(Constants.getTempFileDirPath(projectId, uploadId));
         }
     }

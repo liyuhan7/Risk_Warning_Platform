@@ -144,6 +144,32 @@ COMMENT ON COLUMN public.t_assessment_result.overall_score IS '综合得分';
 COMMENT ON COLUMN public.t_assessment_result.details IS '存储评估的详细数据，如各维度得分、风险列表等';
 COMMENT ON COLUMN public.t_assessment_result.status IS '评估状态';
 
+CREATE UNIQUE INDEX IF NOT EXISTS uq_assessment_id_project
+ON public.t_assessment_result(id, project_id);
+
+-- 独立分析运行（P1/P2）
+CREATE TABLE IF NOT EXISTS public.t_analysis_run (
+    analysis_run_id VARCHAR(64) PRIMARY KEY,
+    assessment_id BIGINT NOT NULL,
+    project_id BIGINT NOT NULL,
+    status VARCHAR(32) NOT NULL CONSTRAINT ck_analysis_run_status CHECK (
+        status IN ('RUNNING', 'SUCCEEDED', 'COMPLETED_WITHOUT_DECISION', 'FAILED')),
+    started_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    finished_at TIMESTAMP WITHOUT TIME ZONE,
+    version BIGINT NOT NULL DEFAULT 0,
+    CONSTRAINT fk_analysis_run_assessment FOREIGN KEY (assessment_id, project_id)
+        REFERENCES public.t_assessment_result (id, project_id),
+    CONSTRAINT ck_analysis_run_time CHECK (
+        (status = 'RUNNING' AND finished_at IS NULL)
+        OR (status IN ('SUCCEEDED', 'COMPLETED_WITHOUT_DECISION', 'FAILED')
+            AND finished_at IS NOT NULL AND finished_at >= started_at))
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_analysis_run_scope
+ON public.t_analysis_run(analysis_run_id, assessment_id, project_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_analysis_run_assessment
+ON public.t_analysis_run(analysis_run_id, assessment_id);
+
 
 
 
@@ -197,6 +223,74 @@ COMMENT ON COLUMN public.t_indicator_result.used_calculation_rule_type IS '使�
 COMMENT ON COLUMN public.t_indicator_result.calculation_details IS '计算详情，包含具体规则和中间过程';
 COMMENT ON COLUMN public.t_indicator_result.matched_behaviors_ids IS '匹配到的行为数据ES ID列表';
 COMMENT ON COLUMN public.t_indicator_result.risk_triggered IS '是否触发了风险规则';
+
+-- P2 合规分析权威结果
+CREATE TABLE IF NOT EXISTS public.t_analysis_result (
+    id VARCHAR(64) PRIMARY KEY,
+    schema_version VARCHAR(8) NOT NULL CHECK (schema_version = '1.0'),
+    analysis_run_id VARCHAR(64) NOT NULL REFERENCES public.t_analysis_run(analysis_run_id),
+    assessment_id BIGINT NOT NULL REFERENCES public.t_assessment_result(id) ON DELETE CASCADE,
+    behavior_id VARCHAR(128) NOT NULL,
+    evidence_ids JSONB NOT NULL CHECK (jsonb_typeof(evidence_ids) = 'array'),
+    indicator_id VARCHAR(128) NOT NULL,
+    regulation_ids JSONB CHECK (regulation_ids IS NULL OR jsonb_typeof(regulation_ids) = 'array'),
+    applicable VARCHAR(32) NOT NULL CHECK (applicable IN ('APPLICABLE', 'NOT_APPLICABLE', 'UNKNOWN')),
+    requirement TEXT,
+    enterprise_fact TEXT NOT NULL,
+    compliance_status VARCHAR(32) NOT NULL CHECK (
+        compliance_status IN ('COMPLIANT', 'NON_COMPLIANT', 'INSUFFICIENT_EVIDENCE', 'NEEDS_REVIEW')),
+    gap_type VARCHAR(32) CHECK (gap_type IS NULL OR gap_type IN (
+        'MISSING_ACTION', 'PROHIBITED_ACTION', 'QUANTITATIVE_SHORTFALL',
+        'QUANTITATIVE_EXCESS', 'DOCUMENTATION_GAP')),
+    gap_value DOUBLE PRECISION,
+    gap_unit TEXT,
+    confidence DOUBLE PRECISION NOT NULL CHECK (confidence BETWEEN 0 AND 1),
+    reasoning TEXT NOT NULL,
+    model_version TEXT NOT NULL,
+    prompt_version TEXT NOT NULL,
+    analyzed_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT uq_analysis_result_run_behavior_indicator UNIQUE (analysis_run_id, behavior_id, indicator_id),
+    CONSTRAINT fk_analysis_result_run_scope FOREIGN KEY (analysis_run_id, assessment_id)
+        REFERENCES public.t_analysis_run(analysis_run_id, assessment_id),
+    CONSTRAINT ck_analysis_result_gap CHECK (
+        (compliance_status <> 'NON_COMPLIANT' OR gap_type IS NOT NULL)
+        AND (gap_value IS NULL OR gap_unit IS NOT NULL))
+);
+
+-- P2 检索与固定分析逐 Behavior 审计
+CREATE TABLE IF NOT EXISTS public.t_retrieval_audit (
+    id BIGSERIAL PRIMARY KEY,
+    project_id BIGINT NOT NULL,
+    assessment_id BIGINT NOT NULL REFERENCES public.t_assessment_result(id) ON DELETE CASCADE,
+    analysis_run_id VARCHAR(64) NOT NULL REFERENCES public.t_analysis_run(analysis_run_id),
+    behavior_id VARCHAR(128) NOT NULL,
+    query_text TEXT NOT NULL,
+    query_template_version TEXT NOT NULL,
+    filter_version TEXT NOT NULL,
+    filter_enabled BOOLEAN NOT NULL,
+    filter_applied BOOLEAN NOT NULL,
+    filter_expression TEXT NOT NULL,
+    embedding_model TEXT,
+    embedding_version TEXT,
+    retrieval_status VARCHAR(32) NOT NULL CHECK (
+        retrieval_status IN ('SUCCESS', 'NO_CANDIDATES', 'FAILED')),
+    analysis_status VARCHAR(32) NOT NULL CHECK (
+        analysis_status IN ('NOT_ATTEMPTED', 'SUCCESS', 'RECALL_GAP', 'INSUFFICIENT_EVIDENCE', 'NOT_DEMO_INPUT')),
+    candidates JSONB CHECK (candidates IS NULL OR jsonb_typeof(candidates) = 'array'),
+    error_code TEXT,
+    error_type TEXT,
+    error_message VARCHAR(1000),
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT uq_retrieval_audit_run_behavior UNIQUE (analysis_run_id, behavior_id),
+    CONSTRAINT fk_retrieval_audit_run_scope FOREIGN KEY (analysis_run_id, assessment_id, project_id)
+        REFERENCES public.t_analysis_run(analysis_run_id, assessment_id, project_id)
+);
+
+CREATE INDEX IF NOT EXISTS ix_analysis_result_assessment_run
+ON public.t_analysis_result(assessment_id, analysis_run_id);
+CREATE INDEX IF NOT EXISTS ix_retrieval_audit_assessment_run
+ON public.t_retrieval_audit(assessment_id, analysis_run_id);
 
 -- 8. 事件表 (t_event)
 -- 用于记录系统中的重要事件或日志，如风险预警、评估完成等。

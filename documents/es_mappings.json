@@ -164,6 +164,13 @@
             "placeholder": { "type": "keyword" }
           }
         },
+        "retrievalText": {"type": "text", "analyzer": "standard"},
+        "retrievalTextIk": {"type": "text", "analyzer": "ik_max_word"},
+        "retrievalVector": {"type": "dense_vector", "dims": 1024, "index": true, "similarity": "cosine"},
+        "embeddingModel": {"type": "keyword"},
+        "embeddingVersion": {"type": "keyword"},
+        "retrievalTextHash": {"type": "keyword"},
+        "regionCodes": {"type": "keyword"},
         "createdAt": { "type": "date" }
       }
     }
@@ -196,6 +203,12 @@
         },
         "direction": { "type": "keyword" },
         "quantitativeIndicator": { "type": "double" },
+        "retrievalText": {"type": "text", "analyzer": "standard"},
+        "retrievalTextIk": {"type": "text", "analyzer": "ik_max_word"},
+        "retrievalVector": {"type": "dense_vector", "dims": 1024, "index": true, "similarity": "cosine"},
+        "embeddingModel": {"type": "keyword"},
+        "embeddingVersion": {"type": "keyword"},
+        "retrievalTextHash": {"type": "keyword"},
         "createdAt": { "type": "date" }
       }
     }

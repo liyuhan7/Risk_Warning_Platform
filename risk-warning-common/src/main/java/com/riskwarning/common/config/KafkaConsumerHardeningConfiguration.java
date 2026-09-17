@@ -34,6 +34,10 @@ public class KafkaConsumerHardeningConfiguration {
     public ConsumerFactory<String, Object> kafkaConsumerFactory(
             KafkaProperties properties, ObjectMapper objectMapper) {
         Map<String, Object> consumerProps = properties.buildConsumerProperties();
+        // JsonDeserializer 在下方由实际实例通过 setter 完整配置。Spring Kafka 禁止同一实例
+        // 再读取 spring.json.* 属性；而 Nacos 的 value.default.type 还会让缺类型头消息
+        // 降级为 Message，违背“缺类型头显式失败”的边界，因此必须统一移除这组属性。
+        consumerProps.keySet().removeIf(key -> key.startsWith("spring.json."));
         JsonDeserializer<Object> jsonDeserializer = new JsonDeserializer<>(objectMapper);
         jsonDeserializer.setUseTypeHeaders(true);
         jsonDeserializer.addTrustedPackages("com.riskwarning.**");

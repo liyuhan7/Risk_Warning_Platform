@@ -7,6 +7,8 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 
+import java.time.Duration;
+
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -35,5 +37,24 @@ class KafkaConsumerHardeningConfigurationTest {
         assertNotNull(configuration.kafkaPoisonPillErrorHandler());
         assertInstanceOf(DefaultErrorHandler.class, configuration.kafkaPoisonPillErrorHandler());
         assertNotNull(configuration.kafkaListenerContainerFactory(consumerFactory));
+    }
+
+    /**
+     * Nacos 会把 spring.json.* 放入 consumer properties；显式配置的 JsonDeserializer
+     * 必须仍能由 DefaultKafkaConsumerFactory 创建，不能同时走 setter 与 properties 两条配置路径。
+     */
+    @Test
+    void createsConsumerWhenNacosStillContainsJsonDeserializerProperties() {
+        KafkaProperties properties = new KafkaProperties();
+        properties.getConsumer().getProperties().put(
+                "spring.json.trusted.packages", "com.riskwarning.common.message");
+        properties.getConsumer().getProperties().put(
+                "spring.json.value.default.type", "com.riskwarning.common.message.Message");
+
+        ConsumerFactory<String, Object> factory =
+                configuration.kafkaConsumerFactory(properties, new ObjectMapper());
+
+        org.apache.kafka.clients.consumer.Consumer<String, Object> consumer = factory.createConsumer();
+        consumer.close(Duration.ZERO);
     }
 }

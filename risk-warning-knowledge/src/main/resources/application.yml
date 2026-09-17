@@ -49,3 +49,30 @@ llm:
     backoff-multiplier: 2.0
     # 触发重试的 HTTP 状态码；403/400/401 等语义错误不重试，一次终止
     retryable-status-codes: 408, 429, 500, 502, 503, 504
+
+# 新检索链独立启用，不改变旧 BERT/Milvus 入口。
+embedding:
+  enabled: ${EMBEDDING_ENABLED:false}
+  endpoint: ${EMBEDDING_ENDPOINT:https://api.siliconflow.cn/v1/embeddings}
+  model: ${EMBEDDING_MODEL:BAAI/bge-m3}
+  api-key: ${EMBEDDING_API_KEY:}
+  dimension: 1024
+  batch-size: 16
+  timeout-seconds: 120
+  max-attempts: 3
+  initial-backoff-millis: 500
+
+retrieval:
+  enabled: ${RETRIEVAL_ENABLED:false}
+  indicator-index: ${RETRIEVAL_INDICATOR_INDEX:t_indicator}
+  regulation-index: ${RETRIEVAL_REGULATION_INDEX:t_regulation}
+  embedding-version: ${RETRIEVAL_EMBEDDING_VERSION:bge-m3@2026-09-16-retrieval-v1}
+  indicator-top-k: 10
+  regulation-top-k: 10
+  num-candidates: 100
+  fusion-window: 100
+  dense-weight: 0.5
+  bm25-weight: 0.5
+  # ES 8.11 cosine KNN _score=(1+cosine)/2；不能重复归一化。
+  dense-score-mode: ES_NORMALIZED
+  # filter-v1 由请求显式开启，未指定 RetrievalFilter 时默认不应用。

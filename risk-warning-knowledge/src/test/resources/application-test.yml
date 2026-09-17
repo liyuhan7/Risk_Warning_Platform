@@ -1,0 +1,7 @@
+# 测试只读现有演示索引，不触碰生产知识库。
+embedding:
+  enabled: ${EMBEDDING_ENABLED:false}
+retrieval:
+  enabled: ${RETRIEVAL_ENABLED:false}
+  indicator-index: t_indicator_test
+  regulation-index: t_regulation_test

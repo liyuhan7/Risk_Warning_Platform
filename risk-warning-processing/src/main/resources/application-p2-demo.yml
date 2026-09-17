@@ -1,0 +1,6 @@
+p2:
+  mode: P2_DEMO
+
+knowledge:
+  service:
+    url: http://localhost:8089

@@ -65,9 +65,10 @@ class MessageTaskScopeTest {
 
     @Test
     void preservesScopeInIndicatorMessage() {
-        BehaviorProcessingTaskMessage source = new BehaviorProcessingTaskMessage(
+        BehaviorProcessingTaskMessage source = BehaviorProcessingTaskMessage.forDocuments(
                 "message", "timestamp", "trace", 1L, 10L, 20L, "run-1",
-                DataSourceTypeEnum.FILE_UPLOAD, Collections.emptyList());
+                DataSourceTypeEnum.FILE_UPLOAD,
+                Collections.singletonList(new SourceDocumentRef(101L, "source.pdf")));
 
         IndicatorCalculationTaskMessage next = MessageTask.createIndicatorMessage(source);
 
@@ -75,6 +76,7 @@ class MessageTaskScopeTest {
         assertEquals(Long.valueOf(20L), next.getAssessmentId());
         assertEquals("run-1", next.getAnalysisRunId());
         assertEquals("trace", next.getTraceId());
+        assertEquals(source.getDocuments(), next.getDocuments());
     }
 
     @Test

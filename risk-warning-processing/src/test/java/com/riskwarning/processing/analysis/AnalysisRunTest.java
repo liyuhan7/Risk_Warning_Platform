@@ -65,4 +65,18 @@ class AnalysisRunTest {
         assertNotEquals(first.toScope(), second.toScope());
         assertThrows(IllegalStateException.class, () -> second.succeed(start.plusMinutes(4)));
     }
+
+    @Test
+    void completedWithoutDecisionIsTerminalAndDoesNotChangePreviousSuccess() {
+        AnalysisRun previous = AnalysisRun.start(new AnalysisScope(1L, 2L, "run-1"), start);
+        previous.succeed(start.plusMinutes(1));
+        AnalysisRun current = AnalysisRun.start(
+                new AnalysisScope(1L, 2L, "run-2"), start.plusMinutes(2));
+
+        current.completeWithoutDecision(start.plusMinutes(3));
+
+        assertEquals(AnalysisRunStatus.SUCCEEDED, previous.getStatus());
+        assertEquals(AnalysisRunStatus.COMPLETED_WITHOUT_DECISION, current.getStatus());
+        assertThrows(IllegalStateException.class, () -> current.succeed(start.plusMinutes(4)));
+    }
 }

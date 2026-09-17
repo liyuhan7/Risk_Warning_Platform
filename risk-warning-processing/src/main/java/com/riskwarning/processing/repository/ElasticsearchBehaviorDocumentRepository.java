@@ -9,6 +9,7 @@ import co.elastic.clients.elasticsearch.core.DeleteByQueryResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.elasticsearch.indices.RefreshRequest;
 import com.riskwarning.common.po.behavior.Behavior;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -47,6 +48,9 @@ public class ElasticsearchBehaviorDocumentRepository implements BehaviorDocument
             if (response.errors()) {
                 throw new IllegalStateException("Structured Behavior 批量写入 Elasticsearch 失败");
             }
+            // 计算任务在写入后立即按三作用域查询，默认刷新间隔内的文档不可见会使查询误判为空；
+            // 因此写入完成语义包含刷新：方法返回时新文档必须已可检索。
+            elasticsearchClient.indices().refresh(buildRefreshRequest());
         } catch (Exception exception) {
             if (exception instanceof IllegalStateException) {
                 throw (IllegalStateException) exception;
@@ -114,6 +118,17 @@ public class ElasticsearchBehaviorDocumentRepository implements BehaviorDocument
                     .document(behavior)));
         }
         return builder.build();
+    }
+
+    /**
+     * 构建 t_behavior 的立即刷新请求。
+     *
+     * Behavior 写入后，指标计算任务会同步按三作用域查询，若依赖默认刷新间隔，
+     * 新写入文档在约 1 秒内不可检索，计算侧会把已有行为误判为空并使运行失败；
+     * 因此写入路径在批量写入成功后必须刷新索引。
+     */
+    static RefreshRequest buildRefreshRequest() {
+        return RefreshRequest.of(refresh -> refresh.index(BEHAVIOR_INDEX));
     }
 
     static SearchRequest buildScopeSearchRequest(Long projectId, Long assessmentId, String analysisRunId) {

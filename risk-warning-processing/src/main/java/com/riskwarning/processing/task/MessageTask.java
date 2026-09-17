@@ -15,6 +15,8 @@ import com.riskwarning.processing.service.DocumentProcessingService;
 import com.riskwarning.processing.service.EvidenceExtractionService;
 import com.riskwarning.processing.service.FactExtractionPipeline;
 import com.riskwarning.processing.service.SourceDocumentScopeValidator;
+import com.riskwarning.processing.service.P2DemoProcessingService;
+import com.riskwarning.processing.config.P2ProcessingProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -59,6 +61,12 @@ public class MessageTask {
 
     @Autowired
     private KafkaUtils kafkaUtils;
+
+    @Autowired
+    private P2DemoProcessingService p2DemoProcessingService;
+
+    @Autowired
+    private P2ProcessingProperties p2Properties = new P2ProcessingProperties();
 
 
     @KafkaListener(topics = "behavior_processing_tasks", groupId = "test-consumer")
@@ -186,12 +194,13 @@ public class MessageTask {
         behaviorThreadPoolExecutor.execute(() -> {
             try {
                 log.info("▶ 开始行为评估和指标计算...");
-                behaviorProcessingService.processProjectBehaviors(
-                        message.getUserId(),
-                        message.getProjectId(),
-                        message.getAssessmentId(),
-                        analysisScope.getAnalysisRunId()
-                );
+                if (p2Properties.getMode() == P2ProcessingProperties.Mode.P2_DEMO) {
+                    p2DemoProcessingService.process(message, analysisScope);
+                } else {
+                    behaviorProcessingService.processProjectBehaviors(
+                            message.getUserId(), message.getProjectId(), message.getAssessmentId(),
+                            analysisScope.getAnalysisRunId());
+                }
             } catch (Exception e) {
                 log.error("✗ 指标计算任务失败: projectId={}, assessmentId={}, error={}",
                         message.getProjectId(), message.getAssessmentId(), e.getMessage(), e);
@@ -218,7 +227,7 @@ public class MessageTask {
                 scope.getProjectId(),
                 scope.getAssessmentId(),
                 scope.getAnalysisRunId()
-        );
+        ).withDocuments(message.getDocuments());
     }
 
     static List<SourceDocumentRef> requireDocuments(

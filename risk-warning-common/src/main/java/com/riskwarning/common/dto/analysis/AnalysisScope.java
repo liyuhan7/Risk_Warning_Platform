@@ -1,5 +1,7 @@
 package com.riskwarning.common.dto.analysis;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -14,7 +16,10 @@ public final class AnalysisScope {
     private final Long assessmentId;
     private final String analysisRunId;
 
-    public AnalysisScope(Long projectId, Long assessmentId, String analysisRunId) {
+    @JsonCreator
+    public AnalysisScope(@JsonProperty("projectId") Long projectId,
+                         @JsonProperty("assessmentId") Long assessmentId,
+                         @JsonProperty("analysisRunId") String analysisRunId) {
         if (projectId == null || projectId <= 0 || assessmentId == null || assessmentId <= 0) {
             throw new IllegalArgumentException("项目和评估 ID 必须为正数");
         }

@@ -4,5 +4,6 @@ package com.riskwarning.common.enums;
 public enum AnalysisRunStatus {
     RUNNING,
     SUCCEEDED,
+    COMPLETED_WITHOUT_DECISION,
     FAILED
 }

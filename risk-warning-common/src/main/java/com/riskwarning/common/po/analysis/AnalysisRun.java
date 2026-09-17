@@ -30,7 +30,7 @@ public class AnalysisRun {
     private Long projectId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 16, nullable = false)
+    @Column(name = "status", length = 32, nullable = false)
     private AnalysisRunStatus status;
 
     @Column(name = "started_at", nullable = false, updatable = false)
@@ -69,6 +69,11 @@ public class AnalysisRun {
     /** 标记本次运行失败，不触碰同评估的既有成功结果。 */
     public void fail(LocalDateTime finishedAt) {
         finish(AnalysisRunStatus.FAILED, finishedAt);
+    }
+
+    /** 业务输入不足时结束当前运行，但不发布或替换已有成功结果。 */
+    public void completeWithoutDecision(LocalDateTime finishedAt) {
+        finish(AnalysisRunStatus.COMPLETED_WITHOUT_DECISION, finishedAt);
     }
 
     private void finish(AnalysisRunStatus target, LocalDateTime finishedAt) {

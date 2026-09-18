@@ -7,6 +7,9 @@
         <h2>正在评估中...</h2>
         <p>系统正在分析您上传的文件，请稍候</p>
         <p class="waiting-hint">评估完成后将自动显示结果</p>
+        <p v-if="waitingStalled" class="waiting-stalled">
+          长时间未确认完成状态，请手动刷新页面，或回到项目页查看分析概览。
+        </p>
       </div>
     </div>
 
@@ -24,6 +27,10 @@
           class="sidebar-menu"
           @select="handleMenuSelect"
         >
+          <el-menu-item index="analysis">
+            <el-icon><Cpu /></el-icon>
+            <span>分析概览</span>
+          </el-menu-item>
           <el-menu-item index="overview">
             <el-icon><DataAnalysis /></el-icon>
             <span>总览报告</span>
@@ -79,6 +86,40 @@
 
       <!-- 主内容区 -->
       <el-main class="main-content">
+        <!-- 分析概览视图：只消费 P2 分析链的 overview 聚合，不解释旧报告数据 -->
+        <div v-if="activeView === 'analysis'" class="analysis-view">
+          <el-alert v-if="analysisMockEnabled" title="开发模拟数据" type="warning" :closable="false" />
+          <el-select
+            v-if="analysisMockEnabled"
+            v-model="analysisMockStatus"
+            class="mock-status-select"
+            @change="refreshAnalysis"
+          >
+            <el-option v-for="status in displayStatuses" :key="status" :label="status" :value="status" />
+          </el-select>
+          <el-alert
+            v-if="analysisMissingScope"
+            type="warning"
+            :closable="false"
+            show-icon
+            title="缺少项目信息"
+            description="分析概览需要项目与评估两个身份，请从项目页进入评估结果。"
+          />
+          <el-alert v-if="analysisError" title="分析数据加载失败" type="error" :closable="false">
+            <p>{{ analysisError }}</p>
+            <el-button @click="refreshAnalysis">重试</el-button>
+          </el-alert>
+          <AnalysisOverviewView
+            :data="analysisData"
+            :loading="loadingAnalysis"
+            :error="analysisError"
+            :poll-limit-reached="analysisPollLimitReached"
+            :assessment-id="assessmentId"
+            :project-id="projectId || 0"
+            @refresh="refreshAnalysis"
+          />
+        </div>
+
         <!-- 总览视图 -->
         <div v-if="activeView === 'overview'" v-loading="loadingOverview">
           <OverviewReport :data="overviewData" />
@@ -147,9 +188,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { DataAnalysis, TrendCharts, Document, Link, Loading } from '@element-plus/icons-vue'
+import { DataAnalysis, TrendCharts, Document, Link, Loading, Cpu } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import AppHeader from '@/components/AppHeader.vue'
 import OverviewReport from '@/components/report/OverviewReport.vue'
@@ -157,14 +198,18 @@ import IndicatorReport from '@/components/report/IndicatorReport.vue'
 import RiskReport from '@/components/report/RiskReport.vue'
 import BehaviorFactList from '@/components/evidence/BehaviorFactList.vue'
 import EvidenceViewer from '@/components/evidence/EvidenceViewer.vue'
+import AnalysisOverviewView from '@/components/analysis/AnalysisOverviewView.vue'
 import type {
   IndicatorDistributionVO,
   RiskVO,
   AssessmentDetailVO
 } from '@/types/report'
+import type { AnalysisOverviewVO, DisplayStatus } from '@/types/analysis'
 import type { BehaviorListVO, EvidenceVO, StructuredBehaviorVO } from '@/types/evidence'
 import { getIndicatorDistribution, getRiskList, getAssessmentGeneral } from '@/api/report'
 import { getBehaviors, getEvidenceByIds } from '@/api/evidence'
+import { getAssessmentByProjectId } from '@/api/project'
+import { getAnalysisOverview, analysisMockEnabled } from '@/api/analysis'
 import websocketService from '@/utils/websocket'
 import type { NotificationMessage } from '@/utils/websocket'
 import {
@@ -215,6 +260,209 @@ const projectId = computed(() => {
   return overviewData.value?.projectId ?? null
 })
 
+// ===== 分析概览（P2 分析链）：只读 overview 聚合，六态与行为级结论/候选/审计 =====
+const analysisData = ref<AnalysisOverviewVO | null>(null)
+const loadingAnalysis = ref(false)
+const analysisError = ref('')
+const analysisPollLimitReached = ref(false)
+const analysisMockStatus = ref<DisplayStatus>('COMPLETED_WITHOUT_DECISION')
+const displayStatuses: DisplayStatus[] = [
+  'NOT_STARTED',
+  'RUNNING',
+  'COMPLETED_WITH_DECISION',
+  'COMPLETED_WITHOUT_DECISION',
+  'NO_CANDIDATES',
+  'FAILED'
+]
+
+// 用户手动选过视图后不再自动切换默认视图
+let viewChosenByUser = false
+let analysisTimer: ReturnType<typeof setTimeout> | undefined
+let analysisPollCount = 0
+let analysisGeneration = 0
+
+// 从项目页进入时 URL 只带评估号，项目号要等总览返回，此时不算缺少身份
+const analysisMissingScope = computed(
+  () => !assessmentId.value || (!projectId.value && !loadingOverview.value)
+)
+
+const stopAnalysisPolling = () => {
+  if (analysisTimer) {
+    clearTimeout(analysisTimer)
+  }
+  analysisTimer = undefined
+}
+
+// 仅在 RUNNING 期间轮询，上限 20 次；其余状态不自动刷新
+const loadAnalysis = async (current: number) => {
+  const currentProjectId = projectId.value
+  if (!assessmentId.value || !currentProjectId) {
+    loadingAnalysis.value = false
+    return
+  }
+  loadingAnalysis.value = true
+  analysisError.value = ''
+  try {
+    const response = await getAnalysisOverview(
+      assessmentId.value,
+      currentProjectId,
+      analysisMockStatus.value
+    )
+    if (current !== analysisGeneration) {
+      return
+    }
+    analysisData.value = response.data
+    if (!viewChosenByUser && response.data.displayStatus !== 'NOT_STARTED') {
+      activeView.value = 'analysis'
+    }
+    if (response.data.displayStatus === 'RUNNING') {
+      if (analysisPollCount < 20) {
+        analysisTimer = setTimeout(() => {
+          analysisPollCount++
+          void loadAnalysis(current)
+        }, 3000)
+      } else {
+        analysisPollLimitReached.value = true
+      }
+    }
+  } catch (error: any) {
+    if (current === analysisGeneration) {
+      analysisError.value = error.message || '分析数据加载失败'
+      stopAnalysisPolling()
+    }
+  } finally {
+    if (current === analysisGeneration) {
+      loadingAnalysis.value = false
+    }
+  }
+}
+
+const refreshAnalysis = () => {
+  stopAnalysisPolling()
+  analysisGeneration++
+  analysisPollCount = 0
+  analysisPollLimitReached.value = false
+  void loadAnalysis(analysisGeneration)
+}
+
+// 项目号补齐后补一次分析概览（评估号先到、项目号后到的进入路径）
+watch(projectId, value => {
+  if (value && !analysisData.value && !loadingAnalysis.value) {
+    refreshAnalysis()
+  }
+})
+
+// ===== 等待态兜底：完成通知可能丢失（服务重启、用户不在线、多标签页抢占连接），按项目轮询判断是否已出终态 =====
+let waitingTimer: ReturnType<typeof setTimeout> | undefined
+let waitingPollCount = 0
+let waitingBaselineId: number | null = null
+let waitingBaselineResolved = false
+let waitingBaselineFailed = false
+const waitingStalled = ref(false)
+
+// 进入等待时立刻取一次当前评估作为基线：晚取会把本次上传新建的记录当成旧记录而不结束等待
+function resolveWaitingBaseline() {
+  const currentProjectId = waitingProjectId.value
+  if (!currentProjectId || waitingBaselineResolved) {
+    waitingBaselineResolved = true
+    return Promise.resolve()
+  }
+  return getAssessmentByProjectId(currentProjectId)
+    .then(assessmentResponse => {
+      waitingBaselineId =
+        assessmentResponse.code === 200 && assessmentResponse.data && assessmentResponse.data.id
+          ? Number(assessmentResponse.data.id)
+          : null
+      waitingBaselineResolved = true
+    })
+    .catch(error => {
+      // 基线取不到时退化为接受终态，避免基线接口异常导致永远停在等待页
+      console.warn('等待基线评估解析失败，将按终态直接结束等待', error)
+      waitingBaselineFailed = true
+      waitingBaselineResolved = true
+    })
+}
+
+function stopWaitingFallback() {
+  if (waitingTimer) {
+    clearTimeout(waitingTimer)
+  }
+  waitingTimer = undefined
+}
+
+function finishWaiting(id: number, displayStatus: DisplayStatus) {
+  stopWaitingFallback()
+  assessmentId.value = id
+  isWaiting.value = false
+  router.replace({
+    path: '/assessment-result',
+    query: {
+      assessmentId: id.toString(),
+      projectId: projectId.value ? projectId.value.toString() : ''
+    }
+  })
+  if (displayStatus === 'FAILED') {
+    ElMessage.error('评估失败，请查看分析概览中的审计信息')
+  } else {
+    ElMessage.success('评估完成，正在加载结果...')
+  }
+  loadOverviewData()
+  refreshAnalysis()
+}
+
+function scheduleWaitingFallback() {
+  if (!isWaiting.value) {
+    return
+  }
+  if (waitingPollCount >= 180) {
+    waitingStalled.value = true
+    return
+  }
+  waitingTimer = setTimeout(() => {
+    waitingPollCount++
+    void checkWaitingCompletion()
+  }, 10000)
+}
+
+// 基线记录的是进入等待前的评估；基线解析失败时直接接受终态，避免把本次上传的记录误判为旧记录而永远不结束
+function checkWaitingCompletion() {
+  const currentProjectId = waitingProjectId.value
+  if (!currentProjectId || !isWaiting.value) {
+    stopWaitingFallback()
+    return
+  }
+  getAssessmentByProjectId(currentProjectId)
+    .then(assessmentResponse => {
+      const candidateId =
+        assessmentResponse.code === 200 && assessmentResponse.data && assessmentResponse.data.id
+          ? Number(assessmentResponse.data.id)
+          : null
+      if (!candidateId) {
+        return null
+      }
+      return getAnalysisOverview(candidateId, currentProjectId).then(overviewResponse => ({
+        candidateId,
+        displayStatus: overviewResponse.data.displayStatus
+      }))
+    })
+    .then(result => {
+      if (!result) {
+        return
+      }
+      const isOurs = waitingBaselineFailed || result.candidateId !== waitingBaselineId
+      const isTerminal = result.displayStatus !== 'NOT_STARTED' && result.displayStatus !== 'RUNNING'
+      if (isOurs && isTerminal) {
+        finishWaiting(result.candidateId, result.displayStatus)
+        return
+      }
+      scheduleWaitingFallback()
+    })
+    .catch(error => {
+      console.warn('等待完成状态查询失败，将继续重试', error)
+      scheduleWaitingFallback()
+    })
+}
+
 const behaviors = computed(() => behaviorList.value?.behaviors ?? [])
 
 const selectedBehavior = computed(
@@ -263,9 +511,12 @@ const getDimensionBadgeType = (dimension: string): 'danger' | 'warning' | 'succe
 // 菜单选择处理
 const handleMenuSelect = (index: string) => {
   activeView.value = index
+  viewChosenByUser = true
 
   // 切换视图时加载对应数据
-  if (index === 'overview' && !overviewData.value) {
+  if (index === 'analysis' && !analysisData.value) {
+    refreshAnalysis()
+  } else if (index === 'overview' && !overviewData.value) {
     loadOverviewData()
   } else if (index === 'indicator' && !indicatorData.value) {
     loadIndicatorData()
@@ -429,23 +680,27 @@ const handleNotificationMessage = (message: NotificationMessage) => {
 
       // 关闭等待状态
       isWaiting.value = false
+      stopWaitingFallback()
 
       ElMessage.success('评估完成，正在加载结果...')
 
       // 加载数据
       loadOverviewData()
+      refreshAnalysis()
     }
   }
 }
 
 // 初始化
 onMounted(() => {
-  // 如果是等待模式，监听WebSocket消息
+  // 如果是等待模式，监听WebSocket消息，并启动轮询兜底
   if (isWaiting.value) {
     websocketService.on('notification', handleNotificationMessage)
+    void resolveWaitingBaseline().then(() => scheduleWaitingFallback())
   } else if (assessmentId.value) {
     // 非等待模式且有assessmentId，直接加载数据
     loadOverviewData()
+    refreshAnalysis()
   }
 })
 
@@ -453,6 +708,9 @@ onMounted(() => {
 onUnmounted(() => {
   // 移除WebSocket监听器
   websocketService.off('notification', handleNotificationMessage)
+  analysisGeneration++
+  stopAnalysisPolling()
+  stopWaitingFallback()
 })
 </script>
 
@@ -513,6 +771,12 @@ onUnmounted(() => {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.6);
   margin-top: 24px;
+}
+
+.waiting-content .waiting-stalled {
+  font-size: 14px;
+  color: #f0c78a;
+  margin-top: 12px;
 }
 
 .page-title {
@@ -621,6 +885,17 @@ onUnmounted(() => {
 .main-content {
   background: transparent;
   padding: 0;
+}
+
+/* 分析概览 */
+.analysis-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mock-status-select {
+  width: 260px;
 }
 
 /* 证据回溯 */

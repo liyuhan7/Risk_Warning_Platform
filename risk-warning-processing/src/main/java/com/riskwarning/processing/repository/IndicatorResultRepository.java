@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -23,6 +24,11 @@ public interface IndicatorResultRepository extends JpaRepository<IndicatorResult
      */
     Optional<IndicatorResult> findByAssessmentIdAndAnalysisRunIdAndIndicatorEsId(
             Long assessmentId, String analysisRunId, String indicatorEsId);
+
+    /**
+     * 按评估与运行读取指标结果，供后续分析上下文回放旧链检索轨迹。
+     */
+    List<IndicatorResult> findByAssessmentIdAndAnalysisRunId(Long assessmentId, String analysisRunId);
 
     /**
      * 统计指定 assessmentId 的记录数

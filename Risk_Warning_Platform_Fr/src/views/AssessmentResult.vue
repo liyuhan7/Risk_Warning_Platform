@@ -88,15 +88,6 @@
       <el-main class="main-content">
         <!-- 分析概览视图：只消费 P2 分析链的 overview 聚合，不解释旧报告数据 -->
         <div v-if="activeView === 'analysis'" class="analysis-view">
-          <el-alert v-if="analysisMockEnabled" title="开发模拟数据" type="warning" :closable="false" />
-          <el-select
-            v-if="analysisMockEnabled"
-            v-model="analysisMockStatus"
-            class="mock-status-select"
-            @change="refreshAnalysis"
-          >
-            <el-option v-for="status in displayStatuses" :key="status" :label="status" :value="status" />
-          </el-select>
           <el-alert
             v-if="analysisMissingScope"
             type="warning"
@@ -209,7 +200,7 @@ import type { BehaviorListVO, EvidenceVO, StructuredBehaviorVO } from '@/types/e
 import { getIndicatorDistribution, getRiskList, getAssessmentGeneral } from '@/api/report'
 import { getBehaviors, getEvidenceByIds } from '@/api/evidence'
 import { getAssessmentByProjectId } from '@/api/project'
-import { getAnalysisOverview, analysisMockEnabled } from '@/api/analysis'
+import { getAnalysisOverview } from '@/api/analysis'
 import websocketService from '@/utils/websocket'
 import type { NotificationMessage } from '@/utils/websocket'
 import {
@@ -265,15 +256,6 @@ const analysisData = ref<AnalysisOverviewVO | null>(null)
 const loadingAnalysis = ref(false)
 const analysisError = ref('')
 const analysisPollLimitReached = ref(false)
-const analysisMockStatus = ref<DisplayStatus>('COMPLETED_WITHOUT_DECISION')
-const displayStatuses: DisplayStatus[] = [
-  'NOT_STARTED',
-  'RUNNING',
-  'COMPLETED_WITH_DECISION',
-  'COMPLETED_WITHOUT_DECISION',
-  'NO_CANDIDATES',
-  'FAILED'
-]
 
 // 用户手动选过视图后不再自动切换默认视图
 let viewChosenByUser = false
@@ -305,8 +287,7 @@ const loadAnalysis = async (current: number) => {
   try {
     const response = await getAnalysisOverview(
       assessmentId.value,
-      currentProjectId,
-      analysisMockStatus.value
+      currentProjectId
     )
     if (current !== analysisGeneration) {
       return

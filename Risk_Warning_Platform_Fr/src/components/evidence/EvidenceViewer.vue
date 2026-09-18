@@ -26,7 +26,7 @@
           :closable="false"
           show-icon
           title="证据引用缺失"
-          :description="`本条事实引用了 ${missingIds.length} 条在当前评估中不存在的证据：${missingIds.join('、')}`"
+          :description="`本条事实引用了 ${missingIds.length} 条在当前评估中不存在的证据`"
         />
 
         <el-empty
@@ -44,11 +44,6 @@
             <span class="file-name">{{ evidence.sourceFileName }}</span>
             <span class="page-label">{{ pageLabel(evidence.pageNumber) }}</span>
             <span class="segment-label">第 {{ evidence.segmentIndex + 1 }} 段</span>
-          </div>
-
-          <div class="evidence-id">
-            <span class="id-label">Evidence ID</span>
-            <code>{{ evidence.evidenceId }}</code>
           </div>
 
           <p class="evidence-text">
@@ -234,24 +229,6 @@ const textParts = (evidence: EvidenceVO): TextPart[] => {
   padding: 1px 8px;
   border-radius: 10px;
   background: #f0f2f5;
-}
-
-.evidence-id {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.id-label {
-  font-size: 12px;
-  color: #909399;
-}
-
-.evidence-id code {
-  font-size: 12px;
-  color: #606266;
-  word-break: break-all;
 }
 
 .evidence-text {

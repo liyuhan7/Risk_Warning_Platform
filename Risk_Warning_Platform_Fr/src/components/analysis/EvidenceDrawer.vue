@@ -6,7 +6,6 @@
       <el-card v-for="e in evidences" :key="e.evidenceId" class="evidence"><h3>{{ e.sourceFileName }}</h3>
 <p>{{ e.pageNumber === null ? '页码未知' : `第 ${e.pageNumber} 页` }}</p>
 <p class="original">{{ e.text }}</p>
-<p>哈希 {{ e.textHash }}</p>
 </el-card>
     </div>
   </el-drawer>

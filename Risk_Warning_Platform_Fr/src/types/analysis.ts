@@ -103,4 +103,4 @@ export const labels: Record<string, string> = {
     PROHIBITED_ACTION: '存在禁止行为', QUANTITATIVE_SHORTFALL: '数量不足', QUANTITATIVE_EXCESS: '数量超限',
     DOCUMENTATION_GAP: '材料缺口', INDICATOR: '指标', REGULATION: '法规'
 };
-export const label = (value: string | null) => value ? (labels[value] ?? value) : '未提供';
+export const label = (value: string | null | undefined) => value ? (labels[value] ?? value) : '未提供';

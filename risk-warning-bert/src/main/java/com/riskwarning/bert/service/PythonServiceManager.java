@@ -45,6 +45,10 @@ public class PythonServiceManager {
     @Value("${bert.service.healthcheck.interval:5000}")
     private long healthcheckInterval;
 
+    /** 模型与 Python 依赖冷启动耗时独立于单次健康请求超时。 */
+    @Value("${bert.service.startup-timeout:60000}")
+    private long startupTimeout;
+
     private Process pythonProcess;
     private Thread healthcheckThread;
     private volatile boolean running = false;
@@ -245,8 +249,11 @@ public class PythonServiceManager {
     }
 
     private void waitForServiceReady() {
-        int maxAttempts = 60;
-        for (int i = 0; i < maxAttempts && running; i++) {
+        if (startupTimeout <= 0) {
+            throw new IllegalArgumentException("Python服务启动超时必须为正数");
+        }
+        long startedAt = System.nanoTime();
+        while (running && TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt) < startupTimeout) {
             try {
                 if (checkHealth()) {
                     log.info("Python服务已就绪");
@@ -258,7 +265,7 @@ public class PythonServiceManager {
                 throw new RuntimeException("等待服务就绪时被中断", e);
             }
         }
-        throw new RuntimeException("Python服务启动超时，60秒内未就绪");
+        throw new RuntimeException("Python服务启动超时，" + startupTimeout + "毫秒内未就绪");
     }
 
     private boolean checkHealth() {

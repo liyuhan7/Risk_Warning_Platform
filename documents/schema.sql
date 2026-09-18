@@ -273,9 +273,9 @@ CREATE TABLE IF NOT EXISTS public.t_retrieval_audit (
     embedding_model TEXT,
     embedding_version TEXT,
     retrieval_status VARCHAR(32) NOT NULL CHECK (
-        retrieval_status IN ('SUCCESS', 'NO_CANDIDATES', 'FAILED')),
+        retrieval_status IN ('SUCCESS', 'NO_CANDIDATES', 'FAILED', 'SNAPSHOT_UNAVAILABLE')),
     analysis_status VARCHAR(32) NOT NULL CHECK (
-        analysis_status IN ('NOT_ATTEMPTED', 'SUCCESS', 'RECALL_GAP', 'INSUFFICIENT_EVIDENCE', 'NOT_DEMO_INPUT')),
+        analysis_status IN ('NOT_ATTEMPTED', 'SUCCESS', 'RECALL_GAP', 'INSUFFICIENT_EVIDENCE', 'NOT_DEMO_INPUT', 'WAITING_P3')),
     candidates JSONB CHECK (candidates IS NULL OR jsonb_typeof(candidates) = 'array'),
     error_code TEXT,
     error_type TEXT,

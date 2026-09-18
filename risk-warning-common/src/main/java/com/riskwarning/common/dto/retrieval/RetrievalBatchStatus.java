@@ -1,5 +1,5 @@
 package com.riskwarning.common.dto.retrieval;
 
 public enum RetrievalBatchStatus {
-    SUCCESS, NO_CANDIDATES
+    SUCCESS, NO_CANDIDATES, SNAPSHOT_UNAVAILABLE
 }

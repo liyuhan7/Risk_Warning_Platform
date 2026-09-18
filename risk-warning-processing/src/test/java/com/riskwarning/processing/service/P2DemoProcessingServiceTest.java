@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.riskwarning.common.dto.analysis.AnalysisScope;
 import com.riskwarning.common.dto.analysis.SourceDocumentRef;
 import com.riskwarning.common.dto.retrieval.*;
+import com.riskwarning.common.message.AssessmentCompletedEventMessage;
 import com.riskwarning.common.message.IndicatorCalculationTaskMessage;
+import com.riskwarning.common.message.NotificationMessage;
 import com.riskwarning.common.po.behavior.Behavior;
 import com.riskwarning.common.po.evidence.EvidenceChunk;
 import com.riskwarning.common.po.indicator.IndicatorResult;
@@ -13,6 +15,7 @@ import com.riskwarning.processing.client.RetrievalClient;
 import com.riskwarning.processing.config.P2ProcessingProperties;
 import com.riskwarning.processing.repository.*;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,8 +23,11 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.time.LocalDateTime;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
 
 class P2DemoProcessingServiceTest {
@@ -36,7 +42,7 @@ class P2DemoProcessingServiceTest {
     private final AnalysisScope scope = new AnalysisScope(10L, 20L, "run-p2");
 
     @Test
-    void noCandidatesCompletesWithoutDecisionAndPublishesNothing() {
+    void noCandidatesCompletesWithoutDecisionAndNotifiesFrontend() {
         Behavior behavior = behavior("behavior-1");
         when(behaviors.findByScope(10L, 20L, "run-p2")).thenReturn(Collections.singletonList(behavior));
         when(retrieval.retrieve(any())).thenReturn(RetrievalBatchResponse.builder()
@@ -50,7 +56,13 @@ class P2DemoProcessingServiceTest {
         verify(noDecision).complete(scope);
         verify(persistence).saveAnalyses(Collections.emptyList());
         verify(persistence, never()).saveSuccess(anyList(), anyList());
-        verifyNoInteractions(kafka);
+        // 无决策终态不再借用评估完成事件：报告汇总要求运行仍在进行中，改由通知直接告知前端等待结束
+        ArgumentCaptor<NotificationMessage> notification = ArgumentCaptor.forClass(NotificationMessage.class);
+        verify(kafka).sendMessage(notification.capture());
+        assertEquals(NotificationMessage.NotificationType.ASSESSMENT_COMPLETED,
+                notification.getValue().getNotificationType());
+        assertTrue(notification.getValue().getExtraData().contains("COMPLETED_WITHOUT_DECISION"));
+        verify(kafka, never()).sendMessage(isA(AssessmentCompletedEventMessage.class));
     }
 
     @Test

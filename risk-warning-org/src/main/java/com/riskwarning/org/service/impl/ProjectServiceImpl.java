@@ -141,10 +141,7 @@ public class ProjectServiceImpl implements ProjectService {
         projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("project not found: " + projectId));
 
-        Assessment assessment = assessmentRepository.findByProjectId(projectId);
-        if (assessment == null) {
-            throw new IllegalArgumentException("assessment not found for project: " + projectId);
-        }
-        return assessment;
+        return assessmentRepository.findFirstByProjectIdOrderByIdDesc(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("assessment not found for project: " + projectId));
     }
 }

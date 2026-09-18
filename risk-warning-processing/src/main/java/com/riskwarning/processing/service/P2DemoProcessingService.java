@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.riskwarning.common.dto.analysis.*;
 import com.riskwarning.common.dto.retrieval.*;
+import com.riskwarning.common.enums.AnalysisRunStatus;
 import com.riskwarning.common.enums.analysis.*;
 import com.riskwarning.common.enums.indicator.IndicatorRiskStatus;
 import com.riskwarning.common.enums.risk.RiskLevelEnum;
 import com.riskwarning.common.message.AssessmentCompletedEventMessage;
 import com.riskwarning.common.message.IndicatorCalculationTaskMessage;
+import com.riskwarning.common.message.NotificationMessage;
 import com.riskwarning.common.po.analysis.*;
 import com.riskwarning.common.po.behavior.Behavior;
 import com.riskwarning.common.po.evidence.EvidenceChunk;
@@ -19,17 +21,20 @@ import com.riskwarning.common.utils.StringUtils;
 import com.riskwarning.processing.client.RetrievalClient;
 import com.riskwarning.processing.config.P2ProcessingProperties;
 import com.riskwarning.processing.repository.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.nio.file.*;
 import java.security.MessageDigest;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /** P2 固定样本垂直切片；非白名单输入只记录无结论，不生成业务判断。 */
+@Slf4j
 @Service
 public class P2DemoProcessingService {
     private static final String RULE = "p2_mock_fixture_v1";
@@ -107,6 +112,7 @@ public class P2DemoProcessingService {
         if (!complete) {
             resultPersistence.saveAnalyses(validAnalyses);
             noDecisionService.complete(scope);
+            notifyWithoutDecision(message.getUserId(), scope);
             return;
         }
         List<IndicatorResult> output = buildIndicatorResults(scope, prepared);
@@ -114,6 +120,33 @@ public class P2DemoProcessingService {
         kafka.sendMessage(new AssessmentCompletedEventMessage(StringUtils.generateMessageId(),
                 String.valueOf(System.currentTimeMillis()), StringUtils.generateTraceId(), message.getUserId(),
                 scope.getProjectId(), scope.getAssessmentId(), scope.getAnalysisRunId()));
+    }
+
+    /**
+     * 无决策终态同样要通知前端。
+     *
+     * 结束无决策运行时运行状态不再是"进行中"，报告侧的汇总要求运行仍处于进行中，
+     * 因此这条路径不会产生评估完成事件；若在此不通知，等待页面将一直停留在等待态。
+     * 复用评估完成类型，具体终态由 extraData 的 displayStatus 表达。
+     */
+    private void notifyWithoutDecision(Long userId, AnalysisScope scope) {
+        try {
+            NotificationMessage notification = new NotificationMessage(
+                    StringUtils.generateMessageId(),
+                    LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                    StringUtils.generateTraceId(),
+                    userId, scope.getProjectId(), scope.getAssessmentId(),
+                    NotificationMessage.NotificationType.ASSESSMENT_COMPLETED,
+                    "评估完成通知",
+                    "材料分析已完成，但未形成决策结论，请在分析概览查看未决策原因。");
+            notification.setExtraData(mapper.writeValueAsString(Collections.singletonMap(
+                    "displayStatus", AnalysisRunStatus.COMPLETED_WITHOUT_DECISION.name())));
+            kafka.sendMessage(notification);
+        } catch (Exception failure) {
+            // 运行已处于终态，通知失败不能反过来影响已落库的分析结果
+            log.warn("无决策完成通知发送失败: assessmentId={}, run={}",
+                    scope.getAssessmentId(), scope.getAnalysisRunId(), failure);
+        }
     }
 
     private List<RetrievalBatchItem> retrieve(AnalysisScope scope, List<Behavior> scoped) {

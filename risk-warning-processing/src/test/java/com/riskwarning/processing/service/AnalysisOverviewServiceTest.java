@@ -1,0 +1,139 @@
+package com.riskwarning.processing.service;
+
+import com.riskwarning.common.dto.analysis.AnalysisScope;
+import com.riskwarning.common.dto.retrieval.*;
+import com.riskwarning.common.enums.analysis.*;
+import com.riskwarning.common.po.analysis.*;
+import com.riskwarning.common.po.behavior.Behavior;
+import com.riskwarning.common.po.report.Assessment;
+import com.riskwarning.processing.controller.AnalysisOverviewController;
+import com.riskwarning.processing.dto.analysis.*;
+import com.riskwarning.processing.repository.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.time.LocalDateTime;
+import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class AnalysisOverviewServiceTest {
+    private final AssessmentRepository assessments = mock(AssessmentRepository.class);
+    private final ProjectRepository projects = mock(ProjectRepository.class);
+    private final AnalysisRunRepository runs = mock(AnalysisRunRepository.class);
+    private final AnalysisResultRepository results = mock(AnalysisResultRepository.class);
+    private final RetrievalAuditRepository audits = mock(RetrievalAuditRepository.class);
+    private final BehaviorDocumentRepository behaviors = mock(BehaviorDocumentRepository.class);
+    private final AnalysisOverviewService service = new AnalysisOverviewService(assessments, projects, runs, results, audits, behaviors);
+    private final LocalDateTime start = LocalDateTime.of(2026, 9, 18, 10, 0);
+    private AnalysisRun run;
+
+    @BeforeEach
+    void setup() {
+        when(assessments.findById(86L)).thenReturn(Optional.of(Assessment.builder().id(86L).projectId(7L).assessmentDate(start).build()));
+        when(projects.findById(7L)).thenReturn(Optional.empty());
+        run = AnalysisRun.start(new AnalysisScope(7L, 86L, "latest"), start);
+        when(runs.findFirstByAssessmentIdAndProjectIdOrderByStartedAtDescAnalysisRunIdDesc(86L, 7L)).thenReturn(Optional.of(run));
+        when(results.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.emptyList());
+        when(audits.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.emptyList());
+        when(behaviors.findByScope(7L, 86L, "latest")).thenReturn(Collections.emptyList());
+    }
+
+    @Test void notStartedDoesNotReadArtifacts() {
+        when(runs.findFirstByAssessmentIdAndProjectIdOrderByStartedAtDescAnalysisRunIdDesc(86L, 7L)).thenReturn(Optional.empty());
+        AnalysisOverviewVO vo = service.overview(86L, 7L);
+        assertEquals("NOT_STARTED", vo.getDisplayStatus()); assertNull(vo.getRun()); assertTrue(vo.getBehaviorGroups().isEmpty());
+        verifyNoInteractions(results, audits, behaviors);
+    }
+    @Test void running() { assertEquals("RUNNING", service.overview(86L, 7L).getDisplayStatus()); }
+    @Test void failedDoesNotBecomeNoCandidates() {
+        run.fail(start.plusSeconds(1)); audit(RetrievalAuditStatus.NO_CANDIDATES, AnalysisAuditStatus.NOT_ATTEMPTED, Collections.emptyList());
+        assertEquals("FAILED", service.overview(86L, 7L).getDisplayStatus());
+    }
+    @Test void succeededCountsDecision() {
+        run.succeed(start.plusSeconds(1)); conclusion(ComplianceStatus.NON_COMPLIANT);
+        AnalysisOverviewVO vo = service.overview(86L, 7L);
+        assertEquals("COMPLETED_WITH_DECISION", vo.getDisplayStatus()); assertEquals(1, vo.getSummary().getDecisionCount());
+        assertTrue(vo.getBehaviorGroups().get(0).getConclusions().get(0).isMock());
+    }
+    @Test void insufficientEvidenceRetainedWithoutDecision() {
+        run.completeWithoutDecision(start.plusSeconds(1)); conclusion(ComplianceStatus.INSUFFICIENT_EVIDENCE);
+        AnalysisOverviewVO vo = service.overview(86L, 7L);
+        assertEquals("COMPLETED_WITHOUT_DECISION", vo.getDisplayStatus()); assertEquals(0, vo.getSummary().getDecisionCount());
+        assertEquals("INSUFFICIENT_EVIDENCE", vo.getBehaviorGroups().get(0).getConclusions().get(0).getComplianceStatus());
+    }
+    @Test void noCandidates() {
+        run.completeWithoutDecision(start.plusSeconds(1)); audit(RetrievalAuditStatus.NO_CANDIDATES, AnalysisAuditStatus.NOT_ATTEMPTED, Collections.emptyList());
+        assertEquals("NO_CANDIDATES", service.overview(86L, 7L).getDisplayStatus());
+    }
+    @Test void notDemoIsNotNoCandidates() {
+        run.completeWithoutDecision(start.plusSeconds(1)); audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.NOT_DEMO_INPUT, Collections.emptyList());
+        assertEquals("COMPLETED_WITHOUT_DECISION", service.overview(86L, 7L).getDisplayStatus());
+    }
+    @Test void nullSnapshotIsExplicit() {
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.NOT_ATTEMPTED, null);
+        RetrievalAuditVO vo = service.overview(86L, 7L).getBehaviorGroups().get(0).getRetrievalAudit();
+        assertFalse(vo.isSnapshotAvailable()); assertEquals(0, vo.getCandidateTotal()); assertTrue(vo.getCandidates().isEmpty());
+    }
+    @Test void auditOnlyBehaviorRemains() {
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.RECALL_GAP, Collections.emptyList());
+        AnalysisOverviewVO vo = service.overview(86L, 7L);
+        assertEquals(1, vo.getBehaviorGroups().size()); assertTrue(vo.getBehaviorGroups().get(0).getConclusions().isEmpty());
+        assertEquals(1, vo.getSummary().getRecallGapCount());
+    }
+    @Test void truncationDoesNotLoseConclusionNames() {
+        List<RetrievalCandidateSnapshot> snapshots = new ArrayList<>();
+        for (int i = 0; i < 51; i++) snapshots.add(RetrievalCandidateSnapshot.builder().name("指标"+i).content("原文")
+                .result(RetrievalResult.builder().candidateType(RetrievalCandidateType.INDICATOR).candidateId("i"+i).rank(i+1).build()).build());
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.SUCCESS, snapshots); conclusion(ComplianceStatus.NON_COMPLIANT);
+        AnalysisOverviewVO vo = service.overview(86L, 7L); BehaviorAnalysisGroupVO group = vo.getBehaviorGroups().get(0);
+        assertTrue(vo.isTruncated()); assertTrue(group.getRetrievalAudit().isCandidateTruncated());
+        assertEquals(51, group.getRetrievalAudit().getCandidateTotal()); assertEquals(50, group.getRetrievalAudit().getCandidates().size());
+        assertEquals("指标50", group.getConclusions().get(0).getIndicatorName());
+    }
+    @Test void successCandidatesPreventNoCandidateOverride() {
+        run.completeWithoutDecision(start.plusSeconds(1));
+        RetrievalAudit empty = RetrievalAudit.builder().behaviorId("empty").retrievalStatus(RetrievalAuditStatus.NO_CANDIDATES).candidates(Collections.emptyList()).build();
+        RetrievalAudit full = RetrievalAudit.builder().behaviorId("full").retrievalStatus(RetrievalAuditStatus.SUCCESS)
+                .candidates(Collections.singletonList(new RetrievalCandidateSnapshot())).build();
+        when(audits.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Arrays.asList(empty, full));
+        assertEquals("COMPLETED_WITHOUT_DECISION", service.overview(86L, 7L).getDisplayStatus());
+    }
+    @Test void missingSuccessSnapshotPreventsNoCandidateOverride() {
+        run.completeWithoutDecision(start.plusSeconds(1));
+        when(audits.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Arrays.asList(
+                RetrievalAudit.builder().behaviorId("empty").retrievalStatus(RetrievalAuditStatus.NO_CANDIDATES).candidates(Collections.emptyList()).build(),
+                RetrievalAudit.builder().behaviorId("missing").retrievalStatus(RetrievalAuditStatus.SUCCESS).build()));
+        assertEquals("COMPLETED_WITHOUT_DECISION", service.overview(86L, 7L).getDisplayStatus());
+    }
+    @Test void esFailureKeepsArtifacts() {
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.SUCCESS, Collections.emptyList());
+        when(behaviors.findByScope(7L, 86L, "latest")).thenThrow(new IllegalStateException("ES unavailable"));
+        assertEquals(1, service.overview(86L, 7L).getBehaviorGroups().size());
+    }
+    @Test void behaviorDescriptionAndTime() {
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.SUCCESS, Collections.emptyList());
+        Behavior b = new Behavior(); b.setId("b"); b.setSubject("企业"); b.setAction("检验"); b.setObject("设备");
+        when(behaviors.findByScope(7L, 86L, "latest")).thenReturn(Collections.singletonList(b));
+        AnalysisOverviewVO vo = service.overview(86L, 7L);
+        assertEquals("企业 检验 设备", vo.getBehaviorGroups().get(0).getBehaviorDescription());
+        assertEquals("2026-09-18 10:00:00", vo.getRun().getStartedAt());
+    }
+    @Test void controllerErrors() {
+        AnalysisOverviewController controller = new AnalysisOverviewController(service);
+        assertEquals(400, controller.overview(86L, null).getCode());
+        assertEquals(403, controller.overview(86L, 8L).getCode());
+        when(assessments.findById(99L)).thenReturn(Optional.empty());
+        assertEquals(404, controller.overview(99L, 7L).getCode());
+        when(audits.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenThrow(new IllegalStateException("DB unavailable"));
+        assertEquals(500, controller.overview(86L, 7L).getCode());
+    }
+    private void audit(RetrievalAuditStatus retrieval, AnalysisAuditStatus analysis, List<RetrievalCandidateSnapshot> candidates) {
+        when(audits.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.singletonList(
+                RetrievalAudit.builder().behaviorId("b").retrievalStatus(retrieval).analysisStatus(analysis).candidates(candidates).build()));
+    }
+    private void conclusion(ComplianceStatus status) {
+        when(results.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.singletonList(
+                AnalysisResult.builder().id("result").behaviorId("b").indicatorId("i50").applicable(Applicability.APPLICABLE)
+                        .complianceStatus(status).modelVersion("mock-fixture-v1").build()));
+    }
+}

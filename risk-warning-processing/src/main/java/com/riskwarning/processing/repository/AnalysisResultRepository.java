@@ -7,4 +7,5 @@ import java.util.Optional;
 public interface AnalysisResultRepository extends JpaRepository<AnalysisResult, String> {
     Optional<AnalysisResult> findByAnalysisRunIdAndBehaviorIdAndIndicatorId(
             String analysisRunId, String behaviorId, String indicatorId);
+    java.util.List<AnalysisResult> findByAssessmentIdAndAnalysisRunId(Long assessmentId, String analysisRunId);
 }

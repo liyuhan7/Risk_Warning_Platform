@@ -13,6 +13,8 @@ import com.riskwarning.processing.service.DocumentProcessingService;
 import com.riskwarning.processing.service.EvidenceExtractionService;
 import com.riskwarning.processing.service.FactExtractionPipeline;
 import com.riskwarning.processing.service.SourceDocumentScopeValidator;
+import com.riskwarning.processing.service.P2RetrievalProcessingService;
+import com.riskwarning.processing.config.P2ProcessingProperties;
 import com.riskwarning.processing.entity.dto.ProcessedDocument;
 import com.riskwarning.common.utils.KafkaUtils;
 import org.junit.jupiter.api.io.TempDir;
@@ -33,6 +35,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -94,6 +97,46 @@ class MessageTaskScopeTest {
                         "message", "timestamp", "trace", 1L, 10L, 20L, "run-1",
                         DataSourceTypeEnum.FILE_UPLOAD,
                         Collections.singletonList(new SourceDocumentRef(null, "source.pdf"))));
+    }
+
+    @Test
+    void routesEachModeToItsOwnProcessingChain() {
+        BehaviorProcessingService behaviorProcessingService = mock(BehaviorProcessingService.class);
+        P2RetrievalProcessingService retrievalProcessingService = mock(P2RetrievalProcessingService.class);
+        AnalysisRunFailureService failureService = mock(AnalysisRunFailureService.class);
+        KafkaUtils kafkaUtils = mock(KafkaUtils.class);
+        P2ProcessingProperties properties = new P2ProcessingProperties();
+        org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor executor =
+                new org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.setMaxPoolSize(1);
+        executor.initialize();
+        try {
+            MessageTask task = new MessageTask();
+            ReflectionTestUtils.setField(task, "behaviorProcessingService", behaviorProcessingService);
+            ReflectionTestUtils.setField(task, "p2RetrievalProcessingService", retrievalProcessingService);
+            ReflectionTestUtils.setField(task, "analysisRunFailureService", failureService);
+            ReflectionTestUtils.setField(task, "behaviorThreadPoolExecutor", executor);
+            ReflectionTestUtils.setField(task, "kafkaUtils", kafkaUtils);
+            ReflectionTestUtils.setField(task, "p2Properties", properties);
+            IndicatorCalculationTaskMessage message = new IndicatorCalculationTaskMessage(
+                    "message", "timestamp", "trace", 1L, 10L, 20L, "run-1");
+
+            task.onMessage(message);
+
+            verify(behaviorProcessingService, timeout(1000)).processProjectBehaviors(1L, 10L, 20L, "run-1");
+            verifyNoInteractions(retrievalProcessingService);
+
+            properties.setMode(P2ProcessingProperties.Mode.P2);
+            task.onMessage(message);
+
+            verify(retrievalProcessingService, timeout(1000))
+                    .process(any(IndicatorCalculationTaskMessage.class), eq(new AnalysisScope(10L, 20L, "run-1")));
+            verify(behaviorProcessingService, times(1)).processProjectBehaviors(any(), any(), any(), any());
+            verifyNoInteractions(kafkaUtils);
+        } finally {
+            executor.shutdown();
+        }
     }
 
     @Test

@@ -15,7 +15,7 @@ import com.riskwarning.processing.service.DocumentProcessingService;
 import com.riskwarning.processing.service.EvidenceExtractionService;
 import com.riskwarning.processing.service.FactExtractionPipeline;
 import com.riskwarning.processing.service.SourceDocumentScopeValidator;
-import com.riskwarning.processing.service.P2DemoProcessingService;
+import com.riskwarning.processing.service.P2RetrievalProcessingService;
 import com.riskwarning.processing.config.P2ProcessingProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +63,7 @@ public class MessageTask {
     private KafkaUtils kafkaUtils;
 
     @Autowired
-    private P2DemoProcessingService p2DemoProcessingService;
+    private P2RetrievalProcessingService p2RetrievalProcessingService;
 
     @Autowired
     private P2ProcessingProperties p2Properties = new P2ProcessingProperties();
@@ -194,8 +194,8 @@ public class MessageTask {
         behaviorThreadPoolExecutor.execute(() -> {
             try {
                 log.info("▶ 开始行为评估和指标计算...");
-                if (p2Properties.getMode() == P2ProcessingProperties.Mode.P2_DEMO) {
-                    p2DemoProcessingService.process(message, analysisScope);
+                if (p2Properties.getMode() == P2ProcessingProperties.Mode.P2) {
+                    p2RetrievalProcessingService.process(message, analysisScope);
                 } else {
                     behaviorProcessingService.processProjectBehaviors(
                             message.getUserId(), message.getProjectId(), message.getAssessmentId(),

@@ -8,8 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "p2")
 public class P2ProcessingProperties {
-    public enum Mode { LEGACY, P2_DEMO }
+    public enum Mode { LEGACY, P2 }
     private Mode mode = Mode.LEGACY;
     private int batchSize = 16;
-    private String fixturePath = "test/fixtures/p2/mock-analysis-results.json";
 }

@@ -19,4 +19,6 @@ public class AnalysisSummaryVO {
     private int notDemoInputCount;
     private int recallGapCount;
     private int insufficientEvidenceCount;
+    private int snapshotUnavailableCount;
+    private int waitingForAnalysisCount;
 }

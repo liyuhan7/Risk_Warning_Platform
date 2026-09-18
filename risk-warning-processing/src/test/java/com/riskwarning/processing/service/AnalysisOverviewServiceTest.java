@@ -69,6 +69,45 @@ class AnalysisOverviewServiceTest {
         run.completeWithoutDecision(start.plusSeconds(1)); audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.NOT_DEMO_INPUT, Collections.emptyList());
         assertEquals("COMPLETED_WITHOUT_DECISION", service.overview(86L, 7L).getDisplayStatus());
     }
+    @Test void mixedFailureCannotBeHiddenAsNoCandidates() {
+        run.completeWithoutDecision(start.plusSeconds(1));
+        when(audits.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Arrays.asList(
+                RetrievalAudit.builder().behaviorId("empty").retrievalStatus(RetrievalAuditStatus.NO_CANDIDATES)
+                        .candidates(Collections.emptyList()).build(),
+                RetrievalAudit.builder().behaviorId("failed").retrievalStatus(RetrievalAuditStatus.FAILED).build()));
+        assertNotEquals("NO_CANDIDATES", service.overview(86L, 7L).getDisplayStatus());
+    }
+    @Test void explicitRunNeverFallsBackToLatestAssessmentArtifacts() {
+        when(runs.findByAnalysisRunIdAndAssessmentIdAndProjectId("foreign", 86L, 7L)).thenReturn(Optional.empty());
+        assertThrows(NoSuchElementException.class, () -> service.overview(86L, 7L, "foreign"));
+        verifyNoInteractions(results, audits, behaviors);
+    }
+    @Test void behaviorWithNoAuditStillAppearsWithEvidenceReferences() {
+        Behavior behavior = Behavior.builder().id("fact").subject("企业").action("留存")
+                .object("审批意见").evidenceIds(Collections.singletonList("evidence")).confidence(0.95).build();
+        when(behaviors.findByScope(7L, 86L, "latest")).thenReturn(Collections.singletonList(behavior));
+        BehaviorAnalysisGroupVO group = service.overview(86L, 7L).getBehaviorGroups().get(0);
+        assertEquals("企业", group.getSubject());
+        assertEquals(Collections.singletonList("evidence"), group.getEvidenceIds());
+        assertNull(group.getRetrievalAudit());
+    }
+    @Test void candidatePreservesRetrievalIdentityAndVersions() {
+        Map<String, String> filters = Collections.singletonMap("enabled", "false");
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_P3, Collections.singletonList(
+                RetrievalCandidateSnapshot.builder().name("指标")
+                        .result(RetrievalResult.builder().candidateType(RetrievalCandidateType.INDICATOR)
+                                .candidateId("indicator-1").behaviorId("b").assessmentId(86L)
+                                .analysisRunId("latest").embeddingModel("bge-m3").embeddingVersion("v1")
+                                .matchedFilters(filters).build()).build()));
+        RetrievalCandidateVO candidate = service.overview(86L, 7L).getBehaviorGroups().get(0)
+                .getRetrievalAudit().getCandidates().get(0);
+        assertEquals("b", candidate.getBehaviorId());
+        assertEquals(86L, candidate.getAssessmentId());
+        assertEquals("latest", candidate.getAnalysisRunId());
+        assertEquals("bge-m3", candidate.getEmbeddingModel());
+        assertEquals("v1", candidate.getEmbeddingVersion());
+        assertEquals(filters, candidate.getMatchedFilters());
+    }
     @Test void nullSnapshotIsExplicit() {
         audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.NOT_ATTEMPTED, null);
         RetrievalAuditVO vo = service.overview(86L, 7L).getBehaviorGroups().get(0).getRetrievalAudit();
@@ -79,6 +118,36 @@ class AnalysisOverviewServiceTest {
         AnalysisOverviewVO vo = service.overview(86L, 7L);
         assertEquals(1, vo.getBehaviorGroups().size()); assertTrue(vo.getBehaviorGroups().get(0).getConclusions().isEmpty());
         assertEquals(1, vo.getSummary().getRecallGapCount());
+    }
+    @Test void indicatorWithoutDescriptionStillHasMetadataSnapshot() {
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.NOT_ATTEMPTED,
+                Collections.singletonList(RetrievalCandidateSnapshot.builder().name("采购审批指标")
+                        .result(RetrievalResult.builder().candidateType(RetrievalCandidateType.INDICATOR)
+                                .candidateId("indicator-1").build()).build()));
+        RetrievalCandidateVO candidate = service.overview(86L, 7L).getBehaviorGroups().get(0)
+                .getRetrievalAudit().getCandidates().get(0);
+        assertTrue(candidate.isSnapshotAvailable());
+        assertFalse(candidate.isContentAvailable());
+    }
+    @Test void contentAloneDoesNotMakeMissingCandidateMetadataAvailable() {
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.NOT_ATTEMPTED,
+                Collections.singletonList(RetrievalCandidateSnapshot.builder().content("法规原文")
+                        .result(RetrievalResult.builder().candidateType(RetrievalCandidateType.REGULATION)
+                                .candidateId("regulation-1").build()).build()));
+        RetrievalCandidateVO candidate = service.overview(86L, 7L).getBehaviorGroups().get(0)
+                .getRetrievalAudit().getCandidates().get(0);
+        assertFalse(candidate.isSnapshotAvailable());
+        assertTrue(candidate.isContentAvailable());
+    }
+    @Test void blankContentIsNotAnOriginalTextSource() {
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.NOT_ATTEMPTED,
+                Collections.singletonList(RetrievalCandidateSnapshot.builder().name("采购指标").content("  ")
+                        .result(RetrievalResult.builder().candidateType(RetrievalCandidateType.INDICATOR)
+                                .candidateId("indicator-1").build()).build()));
+        RetrievalCandidateVO candidate = service.overview(86L, 7L).getBehaviorGroups().get(0)
+                .getRetrievalAudit().getCandidates().get(0);
+        assertTrue(candidate.isSnapshotAvailable());
+        assertFalse(candidate.isContentAvailable());
     }
     @Test void truncationDoesNotLoseConclusionNames() {
         List<RetrievalCandidateSnapshot> snapshots = new ArrayList<>();
@@ -117,6 +186,47 @@ class AnalysisOverviewServiceTest {
         AnalysisOverviewVO vo = service.overview(86L, 7L);
         assertEquals("企业 检验 设备", vo.getBehaviorGroups().get(0).getBehaviorDescription());
         assertEquals("2026-09-18 10:00:00", vo.getRun().getStartedAt());
+    }
+    @Test void failedNewerRunDoesNotHideTheOlderSuccessfulRun() {
+        AnalysisRun older = AnalysisRun.start(new AnalysisScope(7L, 86L, "good-run"), start);
+        older.completeWithoutDecision(start.plusSeconds(1));
+        when(runs.findByAnalysisRunIdAndAssessmentIdAndProjectId("good-run", 86L, 7L)).thenReturn(Optional.of(older));
+        when(audits.findByAssessmentIdAndAnalysisRunId(86L, "good-run")).thenReturn(Collections.singletonList(
+                RetrievalAudit.builder().behaviorId("b").retrievalStatus(RetrievalAuditStatus.SUCCESS)
+                        .analysisStatus(AnalysisAuditStatus.WAITING_P3)
+                        .embeddingModel("BAAI/bge-m3").embeddingVersion("v1")
+                        .candidates(Collections.singletonList(RetrievalCandidateSnapshot.builder().name("采购指标")
+                                .result(RetrievalResult.builder().candidateType(RetrievalCandidateType.INDICATOR)
+                                        .candidateId("indicator-1").behaviorId("b").assessmentId(86L)
+                                        .analysisRunId("good-run").embeddingModel("BAAI/bge-m3").embeddingVersion("v1")
+                                        .rank(1).score(0.8).scoreType(ScoreType.COSINE_SIMILARITY).build()).build()))
+                        .build()));
+        when(behaviors.findByScope(7L, 86L, "good-run")).thenReturn(Collections.singletonList(
+                Behavior.builder().id("b").subject("企业").action("留存").object("审批意见")
+                        .evidenceIds(Collections.singletonList("evidence")).build()));
+
+        run.fail(start.plusSeconds(2));
+        audit(RetrievalAuditStatus.FAILED, AnalysisAuditStatus.NOT_ATTEMPTED, Collections.emptyList());
+
+        AnalysisOverviewVO olderView = service.overview(86L, 7L, "good-run");
+        assertEquals("COMPLETED_WITHOUT_DECISION", olderView.getDisplayStatus());
+        assertEquals(1, olderView.getSummary().getWaitingForAnalysisCount());
+        assertEquals(0, olderView.getSummary().getRetrievalFailedCount());
+        assertEquals("b", olderView.getBehaviorGroups().get(0).getBehaviorId());
+        assertEquals(1, olderView.getBehaviorGroups().get(0).getRetrievalAudit().getCandidates().size());
+
+        AnalysisOverviewVO latestView = service.overview(86L, 7L);
+        assertEquals("FAILED", latestView.getDisplayStatus());
+        assertEquals(1, latestView.getSummary().getRetrievalFailedCount());
+        assertEquals(0, latestView.getSummary().getWaitingForAnalysisCount());
+    }
+    @Test void runSummaryDistinguishesRealRetrievalFromMockConclusions() {
+        run.succeed(start.plusSeconds(1));
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_P3, Collections.emptyList());
+        assertEquals("P2_RETRIEVAL", service.overview(86L, 7L).getRun().getAnalysisMode());
+
+        conclusion(ComplianceStatus.NON_COMPLIANT);
+        assertEquals("LEGACY_MOCK_DEMO", service.overview(86L, 7L).getRun().getAnalysisMode());
     }
     @Test void controllerErrors() {
         AnalysisOverviewController controller = new AnalysisOverviewController(service);

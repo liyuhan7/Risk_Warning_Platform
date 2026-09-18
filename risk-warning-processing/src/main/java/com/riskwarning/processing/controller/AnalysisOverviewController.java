@@ -17,11 +17,16 @@ import java.util.NoSuchElementException;
 public class AnalysisOverviewController {
     private final AnalysisOverviewService service;
 
+    public Result<AnalysisOverviewVO> overview(Long assessmentId, Long projectId) {
+        return overview(assessmentId, projectId, null);
+    }
+
     @AuthRequired
     @GetMapping("/overview/{assessmentId}")
     public Result<AnalysisOverviewVO> overview(@PathVariable Long assessmentId,
-                                              @RequestParam(required = false) Long projectId) {
-        try { return Result.success(service.overview(assessmentId, projectId)); }
+                                              @RequestParam(required = false) Long projectId,
+                                              @RequestParam(required = false) String analysisRunId) {
+        try { return Result.success(service.overview(assessmentId, projectId, analysisRunId)); }
         catch (IllegalArgumentException e) { return Result.fail(400, e.getMessage()); }
         catch (SecurityException e) { return Result.fail(403, e.getMessage()); }
         catch (NoSuchElementException e) { return Result.fail(404, e.getMessage()); }

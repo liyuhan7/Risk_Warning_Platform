@@ -34,6 +34,12 @@ public class AnalysisOverviewService {
      */
     @Transactional(readOnly = true)
     public AnalysisOverviewVO overview(Long assessmentId, Long projectId) {
+        return overview(assessmentId, projectId, null);
+    }
+
+    /** 指定 Run 时必须同时验证项目和评估归属，不回退到其他运行。 */
+    @Transactional(readOnly = true)
+    public AnalysisOverviewVO overview(Long assessmentId, Long projectId, String analysisRunId) {
         if (projectId == null || projectId <= 0 || assessmentId == null || assessmentId <= 0) {
             throw new IllegalArgumentException("projectId 与 assessmentId 必须为正数");
         }
@@ -46,13 +52,17 @@ public class AnalysisOverviewService {
                 .projectName(projects.findById(projectId).map(p -> p.getName()).orElse(null))
                 .assessmentDate(time(assessment.getAssessmentDate())).displayStatus("NOT_STARTED")
                 .summary(new AnalysisSummaryVO()).behaviorGroups(new ArrayList<>()).build();
-        Optional<AnalysisRun> latest = runs.findFirstByAssessmentIdAndProjectIdOrderByStartedAtDescAnalysisRunIdDesc(assessmentId, projectId);
+        Optional<AnalysisRun> latest = hasText(analysisRunId)
+                ? Optional.of(runs.findByAnalysisRunIdAndAssessmentIdAndProjectId(analysisRunId, assessmentId, projectId)
+                    .orElseThrow(() -> new NoSuchElementException("指定运行不存在或不属于本次评估")))
+                : runs.findFirstByAssessmentIdAndProjectIdOrderByStartedAtDescAnalysisRunIdDesc(assessmentId, projectId);
         if (!latest.isPresent()) { return vo; }
         AnalysisRun run = latest.get();
         vo.setRun(AnalysisRunSummaryVO.builder().analysisRunId(run.getAnalysisRunId()).status(run.getStatus().name())
                 .startedAt(time(run.getStartedAt())).finishedAt(time(run.getFinishedAt())).build());
         List<RetrievalAudit> auditRows = audits.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId());
         List<AnalysisResult> resultRows = results.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId());
+        vo.getRun().setAnalysisMode(AnalysisModeResolver.resolve(resultRows, auditRows));
         Map<String, Behavior> descriptions = new HashMap<>();
         // ES 不可用只影响行为描述，PostgreSQL 的审计与结论仍可回放。
         try {
@@ -61,6 +71,7 @@ public class AnalysisOverviewService {
             log.warn("分析概览行为描述不可用: assessmentId={}, run={}", assessmentId, run.getAnalysisRunId(), e);
         }
         Map<String, BehaviorAnalysisGroupVO> groups = new TreeMap<>();
+        descriptions.forEach((id, behavior) -> groups.put(id, group(id, behavior)));
         for (RetrievalAudit audit : auditRows) {
             BehaviorAnalysisGroupVO group = groups.computeIfAbsent(audit.getBehaviorId(), id -> group(id, descriptions.get(id)));
             group.setRetrievalAudit(audit(audit));
@@ -93,6 +104,8 @@ public class AnalysisOverviewService {
             if ("SUCCESS".equals(retrieval)) summary.setRetrievalSuccessCount(summary.getRetrievalSuccessCount()+1);
             if ("NO_CANDIDATES".equals(retrieval)) summary.setNoCandidateCount(summary.getNoCandidateCount()+1);
             if ("FAILED".equals(retrieval)) summary.setRetrievalFailedCount(summary.getRetrievalFailedCount()+1);
+            if ("SNAPSHOT_UNAVAILABLE".equals(retrieval)) summary.setSnapshotUnavailableCount(summary.getSnapshotUnavailableCount()+1);
+            if ("WAITING_P3".equals(analysis)) summary.setWaitingForAnalysisCount(summary.getWaitingForAnalysisCount()+1);
             if ("NOT_ATTEMPTED".equals(analysis)) summary.setNotAttemptedCount(summary.getNotAttemptedCount()+1);
             if ("NOT_DEMO_INPUT".equals(analysis)) summary.setNotDemoInputCount(summary.getNotDemoInputCount()+1);
             if ("RECALL_GAP".equals(analysis)) summary.setRecallGapCount(summary.getRecallGapCount()+1);
@@ -100,9 +113,9 @@ public class AnalysisOverviewService {
         }
         String status = run.getStatus().name();
         if ("SUCCEEDED".equals(status)) status = "COMPLETED_WITH_DECISION";
-        if ("COMPLETED_WITHOUT_DECISION".equals(status) && summary.getNoCandidateCount() > 0
-                && auditRows.stream().filter(a -> "SUCCESS".equals(value(a.getRetrievalStatus())))
-                    .allMatch(a -> a.getCandidates() != null && a.getCandidates().isEmpty())) { status = "NO_CANDIDATES"; }
+        if ("COMPLETED_WITHOUT_DECISION".equals(status) && !auditRows.isEmpty()
+                && auditRows.stream().allMatch(a -> a.getRetrievalStatus()
+                    == com.riskwarning.common.enums.analysis.RetrievalAuditStatus.NO_CANDIDATES)) { status = "NO_CANDIDATES"; }
         vo.setDisplayStatus(status);
         return vo;
     }
@@ -115,6 +128,11 @@ public class AnalysisOverviewService {
         }
         return BehaviorAnalysisGroupVO.builder().behaviorId(id).behaviorDescription(description)
                 .behaviorType(b == null ? null : b.getType()).behaviorDimension(b == null ? null : b.getDimension())
+                .subject(b == null ? null : b.getSubject()).action(b == null ? null : b.getAction())
+                .object(b == null ? null : b.getObject()).quantitativeData(b == null ? null : b.getQuantitativeData())
+                .quantitativeUnit(b == null ? null : b.getQuantitativeUnit()).confidence(b == null ? null : b.getConfidence())
+                .sourceDocumentId(b == null ? null : b.getSourceDocumentId())
+                .evidenceIds(b == null ? Collections.emptyList() : safe(b.getEvidenceIds()))
                 .conclusions(new ArrayList<>()).build();
     }
 
@@ -124,21 +142,12 @@ public class AnalysisOverviewService {
         vo.setRetrievalStatus(value(row.getRetrievalStatus())); vo.setAnalysisStatus(value(row.getAnalysisStatus()));
         vo.setSnapshotAvailable(row.getCandidates() != null);
         vo.setCandidateTotal(safe(row.getCandidates()).size()); vo.setCandidateTruncated(vo.getCandidateTotal() > 50);
-        vo.setCandidates(safe(row.getCandidates()).stream().limit(50).map(s -> {
-            RetrievalCandidateVO c = new RetrievalCandidateVO();
-            if (s != null) {
-                org.springframework.beans.BeanUtils.copyProperties(s, c);
-                if (s.getResult() != null) {
-                    org.springframework.beans.BeanUtils.copyProperties(s.getResult(), c);
-                    c.setCandidateType(value(s.getResult().getCandidateType())); c.setScoreType(value(s.getResult().getScoreType()));
-                }
-            }
-            c.setSnapshotAvailable(s != null && s.getResult() != null && s.getContent() != null);
-            return c;
-        }).collect(Collectors.toList()));
+        vo.setCandidates(safe(row.getCandidates()).stream().limit(50)
+                .map(RetrievalCandidateVoMapper::toVo).collect(Collectors.toList()));
         return vo;
     }
     private static String value(Enum<?> value) { return value == null ? null : value.name(); }
+    private static boolean hasText(String value) { return value != null && !value.trim().isEmpty(); }
     private static String time(LocalDateTime value) { return value == null ? null : TIME.format(value); }
     private static <T> List<T> safe(List<T> values) { return values == null ? Collections.emptyList() : values; }
 }

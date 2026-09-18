@@ -1,8 +1,0 @@
-embedding:
-  enabled: true
-
-retrieval:
-  enabled: true
-  indicator-index: t_indicator_test
-  regulation-index: t_regulation_test
-

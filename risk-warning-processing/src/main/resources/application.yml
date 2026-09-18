@@ -20,7 +20,6 @@ knowledge:
 p2:
   mode: ${P2_PROCESSING_MODE:LEGACY}
   batch-size: 16
-  fixture-path: ${P2_FIXTURE_PATH:test/fixtures/p2/mock-analysis-results.json}
 
 feign:
   client:

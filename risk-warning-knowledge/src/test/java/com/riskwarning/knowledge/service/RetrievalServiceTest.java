@@ -1,6 +1,10 @@
 package com.riskwarning.knowledge.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import com.riskwarning.common.dto.retrieval.RetrievalBatchItem;
+import com.riskwarning.common.dto.retrieval.RetrievalBatchStatus;
 import com.riskwarning.common.dto.retrieval.RetrievalCandidateType;
 import com.riskwarning.common.dto.retrieval.RetrievalBatchRequest;
 import com.riskwarning.common.dto.retrieval.RetrievalFilter;
@@ -13,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -129,6 +134,58 @@ class RetrievalServiceTest {
         return RetrievalBatchRequest.builder()
                 .scope(new com.riskwarning.common.dto.analysis.AnalysisScope(1L, 2L, "run-1"))
                 .requests(requests).build();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void emptySearchRetainsModelVersionAndActualFilterState() throws IOException {
+        ElasticsearchClient client = mock(ElasticsearchClient.class);
+        AiEmbeddingProvider embedding = mock(AiEmbeddingProvider.class);
+        when(embedding.dimension()).thenReturn(1024);
+        when(embedding.modelId()).thenReturn("BAAI/bge-m3");
+        when(embedding.embed(anyList(), any())).thenReturn(Collections.singletonList(vector()));
+        SearchResponse<Map> empty = new SearchResponse.Builder<Map>().took(1).timedOut(false)
+                .shards(s -> s.total(1).successful(1).failed(0)).hits(h -> h.hits(Collections.emptyList())).build();
+        when(client.search(any(SearchRequest.class), eq(Map.class))).thenReturn(empty);
+        RetrievalProperties properties = new RetrievalProperties();
+        RetrievalBatchItem item = new RetrievalService(client, embedding, properties)
+                .retrieveBatch(batch(Collections.singletonList(request("b")))).getItems().get(0);
+        assertEquals(RetrievalBatchStatus.NO_CANDIDATES, item.getStatus());
+        assertEquals("BAAI/bge-m3", item.getEmbeddingModel());
+        assertEquals(properties.getEmbeddingVersion(), item.getEmbeddingVersion());
+        assertEquals("false", item.getMatchedFilters().get("applied"));
+        assertTrue(item.getCandidates().isEmpty());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void snapshotReadFailurePreservesRealScoredIdsWithExplicitUnavailableStatus() throws IOException {
+        ElasticsearchClient client = mock(ElasticsearchClient.class);
+        AiEmbeddingProvider embedding = mock(AiEmbeddingProvider.class);
+        when(embedding.dimension()).thenReturn(1024);
+        when(embedding.modelId()).thenReturn("BAAI/bge-m3");
+        when(embedding.embed(anyList(), any())).thenReturn(Collections.singletonList(vector()));
+        SearchResponse<Map> scored = new SearchResponse.Builder<Map>().took(1).timedOut(false)
+                .shards(s -> s.total(1).successful(1).failed(0))
+                .hits(h -> h.hits(hit -> hit.index("knowledge").id("real-es-id").score(0.8))).build();
+        when(client.search(any(SearchRequest.class), eq(Map.class))).thenReturn(scored, scored, scored)
+                .thenThrow(new IOException("snapshot read failed"));
+        RetrievalBatchItem item = new RetrievalService(client, embedding, new RetrievalProperties())
+                .retrieveBatch(batch(Collections.singletonList(request("b")))).getItems().get(0);
+        assertEquals(RetrievalBatchStatus.SNAPSHOT_UNAVAILABLE, item.getStatus());
+        assertEquals(2, item.getCandidates().size());
+        item.getCandidates().forEach(candidate -> {
+            assertEquals("real-es-id", candidate.getResult().getCandidateId());
+            assertNotNull(candidate.getResult().getScore());
+            assertNull(candidate.getName());
+            assertNull(candidate.getContent());
+        });
+    }
+
+    private List<Float> vector() {
+        List<Float> vector = new ArrayList<>(Collections.nCopies(1024, 0.0f));
+        vector.set(0, 1.0f);
+        return vector;
     }
 
     private RetrievalRequest request(String behaviorId) {

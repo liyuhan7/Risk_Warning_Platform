@@ -71,9 +71,22 @@ public class RetrievalService {
         for (int i = 0; i < batch.getRequests().size(); i++) {
             RetrievalRequest request = batch.getRequests().get(i);
             List<RetrievalResult> results = retrieveWithVector(request, vectors.get(i));
-            List<RetrievalCandidateSnapshot> snapshots = hydrate(results);
+            List<RetrievalCandidateSnapshot> snapshots;
+            RetrievalBatchStatus status;
+            try {
+                snapshots = hydrate(results);
+                status = snapshots.isEmpty() ? RetrievalBatchStatus.NO_CANDIDATES : RetrievalBatchStatus.SUCCESS;
+            } catch (SnapshotUnavailableException failure) {
+                // ID 与评分来自已完成的真实检索；回读失败只保留检索记录，不伪造候选正文。
+                snapshots = new ArrayList<>();
+                for (RetrievalResult result : results) {
+                    snapshots.add(RetrievalCandidateSnapshot.builder().result(result).build());
+                }
+                status = RetrievalBatchStatus.SNAPSHOT_UNAVAILABLE;
+            }
             items.add(RetrievalBatchItem.builder().behaviorId(request.getBehaviorId())
-                    .status(snapshots.isEmpty() ? RetrievalBatchStatus.NO_CANDIDATES : RetrievalBatchStatus.SUCCESS)
+                    .status(status).embeddingModel(embedding.modelId())
+                    .embeddingVersion(properties.getEmbeddingVersion()).matchedFilters(filters.describe(request.getFilter()))
                     .candidates(snapshots).build());
         }
         return RetrievalBatchResponse.builder().items(items).build();
@@ -124,12 +137,12 @@ public class RetrievalService {
             output.addAll(hydrateIndex(properties.getIndicatorIndex(), indicators, true));
             output.addAll(hydrateIndex(properties.getRegulationIndex(), regulations, false));
         } catch (IOException failure) {
-            throw new IllegalStateException("候选快照回读失败", failure);
+            throw new SnapshotUnavailableException("候选快照回读失败", failure);
         }
         output.sort(Comparator.comparing((RetrievalCandidateSnapshot s) -> s.getResult().getCandidateType())
                 .thenComparing(s -> s.getResult().getRank()));
         if (output.size() != results.size()) {
-            throw new IllegalStateException("检索候选在快照回读时缺失");
+            throw new SnapshotUnavailableException("检索候选在快照回读时缺失", null);
         }
         return output;
     }
@@ -161,6 +174,10 @@ public class RetrievalService {
 
     private String string(Object value) {
         return value == null ? null : String.valueOf(value);
+    }
+
+    private static class SnapshotUnavailableException extends IllegalStateException {
+        SnapshotUnavailableException(String message, Throwable cause) { super(message, cause); }
     }
 
     private Map<String, Double> dense(String index, List<Float> vector, int k, List<Query> constraints) throws IOException {

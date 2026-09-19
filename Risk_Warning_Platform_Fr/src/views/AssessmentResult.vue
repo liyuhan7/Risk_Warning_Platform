@@ -31,22 +31,24 @@
             <el-icon><Cpu /></el-icon>
             <span>分析概览</span>
           </el-menu-item>
-          <el-menu-item index="overview">
-            <el-icon><DataAnalysis /></el-icon>
-            <span>总览报告</span>
-          </el-menu-item>
-          <el-menu-item index="indicator">
-            <el-icon><TrendCharts /></el-icon>
-            <span>指标分布</span>
-          </el-menu-item>
-          <el-menu-item index="risk">
-            <el-icon><Document /></el-icon>
-            <span>风险清单</span>
-          </el-menu-item>
-          <el-menu-item index="evidence">
-            <el-icon><Link /></el-icon>
-            <span>证据回溯</span>
-          </el-menu-item>
+          <template v-if="showLegacyViews">
+            <el-menu-item index="overview">
+              <el-icon><DataAnalysis /></el-icon>
+              <span>总览报告</span>
+            </el-menu-item>
+            <el-menu-item index="indicator">
+              <el-icon><TrendCharts /></el-icon>
+              <span>指标分布</span>
+            </el-menu-item>
+            <el-menu-item index="risk">
+              <el-icon><Document /></el-icon>
+              <span>风险清单</span>
+            </el-menu-item>
+            <el-menu-item index="evidence">
+              <el-icon><Link /></el-icon>
+              <span>证据回溯</span>
+            </el-menu-item>
+          </template>
         </el-menu>
 
         <!-- 维度筛选（仅在风险清单视图显示） -->
@@ -209,6 +211,13 @@ import {
   getDimensionLabel,
   getDimensionBadgeType as getDimensionBadgeTypeUtil
 } from '@/utils/riskClassification'
+import {
+  normalizeAnalysisView,
+  resolveAnalysisRunId,
+  showsLegacyAnalysisViews,
+  withAnalysisRunId,
+  type AnalysisView
+} from '@/utils/analysisNavigation'
 
 const route = useRoute()
 const router = useRouter()
@@ -221,7 +230,7 @@ const waitingProjectId = ref<number | null>(
 const assessmentId = ref<number>(Number(route.query.assessmentId) || 0)
 
 // 视图状态
-const activeView = ref('overview')
+const activeView = ref<AnalysisView>('overview')
 const selectedDimension = ref('')
 const selectedRiskLevel = ref('')
 
@@ -256,6 +265,9 @@ const analysisData = ref<AnalysisOverviewVO | null>(null)
 const loadingAnalysis = ref(false)
 const analysisError = ref('')
 const analysisPollLimitReached = ref(false)
+const requestedAnalysisRunId = computed(() => resolveAnalysisRunId(route.query))
+const analysisMode = computed(() => analysisData.value?.run?.analysisMode)
+const showLegacyViews = computed(() => showsLegacyAnalysisViews(analysisMode.value))
 
 // 用户手动选过视图后不再自动切换默认视图
 let viewChosenByUser = false
@@ -287,14 +299,23 @@ const loadAnalysis = async (current: number) => {
   try {
     const response = await getAnalysisOverview(
       assessmentId.value,
-      currentProjectId
+      currentProjectId,
+      requestedAnalysisRunId.value
     )
     if (current !== analysisGeneration) {
       return
     }
     analysisData.value = response.data
+    activeView.value = normalizeAnalysisView(activeView.value, response.data.run?.analysisMode)
     if (!viewChosenByUser && response.data.displayStatus !== 'NOT_STARTED') {
       activeView.value = 'analysis'
+    }
+    const actualRunId = response.data.run?.analysisRunId
+    if (
+      actualRunId &&
+      (route.query.analysisRunId !== actualRunId || route.query.runId !== undefined)
+    ) {
+      void router.replace({ query: withAnalysisRunId(route.query, actualRunId) })
     }
     if (response.data.displayStatus === 'RUNNING') {
       if (analysisPollCount < 20) {
@@ -491,7 +512,7 @@ const getDimensionBadgeType = (dimension: string): 'danger' | 'warning' | 'succe
 
 // 菜单选择处理
 const handleMenuSelect = (index: string) => {
-  activeView.value = index
+  activeView.value = index as AnalysisView
   viewChosenByUser = true
 
   // 切换视图时加载对应数据

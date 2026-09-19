@@ -12,6 +12,7 @@ export interface AnalysisOverviewVO {
 }
 export interface AnalysisRunSummaryVO {
     analysisRunId: string | null;
+    analysisMode: string | null;
     status: string | null;
     startedAt: string | null;
     finishedAt: string | null;

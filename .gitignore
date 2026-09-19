@@ -8,6 +8,7 @@
 *.nar
 *.ear
 *.zip
+!/build/elasticsearch/ik-8.11.0.zip
 *.tar.gz
 *.rar
 hs_err_pid*
@@ -152,3 +153,5 @@ __pycache__/
 risk-warning-bert/classify-service/checkpoints/
 AGENTS.md
 documents/local
+
+/build/tmp/

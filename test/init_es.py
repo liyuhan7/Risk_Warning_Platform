@@ -14,6 +14,7 @@
 
 用法：
   python test/init_es.py --indices t_indicator,t_regulation --yes
+  python test/init_es.py --indices t_indicator,t_regulation --fallback-to-standard-without-ik --yes
 """
 import argparse
 import json
@@ -26,6 +27,9 @@ ES_BASE_URL = "http://localhost:9200"
 
 # 行为与风险数据含运行态标签与向量，不属于种子重建范围，硬编码保护
 ALLOWED_INDICES = ("t_indicator", "t_regulation")
+DEFAULT_ANALYZER = "ik_max_word"
+FALLBACK_ANALYZER = "standard"
+RETRIEVAL_FIELD = "retrievalTextIk"
 
 INDEX_SEED_FILES = {
     "t_indicator": "documents/data/indicator.json",
@@ -50,12 +54,50 @@ def http(method, url, body=None, headers=None):
         return exc.code, exc.read().decode("utf-8", errors="replace")
 
 
-def load_mappings():
+def apply_retrieval_analyzer(mappings, analyzer):
+    """仅调整允许重建索引的 retrievalTextIk analyzer。"""
+    transformed = json.loads(json.dumps(mappings))
+    for index_name in ALLOWED_INDICES:
+        try:
+            field_mapping = transformed[index_name]["mappings"]["properties"][RETRIEVAL_FIELD]
+        except KeyError as exc:
+            raise RuntimeError(
+                f"mapping 缺少 {index_name}.{RETRIEVAL_FIELD}: {exc}"
+            ) from exc
+        field_mapping["analyzer"] = analyzer
+    return transformed
+
+
+def load_mappings(analyzer=DEFAULT_ANALYZER):
     with open("documents/es_mappings.json", "r", encoding="utf-8") as handle:
         mappings = json.load(handle)
-    # 未安装 IK 插件的环境退回 standard 分析器，与既有行为保持一致
-    mappings_str = json.dumps(mappings).replace("ik_max_word", "standard")
-    return json.loads(mappings_str)
+    return apply_retrieval_analyzer(mappings, analyzer)
+
+
+def assert_retrieval_analyzer(index_name, mapping_response, expected_analyzer):
+    """断言 ES 读回的 retrievalTextIk analyzer 与显式策略一致。"""
+    try:
+        actual = mapping_response[index_name]["mappings"]["properties"][RETRIEVAL_FIELD]["analyzer"]
+    except (KeyError, TypeError) as exc:
+        raise RuntimeError(
+            f"{index_name} mapping 读回结果缺少 {RETRIEVAL_FIELD}.analyzer"
+        ) from exc
+    if actual != expected_analyzer:
+        raise RuntimeError(
+            f"{index_name}.{RETRIEVAL_FIELD} analyzer={actual!r}，预期 {expected_analyzer!r}"
+        )
+
+
+def verify_index_mapping(index_name, expected_analyzer):
+    status, text = http("GET", f"{ES_BASE_URL}/{index_name}/_mapping")
+    if status != 200:
+        raise RuntimeError(f"读取索引 {index_name} mapping 失败: {status} {text[:300]}")
+    try:
+        response = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"索引 {index_name} mapping 返回非 JSON 内容") from exc
+    assert_retrieval_analyzer(index_name, response, expected_analyzer)
+    print(f"verify {index_name}: {RETRIEVAL_FIELD} analyzer={expected_analyzer}")
 
 
 def confirm(indices):
@@ -128,6 +170,14 @@ def main():
         default="",
         help="逗号分隔的目标索引，仅允许: %s" % ", ".join(ALLOWED_INDICES),
     )
+    parser.add_argument(
+        "--fallback-to-standard-without-ik",
+        action="store_true",
+        help=(
+            "显式将 retrievalTextIk analyzer 从默认 ik_max_word 降级为 standard；"
+            "仅用于确认未安装 IK 的环境"
+        ),
+    )
     parser.add_argument("--yes", action="store_true", help="跳过交互确认")
     args = parser.parse_args()
 
@@ -148,9 +198,12 @@ def main():
     if not args.yes:
         confirm(indices)
 
-    mappings = load_mappings()
+    analyzer = FALLBACK_ANALYZER if args.fallback_to_standard_without_ik else DEFAULT_ANALYZER
+    print(f"retrievalTextIk analyzer 策略: {analyzer}")
+    mappings = load_mappings(analyzer)
     for index_name in indices:
         rebuild_index(index_name, mappings[index_name])
+        verify_index_mapping(index_name, analyzer)
         bulk_import(index_name, INDEX_SEED_FILES[index_name])
     print("指定索引重建与导入完成。")
     return 0

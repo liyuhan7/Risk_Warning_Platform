@@ -71,8 +71,11 @@ retrieval:
   regulation-top-k: 10
   num-candidates: 100
   fusion-window: 100
-  dense-weight: 0.5
-  bm25-weight: 0.5
+  dense-weight: ${RETRIEVAL_DENSE_WEIGHT:0.5}
+  bm25-weight: ${RETRIEVAL_BM25_WEIGHT:0.5}
   # ES 8.11 cosine KNN _score=(1+cosine)/2；不能重复归一化。
   dense-score-mode: ES_NORMALIZED
+  # 两个阈值必须同时配置才启用质量门禁；默认 null，不在检索侧裁剪候选。
+  indicator-min-score: ${RETRIEVAL_INDICATOR_MIN_SCORE:}
+  regulation-min-score: ${RETRIEVAL_REGULATION_MIN_SCORE:}
   # filter-v1 由请求显式开启，未指定 RetrievalFilter 时默认不应用。

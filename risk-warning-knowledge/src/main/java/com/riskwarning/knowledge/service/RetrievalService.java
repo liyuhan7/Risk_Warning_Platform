@@ -33,8 +33,8 @@ public class RetrievalService {
                 || properties.getNumCandidates() < 1 || properties.getNumCandidates() > 10000
                 || properties.getFusionWindow() < 1 || properties.getFusionWindow() > properties.getNumCandidates()
                 || properties.getIndicatorTopK() < 1 || properties.getRegulationTopK() < 1
-                || properties.getDenseWeight() != 0.5 || properties.getBm25Weight() != 0.5
-                || properties.getDenseScoreMode() == null) {
+                || !validWeights(properties.getDenseWeight(), properties.getBm25Weight())
+                || properties.getDenseScoreMode() == null || !validThresholds(properties)) {
             throw new IllegalArgumentException("检索配置不合法");
         }
     }
@@ -87,9 +87,26 @@ public class RetrievalService {
             items.add(RetrievalBatchItem.builder().behaviorId(request.getBehaviorId())
                     .status(status).embeddingModel(embedding.modelId())
                     .embeddingVersion(properties.getEmbeddingVersion()).matchedFilters(filters.describe(request.getFilter()))
+                    .qualityGateEnabled(properties.isQualityGateEnabled())
+                    .indicatorMinimumScore(properties.getIndicatorMinScore())
+                    .regulationMinimumScore(properties.getRegulationMinScore())
                     .candidates(snapshots).build());
         }
         return RetrievalBatchResponse.builder().items(items).build();
+    }
+
+    private static boolean validWeights(double denseWeight, double bm25Weight) {
+        return Double.isFinite(denseWeight) && Double.isFinite(bm25Weight)
+                && denseWeight >= 0 && bm25Weight >= 0
+                && Math.abs(denseWeight + bm25Weight - 1.0) <= TOLERANCE;
+    }
+
+    private static boolean validThresholds(RetrievalProperties properties) {
+        Double indicator = properties.getIndicatorMinScore();
+        Double regulation = properties.getRegulationMinScore();
+        if ((indicator == null) != (regulation == null)) { return false; }
+        return indicator == null || (Double.isFinite(indicator) && indicator >= 0 && indicator <= 1
+                && Double.isFinite(regulation) && regulation >= 0 && regulation <= 1);
     }
 
     private void validateRequest(RetrievalRequest request) {

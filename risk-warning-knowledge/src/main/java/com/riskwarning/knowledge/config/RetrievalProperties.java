@@ -21,4 +21,11 @@ public class RetrievalProperties {
     private double denseWeight = 0.5;
     private double bm25Weight = 0.5;
     private DenseScoreMode denseScoreMode = DenseScoreMode.ES_NORMALIZED;
+    /** COSINE_SIMILARITY 与 HYBRID 分属不同评分空间，必须成对配置才启用质量门禁。 */
+    private Double indicatorMinScore;
+    private Double regulationMinScore;
+
+    public boolean isQualityGateEnabled() {
+        return indicatorMinScore != null && regulationMinScore != null;
+    }
 }

@@ -16,4 +16,8 @@ public class RetrievalBatchItem {
     private String embeddingModel;
     private String embeddingVersion;
     private Map<String, String> matchedFilters;
+    /** 两类阈值均配置时启用；候选不在检索侧裁剪。 */
+    private boolean qualityGateEnabled;
+    private Double indicatorMinimumScore;
+    private Double regulationMinimumScore;
 }

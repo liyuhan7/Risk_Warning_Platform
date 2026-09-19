@@ -5,3 +5,6 @@ retrieval:
   enabled: true
   indicator-index: t_indicator_test
   regulation-index: t_regulation_test
+  # 当前冻结 0.5/0.5；环境变量仅用于受控消融，改动须留下验收记录。
+  dense-weight: ${RETRIEVAL_DENSE_WEIGHT:0.5}
+  bm25-weight: ${RETRIEVAL_BM25_WEIGHT:0.5}

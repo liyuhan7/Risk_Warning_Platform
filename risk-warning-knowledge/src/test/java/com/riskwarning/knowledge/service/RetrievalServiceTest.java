@@ -53,6 +53,22 @@ class RetrievalServiceTest {
     }
 
     @Test
+    void acceptsExternalizedWeightsWhenTheyRemainNormalized() {
+        AiEmbeddingProvider embedding = mock(AiEmbeddingProvider.class);
+        when(embedding.dimension()).thenReturn(1024);
+        RetrievalProperties properties = new RetrievalProperties();
+        properties.setDenseWeight(0.7);
+        properties.setBm25Weight(0.3);
+        RetrievalService service = new RetrievalService(mock(ElasticsearchClient.class), embedding, properties);
+        assertEquals(0.86, service.fuse(Collections.singletonMap("a", 0.8),
+                Collections.singletonMap("a", 10.0)).get("a"), 1e-9);
+
+        properties.setBm25Weight(0.4);
+        assertThrows(IllegalArgumentException.class,
+                () -> new RetrievalService(mock(ElasticsearchClient.class), embedding, properties));
+    }
+
+    @Test
     void fusesOverUnionUsingBm25MaximumAndZeroForMissingLane() {
         Map<String, Double> dense = new LinkedHashMap<>();
         dense.put("dense-only", 0.8);
@@ -155,6 +171,57 @@ class RetrievalServiceTest {
         assertEquals(properties.getEmbeddingVersion(), item.getEmbeddingVersion());
         assertEquals("false", item.getMatchedFilters().get("applied"));
         assertTrue(item.getCandidates().isEmpty());
+        assertFalse(item.isQualityGateEnabled());
+        assertNull(item.getIndicatorMinimumScore());
+        assertNull(item.getRegulationMinimumScore());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void returnsEnabledDualThresholdsWithoutFilteringCandidates() throws IOException {
+        ElasticsearchClient client = mock(ElasticsearchClient.class);
+        AiEmbeddingProvider embedding = mock(AiEmbeddingProvider.class);
+        when(embedding.dimension()).thenReturn(1024);
+        when(embedding.modelId()).thenReturn("BAAI/bge-m3");
+        when(embedding.embed(anyList(), any())).thenReturn(Collections.singletonList(vector()));
+        SearchResponse<Map> scored = new SearchResponse.Builder<Map>().took(1).timedOut(false)
+                .shards(s -> s.total(1).successful(1).failed(0))
+                .hits(h -> h.hits(hit -> hit.index("knowledge").id("low-score").score(0.4))).build();
+        Map<String, Object> source = new HashMap<>();
+        source.put("name", "低分候选");
+        source.put("description", "指标描述");
+        source.put("fullText", "法规原文");
+        SearchResponse<Map> hydrated = new SearchResponse.Builder<Map>().took(1).timedOut(false)
+                .shards(s -> s.total(1).successful(1).failed(0))
+                .hits(h -> h.hits(hit -> hit.index("knowledge").id("low-score").source(source))).build();
+        when(client.search(any(SearchRequest.class), eq(Map.class)))
+                .thenReturn(scored, scored, scored, hydrated, hydrated);
+        RetrievalProperties properties = new RetrievalProperties();
+        properties.setIndicatorMinScore(0.8);
+        properties.setRegulationMinScore(0.9);
+
+        RetrievalBatchItem item = new RetrievalService(client, embedding, properties)
+                .retrieveBatch(batch(Collections.singletonList(request("b")))).getItems().get(0);
+
+        assertTrue(item.isQualityGateEnabled());
+        assertEquals(0.8, item.getIndicatorMinimumScore());
+        assertEquals(0.9, item.getRegulationMinimumScore());
+        assertEquals(2, item.getCandidates().size());
+        assertTrue(item.getCandidates().stream().allMatch(c -> c.getResult().getScore() < 0.8));
+    }
+
+    @Test void rejectsHalfConfiguredOrOutOfRangeThresholds() {
+        AiEmbeddingProvider embedding = mock(AiEmbeddingProvider.class);
+        when(embedding.dimension()).thenReturn(1024);
+        RetrievalProperties half = new RetrievalProperties();
+        half.setIndicatorMinScore(0.7);
+        assertThrows(IllegalArgumentException.class,
+                () -> new RetrievalService(mock(ElasticsearchClient.class), embedding, half));
+        RetrievalProperties invalid = new RetrievalProperties();
+        invalid.setIndicatorMinScore(0.7);
+        invalid.setRegulationMinScore(1.1);
+        assertThrows(IllegalArgumentException.class,
+                () -> new RetrievalService(mock(ElasticsearchClient.class), embedding, invalid));
     }
 
     @Test

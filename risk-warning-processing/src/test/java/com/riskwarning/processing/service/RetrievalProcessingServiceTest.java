@@ -61,6 +61,34 @@ class RetrievalProcessingServiceTest {
                 .equals("公司留存采购审批意见 留存 审批意见")));
     }
 
+    @Test void disabledQualityGateKeepsWaitingForP3() {
+        response("b", RetrievalBatchStatus.SUCCESS, Collections.singletonList(candidate("b")));
+        service.process(message, scope);
+        verify(audits).save(argThat(a -> a.getAnalysisStatus() == AnalysisAuditStatus.WAITING_P3));
+    }
+
+    @Test void enabledQualityGateMarksRecallGapWhenBothTypesAreBelowThreshold() {
+        List<RetrievalCandidateSnapshot> candidates = Arrays.asList(
+                candidate("b", RetrievalCandidateType.INDICATOR, "indicator-1", 0.4, 1),
+                candidate("b", RetrievalCandidateType.REGULATION, "regulation-1", 0.5, 1));
+        gatedResponse(candidates, 0.7, 0.8);
+        service.process(message, scope);
+        verify(audits).save(argThat(a -> a.getRetrievalStatus() == RetrievalAuditStatus.SUCCESS
+                && a.getAnalysisStatus() == AnalysisAuditStatus.RECALL_GAP
+                && a.getCandidates().size() == 2));
+    }
+
+    @Test void enabledQualityGateWaitsWhenEitherCandidateTypeReachesItsThreshold() {
+        List<RetrievalCandidateSnapshot> candidates = Arrays.asList(
+                candidate("b", RetrievalCandidateType.INDICATOR, "indicator-1", 0.71, 1),
+                candidate("b", RetrievalCandidateType.REGULATION, "regulation-1", 0.5, 1));
+        gatedResponse(candidates, 0.7, 0.8);
+        service.process(message, scope);
+        verify(audits).save(argThat(a -> a.getAnalysisStatus() == AnalysisAuditStatus.WAITING_P3
+                && a.getCandidates().size() == 2
+                && a.getCandidates().stream().anyMatch(c -> "regulation-1".equals(c.getResult().getCandidateId()))));
+    }
+
     @Test void completedRunReplayDoesNotOverwriteSnapshots() {
         run.completeWithoutDecision(LocalDateTime.now());
         service.process(message, scope);
@@ -183,11 +211,28 @@ class RetrievalProcessingServiceTest {
                         .embeddingModel("BAAI/bge-m3").embeddingVersion("v1")
                         .matchedFilters(Collections.singletonMap("applied", "false")).build())).build());
     }
+    private void gatedResponse(List<RetrievalCandidateSnapshot> candidates,
+                               double indicatorMinimumScore, double regulationMinimumScore) {
+        when(retrieval.retrieve(any())).thenReturn(RetrievalBatchResponse.builder().items(Collections.singletonList(
+                RetrievalBatchItem.builder().behaviorId("b").status(RetrievalBatchStatus.SUCCESS).candidates(candidates)
+                        .embeddingModel("BAAI/bge-m3").embeddingVersion("v1")
+                        .qualityGateEnabled(true).indicatorMinimumScore(indicatorMinimumScore)
+                        .regulationMinimumScore(regulationMinimumScore)
+                        .matchedFilters(Collections.singletonMap("applied", "false")).build())).build());
+    }
+
     private RetrievalCandidateSnapshot candidate(String id) {
-        return RetrievalCandidateSnapshot.builder().name("采购审批指标").retrievalTextHash("hash")
-                .result(RetrievalResult.builder().candidateType(RetrievalCandidateType.INDICATOR).candidateId("indicator-1")
-                        .rank(1).score(0.8).scoreType(ScoreType.COSINE_SIMILARITY).embeddingModel("BAAI/bge-m3")
-                        .embeddingVersion("v1").behaviorId(id).assessmentId(90L).analysisRunId("real-run")
+        return candidate(id, RetrievalCandidateType.INDICATOR, "indicator-1", 0.8, 1);
+    }
+
+    private RetrievalCandidateSnapshot candidate(String behaviorId, RetrievalCandidateType type,
+                                                  String candidateId, double score, int rank) {
+        return RetrievalCandidateSnapshot.builder().name("候选名称").retrievalTextHash("hash")
+                .result(RetrievalResult.builder().candidateType(type).candidateId(candidateId)
+                        .rank(rank).score(score).scoreType(type == RetrievalCandidateType.INDICATOR
+                                ? ScoreType.COSINE_SIMILARITY : ScoreType.HYBRID)
+                        .embeddingModel("BAAI/bge-m3").embeddingVersion("v1").behaviorId(behaviorId)
+                        .assessmentId(90L).analysisRunId("real-run")
                         .matchedFilters(Collections.singletonMap("applied", "false")).build()).build();
     }
 }

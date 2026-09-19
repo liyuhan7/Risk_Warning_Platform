@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class AnalysisOverviewService {
     private final AssessmentRepository assessments;
     private final ProjectRepository projects;
-    private final AnalysisRunRepository runs;
+    private final AnalysisRunSelector runSelector;
     private final AnalysisResultRepository results;
     private final RetrievalAuditRepository audits;
     private final BehaviorDocumentRepository behaviors;
@@ -52,14 +52,12 @@ public class AnalysisOverviewService {
                 .projectName(projects.findById(projectId).map(p -> p.getName()).orElse(null))
                 .assessmentDate(time(assessment.getAssessmentDate())).displayStatus("NOT_STARTED")
                 .summary(new AnalysisSummaryVO()).behaviorGroups(new ArrayList<>()).build();
-        Optional<AnalysisRun> latest = hasText(analysisRunId)
-                ? Optional.of(runs.findByAnalysisRunIdAndAssessmentIdAndProjectId(analysisRunId, assessmentId, projectId)
-                    .orElseThrow(() -> new NoSuchElementException("指定运行不存在或不属于本次评估")))
-                : runs.findFirstByAssessmentIdAndProjectIdOrderByStartedAtDescAnalysisRunIdDesc(assessmentId, projectId);
-        if (!latest.isPresent()) { return vo; }
-        AnalysisRun run = latest.get();
+        AnalysisRunSelector.Selection selection = runSelector.select(assessmentId, projectId, analysisRunId);
+        if (selection.getRun() == null) { return vo; }
+        AnalysisRun run = selection.getRun();
         vo.setRun(AnalysisRunSummaryVO.builder().analysisRunId(run.getAnalysisRunId()).status(run.getStatus().name())
-                .startedAt(time(run.getStartedAt())).finishedAt(time(run.getFinishedAt())).build());
+                .startedAt(time(run.getStartedAt())).finishedAt(time(run.getFinishedAt()))
+                .fallbackToUsableRun(selection.isFallbackToUsableRun()).build());
         List<RetrievalAudit> auditRows = audits.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId());
         List<AnalysisResult> resultRows = results.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId());
         vo.getRun().setAnalysisMode(AnalysisModeResolver.resolve(resultRows, auditRows));
@@ -147,7 +145,6 @@ public class AnalysisOverviewService {
         return vo;
     }
     private static String value(Enum<?> value) { return value == null ? null : value.name(); }
-    private static boolean hasText(String value) { return value != null && !value.trim().isEmpty(); }
     private static String time(LocalDateTime value) { return value == null ? null : TIME.format(value); }
     private static <T> List<T> safe(List<T> values) { return values == null ? Collections.emptyList() : values; }
 }

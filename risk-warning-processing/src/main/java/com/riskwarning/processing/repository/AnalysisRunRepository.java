@@ -5,6 +5,7 @@ import com.riskwarning.common.po.analysis.AnalysisRun;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.Optional;
 
 /** 运行记录存储；状态查询不能代替数据库的在途运行唯一约束。 */
@@ -20,4 +21,7 @@ public interface AnalysisRunRepository extends JpaRepository<AnalysisRun, String
     Optional<AnalysisRun> findFirstByAssessmentIdAndStatusOrderByFinishedAtDesc(
             Long assessmentId, AnalysisRunStatus status);
     Optional<AnalysisRun> findFirstByAssessmentIdAndProjectIdOrderByStartedAtDescAnalysisRunIdDesc(Long assessmentId, Long projectId);
+
+    Optional<AnalysisRun> findFirstByAssessmentIdAndProjectIdAndStatusInOrderByStartedAtDescAnalysisRunIdDesc(
+            Long assessmentId, Long projectId, Collection<AnalysisRunStatus> statuses);
 }

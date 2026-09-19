@@ -23,7 +23,9 @@ class AnalysisOverviewServiceTest {
     private final AnalysisResultRepository results = mock(AnalysisResultRepository.class);
     private final RetrievalAuditRepository audits = mock(RetrievalAuditRepository.class);
     private final BehaviorDocumentRepository behaviors = mock(BehaviorDocumentRepository.class);
-    private final AnalysisOverviewService service = new AnalysisOverviewService(assessments, projects, runs, results, audits, behaviors);
+    private final AnalysisRunSelector runSelector = new AnalysisRunSelector(runs);
+    private final AnalysisOverviewService service = new AnalysisOverviewService(
+            assessments, projects, runSelector, results, audits, behaviors);
     private final LocalDateTime start = LocalDateTime.of(2026, 9, 18, 10, 0);
     private AnalysisRun run;
 
@@ -215,10 +217,30 @@ class AnalysisOverviewServiceTest {
         assertEquals("b", olderView.getBehaviorGroups().get(0).getBehaviorId());
         assertEquals(1, olderView.getBehaviorGroups().get(0).getRetrievalAudit().getCandidates().size());
 
-        AnalysisOverviewVO latestView = service.overview(86L, 7L);
-        assertEquals("FAILED", latestView.getDisplayStatus());
-        assertEquals(1, latestView.getSummary().getRetrievalFailedCount());
-        assertEquals(0, latestView.getSummary().getWaitingForAnalysisCount());
+        when(runs.findFirstByAssessmentIdAndProjectIdAndStatusInOrderByStartedAtDescAnalysisRunIdDesc(
+                eq(86L), eq(7L), anyCollection())).thenReturn(Optional.of(older));
+        AnalysisOverviewVO defaultView = service.overview(86L, 7L);
+        assertEquals("good-run", defaultView.getRun().getAnalysisRunId());
+        assertTrue(defaultView.getRun().isFallbackToUsableRun());
+        assertEquals("COMPLETED_WITHOUT_DECISION", defaultView.getDisplayStatus());
+        assertEquals(1, defaultView.getSummary().getWaitingForAnalysisCount());
+        assertEquals(0, defaultView.getSummary().getRetrievalFailedCount());
+
+        when(runs.findByAnalysisRunIdAndAssessmentIdAndProjectId("latest", 86L, 7L)).thenReturn(Optional.of(run));
+        AnalysisOverviewVO explicitFailed = service.overview(86L, 7L, "latest");
+        assertEquals("latest", explicitFailed.getRun().getAnalysisRunId());
+        assertFalse(explicitFailed.getRun().isFallbackToUsableRun());
+        assertEquals("FAILED", explicitFailed.getDisplayStatus());
+    }
+
+    @Test void onlyFailedRunFallsBackToLatestItself() {
+        run.fail(start.plusSeconds(1));
+        when(runs.findFirstByAssessmentIdAndProjectIdAndStatusInOrderByStartedAtDescAnalysisRunIdDesc(
+                eq(86L), eq(7L), anyCollection())).thenReturn(Optional.empty());
+        AnalysisOverviewVO vo = service.overview(86L, 7L);
+        assertEquals("latest", vo.getRun().getAnalysisRunId());
+        assertEquals("FAILED", vo.getDisplayStatus());
+        assertFalse(vo.getRun().isFallbackToUsableRun());
     }
     @Test void runSummaryDistinguishesRealRetrievalFromMockConclusions() {
         run.succeed(start.plusSeconds(1));

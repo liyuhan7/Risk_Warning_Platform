@@ -88,6 +88,8 @@ public class P2RetrievalProcessingService {
         }
         if (failed) { throw new IllegalStateException("当前运行存在失败的检索批次"); }
         noDecision.complete(scope);
+        log.info("[P2 Retrieval Completed] projectId={}, assessmentId={}, analysisRunId={}, behaviorCount={}, runStatus=COMPLETED_WITHOUT_DECISION，事实与候选已就绪，等待 P3 合规判断",
+                scope.getProjectId(), scope.getAssessmentId(), scope.getAnalysisRunId(), scoped.size());
         notifyCompleted(message, scope);
     }
 
@@ -182,10 +184,32 @@ public class P2RetrievalProcessingService {
             }
             audit.setAnalysisStatus(!evidenceAvailable.get(behavior.getId()) ? AnalysisAuditStatus.INSUFFICIENT_EVIDENCE
                     : audit.getRetrievalStatus() == RetrievalAuditStatus.SUCCESS
-                    ? AnalysisAuditStatus.WAITING_P3 : AnalysisAuditStatus.NOT_ATTEMPTED);
+                    ? qualityGateStatus(item, candidates) : AnalysisAuditStatus.NOT_ATTEMPTED);
             output.add(audit);
         }
         return output;
+    }
+
+    /** 门禁只决定后续分析状态，不裁剪用于审计的完整候选快照。 */
+    private AnalysisAuditStatus qualityGateStatus(RetrievalBatchItem item,
+                                                  List<RetrievalCandidateSnapshot> candidates) {
+        if (!item.isQualityGateEnabled()) { return AnalysisAuditStatus.WAITING_P3; }
+        Double indicatorThreshold = item.getIndicatorMinimumScore();
+        Double regulationThreshold = item.getRegulationMinimumScore();
+        if (!validThreshold(indicatorThreshold) || !validThreshold(regulationThreshold)) {
+            throw new IllegalStateException("检索质量门禁阈值不完整");
+        }
+        boolean qualified = candidates.stream().filter(Objects::nonNull)
+                .map(RetrievalCandidateSnapshot::getResult).filter(Objects::nonNull)
+                .anyMatch(result -> result.getScore() != null
+                        && result.getCandidateType() != null
+                        && result.getScore() >= (result.getCandidateType() == RetrievalCandidateType.INDICATOR
+                        ? indicatorThreshold : regulationThreshold));
+        return qualified ? AnalysisAuditStatus.WAITING_P3 : AnalysisAuditStatus.RECALL_GAP;
+    }
+
+    private static boolean validThreshold(Double value) {
+        return value != null && Double.isFinite(value) && value >= 0 && value <= 1;
     }
 
     private boolean verifyEvidence(AnalysisScope scope, Behavior behavior) {
@@ -221,6 +245,8 @@ public class P2RetrievalProcessingService {
                     "检索完成通知", "材料检索已完成，合规判断等待后续分析，请查看事实与候选依据。");
             notification.setExtraData("{\"displayStatus\":\"COMPLETED_WITHOUT_DECISION\",\"analysisStage\":\"P2\"}");
             kafka.sendMessage(notification);
+            log.info("[P2 Completion Notification Sent] projectId={}, assessmentId={}, analysisRunId={}, messageId={}",
+                    scope.getProjectId(), scope.getAssessmentId(), scope.getAnalysisRunId(), notification.getMessageId());
         } catch (RuntimeException failure) {
             log.warn("检索完成通知发送失败: assessmentId={}, run={}", scope.getAssessmentId(), scope.getAnalysisRunId());
         }

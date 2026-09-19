@@ -37,7 +37,7 @@ public class AnalysisContextService {
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final AssessmentRepository assessments;
-    private final AnalysisRunRepository runs;
+    private final AnalysisRunSelector runSelector;
     private final RetrievalAuditRepository audits;
     private final BehaviorDocumentRepository behaviors;
     private final AnalysisResultRepository results;
@@ -54,17 +54,14 @@ public class AnalysisContextService {
         if (!projectId.equals(assessment.getProjectId())) {
             throw new SecurityException("项目与评估归属不匹配");
         }
-        Optional<AnalysisRun> selected = hasText(analysisRunId)
-                ? Optional.of(runs.findByAnalysisRunIdAndAssessmentIdAndProjectId(analysisRunId, assessmentId, projectId)
-                    .orElseThrow(() -> new NoSuchElementException("指定运行不存在或不属于本次评估")))
-                : runs.findFirstByAssessmentIdAndProjectIdOrderByStartedAtDescAnalysisRunIdDesc(assessmentId, projectId);
-        if (!selected.isPresent()) {
+        AnalysisRunSelector.Selection selection = runSelector.select(assessmentId, projectId, analysisRunId);
+        if (selection.getRun() == null) {
             return AnalysisContextVO.builder().contextVersion(CONTEXT_VERSION).assessmentId(assessmentId)
                     .projectId(projectId).runStatus("NOT_STARTED").analysisMode(AnalysisModeResolver.NO_ARTIFACTS)
                     .generatedAt(time(LocalDateTime.now())).blockedReasons(new TreeMap<>())
                     .items(new ArrayList<>()).build();
         }
-        AnalysisRun run = selected.get();
+        AnalysisRun run = selection.getRun();
         List<RetrievalAudit> auditRows = audits.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId());
         List<AnalysisResult> resultRows = results.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId());
         Map<String, AnalysisTrace> traces = legacyTraces(projectId, assessmentId, run.getAnalysisRunId());

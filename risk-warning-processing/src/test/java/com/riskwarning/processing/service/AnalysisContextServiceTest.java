@@ -30,8 +30,9 @@ class AnalysisContextServiceTest {
     private final BehaviorDocumentRepository behaviors = mock(BehaviorDocumentRepository.class);
     private final AnalysisResultRepository results = mock(AnalysisResultRepository.class);
     private final IndicatorResultRepository indicatorResults = mock(IndicatorResultRepository.class);
+    private final AnalysisRunSelector runSelector = new AnalysisRunSelector(runs);
     private final AnalysisContextService service = new AnalysisContextService(
-            assessments, runs, audits, behaviors, results, indicatorResults);
+            assessments, runSelector, audits, behaviors, results, indicatorResults);
     private final LocalDateTime start = LocalDateTime.of(2026, 9, 18, 10, 0);
     private AnalysisRun run;
     private Behavior behavior;
@@ -69,6 +70,29 @@ class AnalysisContextServiceTest {
         assertEquals(AnalysisModeResolver.NO_ARTIFACTS, context.getAnalysisMode());
         assertEquals(0, context.getBehaviorCount());
         assertTrue(context.getItems().isEmpty());
+    }
+
+    @Test void defaultSelectionMatchesOverviewUsableRunRule() {
+        AnalysisRun failed = AnalysisRun.start(new AnalysisScope(7L, 86L, "failed-run"), start.plusMinutes(1));
+        failed.fail(start.plusMinutes(2));
+        run.completeWithoutDecision(start.plusSeconds(1));
+        when(runs.findFirstByAssessmentIdAndProjectIdOrderByStartedAtDescAnalysisRunIdDesc(86L, 7L))
+                .thenReturn(Optional.of(failed));
+        when(runs.findFirstByAssessmentIdAndProjectIdAndStatusInOrderByStartedAtDescAnalysisRunIdDesc(
+                eq(86L), eq(7L), anyCollection())).thenReturn(Optional.of(run));
+
+        AnalysisContextVO context = service.context(86L, 7L, null);
+        assertEquals("run-1", context.getAnalysisRunId());
+        assertEquals("COMPLETED_WITHOUT_DECISION", context.getRunStatus());
+    }
+
+    @Test void explicitFailedRunIsReadWithoutFallback() {
+        run.fail(start.plusSeconds(1));
+        AnalysisContextVO context = service.context(86L, 7L, "run-1");
+        assertEquals("run-1", context.getAnalysisRunId());
+        assertEquals("FAILED", context.getRunStatus());
+        verify(runs, never()).findFirstByAssessmentIdAndProjectIdAndStatusInOrderByStartedAtDescAnalysisRunIdDesc(
+                anyLong(), anyLong(), anyCollection());
     }
 
     @Test void successfulRetrievalWaitsForAnalysisWithBothCandidateTypes() {

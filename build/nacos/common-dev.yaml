@@ -14,11 +14,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
+    # 控制台只保留业务日志；SQL 排查时在本地临时开启，避免概览轮询淹没完成日志。
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+        format_sql: false
 
   # Elasticsearch 配置 (ES in Docker，本地无认证)
   elasticsearch:

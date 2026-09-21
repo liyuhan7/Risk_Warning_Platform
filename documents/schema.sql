@@ -129,6 +129,7 @@ COMMENT ON COLUMN public.t_project_member.role IS '用户在项目中的角色';
 CREATE TABLE IF NOT EXISTS public.t_assessment_result (
     id BIGSERIAL PRIMARY KEY,
     project_id BIGINT NOT NULL REFERENCES public.t_project(id) ON DELETE CASCADE,
+    source_task_id VARCHAR(160),
     assessment_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     overall_score NUMERIC,
     overall_risk_level INT,
@@ -140,12 +141,15 @@ CREATE TABLE IF NOT EXISTS public.t_assessment_result (
 
 COMMENT ON TABLE public.t_assessment_result IS '项目评估结果摘要表';
 COMMENT ON COLUMN public.t_assessment_result.project_id IS '关联的项目ID';
+COMMENT ON COLUMN public.t_assessment_result.source_task_id IS '创建本评估的上传确认稳定任务标识；历史记录为空';
 COMMENT ON COLUMN public.t_assessment_result.overall_score IS '综合得分';
 COMMENT ON COLUMN public.t_assessment_result.details IS '存储评估的详细数据，如各维度得分、风险列表等';
 COMMENT ON COLUMN public.t_assessment_result.status IS '评估状态';
 
 CREATE UNIQUE INDEX IF NOT EXISTS uq_assessment_id_project
 ON public.t_assessment_result(id, project_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_assessment_source_task
+ON public.t_assessment_result(source_task_id);
 
 -- 独立分析运行（P1/P2）
 CREATE TABLE IF NOT EXISTS public.t_analysis_run (
@@ -393,3 +397,32 @@ COMMENT ON COLUMN public.t_project_file.file_paths IS '存储文件存储路径�
 -- 项目文件表索引
 CREATE INDEX IF NOT EXISTS idx_project_file_project_id 
 ON public.t_project_file(project_id);
+
+-- 10. Lease 模式持久任务表
+CREATE TABLE IF NOT EXISTS public.t_durable_work (
+    id VARCHAR(64) PRIMARY KEY,
+    namespace VARCHAR(64) NOT NULL,
+    kind VARCHAR(64) NOT NULL,
+    task_key VARCHAR(160) NOT NULL,
+    payload TEXT NOT NULL,
+    state VARCHAR(16) NOT NULL,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    available_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    lease_until TIMESTAMP WITHOUT TIME ZONE,
+    worker_id VARCHAR(128),
+    lease_token VARCHAR(64),
+    last_error TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT uq_durable_work_task UNIQUE (namespace, kind, task_key),
+    CONSTRAINT ck_durable_work_state CHECK (state IN ('READY', 'RUNNING', 'DONE', 'FAILED')),
+    CONSTRAINT ck_durable_work_attempts CHECK (attempts >= 0),
+    CONSTRAINT ck_durable_work_lease CHECK (
+        (state = 'RUNNING' AND lease_until IS NOT NULL
+            AND worker_id IS NOT NULL AND lease_token IS NOT NULL)
+        OR (state <> 'RUNNING' AND lease_until IS NULL
+            AND worker_id IS NULL AND lease_token IS NULL)
+    )
+);
+CREATE INDEX IF NOT EXISTS ix_durable_work_claim
+ON public.t_durable_work(namespace, kind, state, available_at, lease_until);

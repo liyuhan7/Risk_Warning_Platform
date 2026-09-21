@@ -10,6 +10,8 @@ import org.springframework.util.concurrent.ListenableFuture;
 import java.util.HashSet;
 import java.util.Stack;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Component
 public class KafkaUtils {
@@ -27,6 +29,14 @@ public class KafkaUtils {
         ListenableFuture<SendResult<String, Message>> future =
                 kafkaTemplate.send(message.getTopic().getTopicName(), message);
         return future.get();
+    }
+
+    /** 带超时等待 Broker 确认，用于 Outbox 发送；超时视为失败交由上层重试。 */
+    public SendResult<String, Message> sendMessageAndWait(Message message, long timeoutMillis)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        ListenableFuture<SendResult<String, Message>> future =
+                kafkaTemplate.send(message.getTopic().getTopicName(), message);
+        return future.get(timeoutMillis, TimeUnit.MILLISECONDS);
     }
 
     public static void main(String[] args) {

@@ -14,11 +14,6 @@ org:
 #  secret: risk-warning-platform-jwt-secret-key-2023
 #  expiration: 86400
 
-# 打开 AOP 和包级别的 DEBUG 日志，便于查看切面匹配与代理创建
 logging:
   level:
-    org.springframework.aop: DEBUG
-    com.riskwarning.common: DEBUG
-    com.riskwarning.org: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.riskwarning.org: INFO

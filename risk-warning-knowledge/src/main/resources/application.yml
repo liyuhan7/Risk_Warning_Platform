@@ -66,6 +66,10 @@ embedding:
   max-attempts: 3
   initial-backoff-millis: 500
 
+logging:
+  level:
+    com.riskwarning.knowledge: INFO
+
 retrieval:
   enabled: ${RETRIEVAL_ENABLED:false}
   indicator-index: ${RETRIEVAL_INDICATOR_INDEX:t_indicator}

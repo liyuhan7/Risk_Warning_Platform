@@ -72,6 +72,12 @@ assessment:
 logging:
   file:
     name: ${spring.application.name}/out/app.log
+  level:
+    # IDE 控制台只显示业务服务进度、可靠链模式和异常；结构化审计明细保留按需开启。
+    root: WARN
+    com.riskwarning.common.observability.AssessmentFlowLogger: WARN
+    com.riskwarning.common.reliability: WARN
+    com.riskwarning.common.reliability.ReliabilityModeReporter: INFO
 
 management:
   endpoints:

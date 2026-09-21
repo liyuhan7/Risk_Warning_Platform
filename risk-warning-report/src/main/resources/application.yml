@@ -4,3 +4,7 @@ server:
 assessment:
   reliability:
     enabled: ${ASSESSMENT_RELIABILITY_ENABLED:true}
+
+logging:
+  level:
+    com.riskwarning.report: INFO

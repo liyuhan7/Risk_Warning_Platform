@@ -8,7 +8,6 @@ assessment:
 #初始化表后改为never
 spring:
   config:
-    # 本地可选 .env 兜底（已 gitignore）；服务级 llm.* 配置由 Nacos risk-warning-processing.yaml 提供
     import: optional:file:.env[.properties]
 
 # BERT 分类服务配置
@@ -33,7 +32,11 @@ feign:
         readTimeout: 390000
         loggerLevel: basic
 
-# 大模型 Provider 配置由 Nacos risk-warning-processing.yaml 提供（enabled/base-url/model/超时/重试）。
+# 大模型 Provider 配置由 Nacos risk-warning-processing.yml 提供（enabled/base-url/model/超时/重试）。
 # 本文件只保留凭据占位符：api-key 由部署环境的环境变量 LLM_API_KEY 注入，禁止写入任何配置文件。
 llm:
   api-key: ${LLM_API_KEY:}
+
+logging:
+  level:
+    com.riskwarning.processing: INFO

@@ -17,22 +17,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ReliabilityServiceOptInConfigurationTest {
 
     @Test
-    void commonConfigurationDoesNotEnableReliabilityGlobally() throws IOException {
+    void commonConfigurationProvidesRuntimeParametersWithoutEnablingReliability() throws IOException {
         assertThat(property("build/nacos/common-dev.yaml", "assessment.reliability.enabled"))
                 .isNull();
+        assertThat(property("build/nacos/common-dev.yaml", "assessment.reliability.namespace"))
+                .isEqualTo("${ASSESSMENT_WORK_NAMESPACE:${spring.application.name}}");
     }
 
     @Test
     void durableWorkServicesOptInByDefault() throws IOException {
-        assertThat(property("risk-warning-org/src/main/resources/application.yml",
-                "assessment.reliability.enabled"))
-                .isEqualTo("${ASSESSMENT_RELIABILITY_ENABLED:true}");
-        assertThat(property("risk-warning-processing/src/main/resources/application.yml",
-                "assessment.reliability.enabled"))
-                .isEqualTo("${ASSESSMENT_RELIABILITY_ENABLED:true}");
-        assertThat(property("risk-warning-report/src/main/resources/application.yml",
-                "assessment.reliability.enabled"))
-                .isEqualTo("${ASSESSMENT_RELIABILITY_ENABLED:true}");
+        assertReliabilityOptIn("risk-warning-org/src/main/resources/application.yml");
+        assertReliabilityOptIn("risk-warning-processing/src/main/resources/application.yml");
+        assertReliabilityOptIn("risk-warning-report/src/main/resources/application.yml");
+    }
+
+    @Test
+    void processingBusinessModeKeepsLocalFallbackAndUsesServiceConfigurationForP2() throws IOException {
+        assertThat(property("risk-warning-processing/src/main/resources/application.yml", "p2.mode"))
+                .isEqualTo("${P2_PROCESSING_MODE:LEGACY}");
     }
 
     @Test
@@ -43,6 +45,13 @@ class ReliabilityServiceOptInConfigurationTest {
         assertThat(property("risk-warning-notification/src/main/resources/application.yml",
                 "assessment.reliability.enabled"))
                 .isEqualTo(Boolean.FALSE);
+    }
+
+    private void assertReliabilityOptIn(String relativePath) throws IOException {
+        assertThat(property(relativePath, "assessment.reliability.enabled"))
+                .isEqualTo("${ASSESSMENT_RELIABILITY_ENABLED:true}");
+        assertThat(property(relativePath, "assessment.reliability.namespace"))
+                .isNull();
     }
 
     private Object property(String relativePath, String key) throws IOException {

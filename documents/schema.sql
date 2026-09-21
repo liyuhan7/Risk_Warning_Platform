@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS public.t_assessment_result (
     source_task_id VARCHAR(160),
     assessment_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     overall_score NUMERIC,
-    overall_risk_level INT,
+    overall_risk_level VARCHAR(64),
     details JSONB,
     recommendations TEXT,
     status assessment_status_enum,
@@ -385,14 +385,18 @@ CREATE TABLE IF NOT EXISTS public.t_project_file (
     id BIGSERIAL PRIMARY KEY,
     project_id BIGINT REFERENCES public.t_project(id) ON DELETE CASCADE,
     user_id BIGINT REFERENCES public.t_user(id) ON DELETE SET NULL,
-    file_paths TEXT, -- 存储JSON序列化后的文件路径列表
-    create_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    assessment_id BIGINT REFERENCES public.t_assessment_result(id) ON DELETE CASCADE,
+    file_path TEXT,
+    original_file_name VARCHAR(512),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-COMMENT ON TABLE public.t_project_file IS '项目上传文件记录表';
+COMMENT ON TABLE public.t_project_file IS '项目上传文件记录表，一份物理文件对应一行';
 COMMENT ON COLUMN public.t_project_file.project_id IS '关联的项目ID';
 COMMENT ON COLUMN public.t_project_file.user_id IS '上传者ID';
-COMMENT ON COLUMN public.t_project_file.file_paths IS '存储文件存储路径的JSON列表';
+COMMENT ON COLUMN public.t_project_file.assessment_id IS '关联的评估结果ID；历史记录允许为空';
+COMMENT ON COLUMN public.t_project_file.file_path IS '文件存储路径';
+COMMENT ON COLUMN public.t_project_file.original_file_name IS '用户上传时的原始文件名；历史记录允许为空';
 
 -- 项目文件表索引
 CREATE INDEX IF NOT EXISTS idx_project_file_project_id 

@@ -9,11 +9,9 @@ import com.riskwarning.common.enums.AssessmentStatusEnum;
 import com.riskwarning.common.enums.indicator.IndicatorRiskStatus;
 import com.riskwarning.common.enums.risk.RiskLevelEnum;
 import com.riskwarning.common.enums.risk.RiskStatusEnum;
-import com.riskwarning.common.message.NotificationMessage;
 import com.riskwarning.common.po.indicator.IndicatorResult;
 import com.riskwarning.common.po.report.Assessment;
 import com.riskwarning.common.po.risk.Risk;
-import com.riskwarning.common.utils.KafkaUtils;
 import com.riskwarning.report.entity.vo.AssessmentGeneralDetails;
 import com.riskwarning.report.repository.AssessmentRepository;
 import com.riskwarning.report.repository.IndicatorResultRepository;
@@ -24,11 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -47,9 +43,6 @@ public class AssessmentServiceImpl implements AssessmentService {
 
     @Autowired
     private ElasticsearchClient elasticsearchClient;
-
-    @Autowired
-    private KafkaUtils kafkaUtils;
 
     private final static Double THRESHOLD_RATIO = 0.5;
 
@@ -132,9 +125,6 @@ public class AssessmentServiceImpl implements AssessmentService {
         )));
         assessment.setAssessmentDate(LocalDateTime.now());
         assessmentRepository.save(assessment);
-
-        // 发送通知消息，通知前端评估完成
-        sendAssessmentCompletedNotification(userId, projectId, assessmentId, assessment);
     }
 
     static Risk buildRisk(Long projectId, Long assessmentId, String analysisRunId,
@@ -181,48 +171,5 @@ public class AssessmentServiceImpl implements AssessmentService {
     static String stableRiskId(String analysisRunId, Long assessmentId, String indicatorEsId, String name) {
         return EvidenceChunk.sha256(analysisRunId + "|" + assessmentId + "|" + indicatorEsId + "|" + name)
                 .substring(0, 32);
-    }
-
-    /**
-     * 发送评估完成通知
-     */
-    private void sendAssessmentCompletedNotification(Long userId, Long projectId, Long assessmentId, Assessment assessment) {
-        try {
-            NotificationMessage notificationMessage = new NotificationMessage();
-            notificationMessage.setMessageId(UUID.randomUUID().toString());
-            notificationMessage.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-            notificationMessage.setTraceId(UUID.randomUUID().toString());
-            notificationMessage.setUserId(userId);
-            notificationMessage.setProjectId(projectId);
-            notificationMessage.setAssessmentId(assessmentId);
-            notificationMessage.setNotificationType(NotificationMessage.NotificationType.ASSESSMENT_COMPLETED);
-            notificationMessage.setTitle("评估完成通知");
-            notificationMessage.setContent(String.format("项目评估已完成，总体风险等级：%s，评估得分：%.2f",
-                    assessment.getOverallRiskLevel().getDescription(),
-                    assessment.getOverallScore()));
-            notificationMessage.setExtraData(JSON.toJSONString(new AssessmentNotificationData(
-                    assessmentId,
-                    projectId,
-                    assessment.getOverallRiskLevel().name(),
-                    assessment.getOverallScore()
-            )));
-
-            kafkaUtils.sendMessage(notificationMessage);
-            log.info("评估完成通知已发送，assessmentId: {}, userId: {}", assessmentId, userId);
-        } catch (Exception e) {
-            log.error("发送评估完成通知失败: {}", e.getMessage());
-        }
-    }
-
-    /**
-     * 评估通知数据
-     */
-    @lombok.Data
-    @lombok.AllArgsConstructor
-    private static class AssessmentNotificationData {
-        private Long assessmentId;
-        private Long projectId;
-        private String riskLevel;
-        private Double overallScore;
     }
 }

@@ -151,6 +151,14 @@
                 <configuration>
                     <mainClass>com.riskwarning.processing.ProcessingApplication</mainClass>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

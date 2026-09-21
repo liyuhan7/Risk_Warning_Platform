@@ -1,5 +1,10 @@
 server:
   port: 8095
+
+org:
+  upload:
+    queue-key: ${UPLOAD_CONFIRM_QUEUE_KEY:file:confirmed:queue}
+
 ## JWT配置
 #jwt:
 #  secret: risk-warning-platform-jwt-secret-key-2023

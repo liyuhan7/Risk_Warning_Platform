@@ -15,5 +15,8 @@ public interface AssessmentRepository extends JpaRepository<Assessment, Integer>
      */
     Optional<Assessment> findFirstByProjectIdOrderByIdDesc(long projectId);
 
+    /** 上传确认幂等检查：稳定任务身份对应的评估是否已提交。 */
+    Optional<Assessment> findBySourceTaskId(String sourceTaskId);
+
     Assessment findById(long l);
 }

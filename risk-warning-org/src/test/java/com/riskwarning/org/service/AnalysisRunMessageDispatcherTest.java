@@ -3,6 +3,7 @@ package com.riskwarning.org.service;
 import com.riskwarning.common.dto.analysis.AnalysisScope;
 import com.riskwarning.common.enums.DataSourceTypeEnum;
 import com.riskwarning.common.message.BehaviorProcessingTaskMessage;
+import com.riskwarning.common.reliability.KafkaOutbox;
 import com.riskwarning.common.utils.KafkaUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -13,14 +14,23 @@ import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 class AnalysisRunMessageDispatcherTest {
 
     private final KafkaUtils kafkaUtils = mock(KafkaUtils.class);
     private final AnalysisRunService runService = mock(AnalysisRunService.class);
-    private final AnalysisRunMessageDispatcher dispatcher =
-            new AnalysisRunMessageDispatcher(kafkaUtils, runService);
+    private final KafkaOutbox outbox = mock(KafkaOutbox.class);
+    private final AnalysisRunMessageDispatcher durableDispatcher =
+            new AnalysisRunMessageDispatcher(kafkaUtils, runService, outbox);
+    private final AnalysisRunMessageDispatcher fallbackDispatcher =
+            new AnalysisRunMessageDispatcher(kafkaUtils, runService, outbox);
     private final AnalysisScope scope = new AnalysisScope(10L, 20L, "run-1");
     private final BehaviorProcessingTaskMessage message = new BehaviorProcessingTaskMessage(
             "message", "timestamp", "trace", 1L, 10L, 20L, "run-1",
@@ -35,38 +45,80 @@ class AnalysisRunMessageDispatcherTest {
     }
 
     @Test
-    void rejectsRegistrationOutsideTransaction() {
-        assertThrows(IllegalStateException.class,
-                () -> dispatcher.dispatchAfterCommit(scope, message));
-    }
-
-    @Test
     void rejectsMessageWhoseScopeDoesNotMatchRun() {
         BehaviorProcessingTaskMessage wrongMessage = new BehaviorProcessingTaskMessage(
                 "message", "timestamp", "trace", 1L, 10L, 20L, "run-2",
                 DataSourceTypeEnum.FILE_UPLOAD, Collections.emptyList());
         assertThrows(IllegalArgumentException.class,
-                () -> dispatcher.dispatchAfterCommit(scope, wrongMessage));
+                () -> durableDispatcher.dispatch(scope, wrongMessage));
+        assertThrows(IllegalArgumentException.class,
+                () -> fallbackDispatcher.dispatch(scope, wrongMessage));
     }
 
     @Test
-    void sendsOnlyAfterCommit() throws Exception {
+    void durableModeEnqueuesMessageInsideTransaction() {
+        when(outbox.isDurable()).thenReturn(true);
         beginTransactionSynchronization();
-        dispatcher.dispatchAfterCommit(scope, message);
+
+        durableDispatcher.dispatch(scope, message);
+
+        verify(outbox).enqueue(message);
+        verifyNoInteractions(kafkaUtils, runService);
+    }
+
+    @Test
+    void durableModeRejectsEnqueueOutsideTransaction() {
+        when(outbox.isDurable()).thenReturn(true);
+
+        assertThrows(IllegalStateException.class,
+                () -> durableDispatcher.dispatch(scope, message));
+        verify(outbox, never()).enqueue(any());
+        verifyNoInteractions(kafkaUtils, runService);
+    }
+
+    @Test
+    void durableModeEnqueueFailurePropagatesWithoutFailingRun() {
+        when(outbox.isDurable()).thenReturn(true);
+        doThrow(new IllegalStateException("insert failed"))
+                .when(outbox).enqueue(message);
+        beginTransactionSynchronization();
+
+        assertThrows(IllegalStateException.class,
+                () -> durableDispatcher.dispatch(scope, message));
+        // 入库失败由业务事务回滚，不单独标记运行失败
+        verifyNoInteractions(kafkaUtils, runService);
+    }
+
+    @Test
+    void fallbackModeRejectsRegistrationOutsideTransaction() {
+        when(outbox.isDurable()).thenReturn(false);
+
+        assertThrows(IllegalStateException.class,
+                () -> fallbackDispatcher.dispatch(scope, message));
+        verifyNoInteractions(kafkaUtils, runService);
+    }
+
+    @Test
+    void fallbackModeSendsOnlyAfterCommit() throws Exception {
+        when(outbox.isDurable()).thenReturn(false);
+        beginTransactionSynchronization();
+        fallbackDispatcher.dispatch(scope, message);
         verifyNoInteractions(kafkaUtils);
 
         registeredSynchronization().afterCommit();
 
         verify(kafkaUtils).sendMessageAndWait(message);
+        verify(outbox, never()).enqueue(any());
         verifyNoInteractions(runService);
     }
 
     @Test
-    void marksRunFailedWhenBrokerRejectsMessage() throws Exception {
+    void fallbackModeMarksRunFailedWhenBrokerRejectsMessage() throws Exception {
+        when(outbox.isDurable()).thenReturn(false);
         doThrow(new IllegalStateException("broker unavailable"))
                 .when(kafkaUtils).sendMessageAndWait(message);
         beginTransactionSynchronization();
-        dispatcher.dispatchAfterCommit(scope, message);
+        fallbackDispatcher.dispatch(scope, message);
 
         registeredSynchronization().afterCommit();
 
@@ -74,9 +126,10 @@ class AnalysisRunMessageDispatcherTest {
     }
 
     @Test
-    void rollbackDoesNotPublishMessage() {
+    void fallbackModeRollbackDoesNotPublishMessage() {
+        when(outbox.isDurable()).thenReturn(false);
         beginTransactionSynchronization();
-        dispatcher.dispatchAfterCommit(scope, message);
+        fallbackDispatcher.dispatch(scope, message);
 
         registeredSynchronization().afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
 

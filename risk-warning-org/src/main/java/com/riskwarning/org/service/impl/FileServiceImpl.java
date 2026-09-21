@@ -6,13 +6,19 @@ import com.riskwarning.common.constants.RedisKey;
 import com.riskwarning.common.context.UserContext;
 import com.riskwarning.common.enums.FileTypeEnum;
 import com.riskwarning.common.exception.BusinessException;
+import com.riskwarning.common.observability.AssessmentFlowEvent;
+import com.riskwarning.common.observability.AssessmentFlowLogger;
+import com.riskwarning.common.observability.AssessmentFlowStage;
+import com.riskwarning.common.observability.AssessmentFlowStatus;
 import com.riskwarning.common.po.file.ProjectFile;
 import com.riskwarning.common.utils.FileUtils;
 import com.riskwarning.common.utils.RedisUtil;
+import com.riskwarning.common.utils.StringUtils;
 import com.riskwarning.org.entity.dto.UploadConfirmDto;
 import com.riskwarning.org.entity.dto.UploadFileDto;
 import com.riskwarning.org.repository.FileRepository;
 import com.riskwarning.org.service.FileService;
+import com.riskwarning.org.task.UploadTaskQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +35,12 @@ public class FileServiceImpl implements FileService {
 
     @Autowired
     private FileRepository fileRepository;
+
+    @Autowired
+    private UploadTaskQueue uploadTaskQueue;
+
+    @Autowired
+    private AssessmentFlowLogger flowLogger;
 
     @Override
     public String initUpload(Long projectId, String fileHash, Long fileSize, Integer totalChunks,
@@ -143,21 +155,56 @@ public class FileServiceImpl implements FileService {
         if(uploadFileMap == null || uploadFileMap.isEmpty()){
             throw new BusinessException("上传任务不存在或已过期");
         }
+        // 冻结确认时刻的文件快照：执行阶段不依赖 Redis 元数据存活
+        List<UploadFileDto> snapshot = new ArrayList<>();
         for(Object value : uploadFileMap.values()) {
             UploadFileDto uploadFileDto = (UploadFileDto) value;
+            if(uploadFileDto.getUploadId() == null || !projectId.equals(uploadFileDto.getProjectId())){
+                throw new BusinessException("上传文件归属项目不一致");
+            }
             Set<Object> chunksSet = redisUtil.sGet(String.format(RedisKey.REDIS_KEY_UPLOAD_CHUNKS, uploadFileDto.getUploadId()));
-            if(chunksSet.size() != uploadFileDto.getTotalChunks()){
+            if(chunksSet == null || chunksSet.size() != uploadFileDto.getTotalChunks()){
                 throw new BusinessException("文件分片上传未完成，无法确认上传");
             }
+            snapshot.add(copyOf(uploadFileDto));
         }
+        // 排序保证快照与 taskId 稳定，重试不会派生不同任务身份
+        snapshot.sort(Comparator.comparing(UploadFileDto::getUploadId));
         // 将确认上传任务放入队列，异步处理文件合并和入
-        redisUtil.lSet(
-                RedisKey.REDIS_KEY_CONFIRMED_FILE_QUEUE,
+        String taskId = StringUtils.deriveUploadTaskId(projectId, uploadIdsOf(snapshot));
+        uploadTaskQueue.enqueue(
                 UploadConfirmDto.builder()
+                        .taskId(taskId)
                         .projectId(projectId)
                         .userId(UserContext.getUser().getId())
-                        .retryCount(0)
+                        .files(snapshot)
                         .build()
         );
+        flowLogger.info(AssessmentFlowEvent.builder(
+                        AssessmentFlowStage.UPLOAD_QUEUE, AssessmentFlowStatus.SUCCEEDED)
+                .projectId(projectId).taskId(taskId)
+                .build());
+    }
+
+    private List<String> uploadIdsOf(List<UploadFileDto> snapshot) {
+        List<String> uploadIds = new ArrayList<>();
+        for (UploadFileDto uploadFileDto : snapshot) {
+            uploadIds.add(uploadFileDto.getUploadId());
+        }
+        return uploadIds;
+    }
+
+    /** 防御性拷贝，避免快照与 Redis 反序列化对象共享可变状态。 */
+    private UploadFileDto copyOf(UploadFileDto source) {
+        return UploadFileDto.builder()
+                .projectId(source.getProjectId())
+                .uploadId(source.getUploadId())
+                .userId(source.getUserId())
+                .filePath(source.getFilePath())
+                .fileHash(source.getFileHash())
+                .totalChunks(source.getTotalChunks())
+                .fileSuffix(source.getFileSuffix())
+                .originalFileName(source.getOriginalFileName())
+                .build();
     }
 }

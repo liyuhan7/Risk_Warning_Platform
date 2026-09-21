@@ -3,6 +3,10 @@ package com.riskwarning.processing.service;
 import com.riskwarning.common.dto.analysis.AnalysisScope;
 import com.riskwarning.common.dto.analysis.SourceDocumentRef;
 import com.riskwarning.common.dto.fact.FactExtractionResult;
+import com.riskwarning.common.observability.AssessmentFlowEvent;
+import com.riskwarning.common.observability.AssessmentFlowLogger;
+import com.riskwarning.common.observability.AssessmentFlowStage;
+import com.riskwarning.common.observability.AssessmentFlowStatus;
 import com.riskwarning.common.po.behavior.Behavior;
 import com.riskwarning.common.po.evidence.EvidenceChunk;
 import com.riskwarning.processing.repository.BehaviorDocumentRepository;
@@ -19,15 +23,18 @@ public class FactExtractionPipeline {
     private final FactExtractionService factExtractionService;
     private final StructuredBehaviorWriter behaviorWriter;
     private final BehaviorDocumentRepository behaviorDocumentRepository;
+    private final AssessmentFlowLogger flowLogger;
 
     public FactExtractionPipeline(EvidenceExtractionService evidenceExtractionService,
                                   FactExtractionService factExtractionService,
                                   StructuredBehaviorWriter behaviorWriter,
-                                  BehaviorDocumentRepository behaviorDocumentRepository) {
+                                  BehaviorDocumentRepository behaviorDocumentRepository,
+                                  AssessmentFlowLogger flowLogger) {
         this.evidenceExtractionService = evidenceExtractionService;
         this.factExtractionService = factExtractionService;
         this.behaviorWriter = behaviorWriter;
         this.behaviorDocumentRepository = behaviorDocumentRepository;
+        this.flowLogger = flowLogger;
     }
 
     /**
@@ -54,8 +61,24 @@ public class FactExtractionPipeline {
                 throw new IllegalStateException("事实抽取返回失败项，禁止写入部分结果");
             }
             behaviors.addAll(result.getBehaviors());
+            flowLogger.info(factEvent(scope));
         }
         behaviorWriter.enrichAndWrite(behaviors);
+        // Behavior 批量为多值身份，事件不携带单个 behaviorId
+        flowLogger.info(AssessmentFlowEvent.builder(
+                        AssessmentFlowStage.BEHAVIOR_PERSIST, AssessmentFlowStatus.SUCCEEDED)
+                .projectId(scope.getProjectId()).assessmentId(scope.getAssessmentId())
+                .analysisRunId(scope.getAnalysisRunId())
+                .build());
         return behaviors;
+    }
+
+    private AssessmentFlowEvent factEvent(AnalysisScope scope) {
+        // 文档级事件没有单值身份字段，taskId/behaviorId 保持占位
+        return AssessmentFlowEvent.builder(
+                        AssessmentFlowStage.FACT_EXTRACT, AssessmentFlowStatus.SUCCEEDED)
+                .projectId(scope.getProjectId()).assessmentId(scope.getAssessmentId())
+                .analysisRunId(scope.getAnalysisRunId())
+                .build();
     }
 }

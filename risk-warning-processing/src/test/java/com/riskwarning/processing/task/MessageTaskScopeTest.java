@@ -16,7 +16,7 @@ import com.riskwarning.processing.service.SourceDocumentScopeValidator;
 import com.riskwarning.processing.service.P2RetrievalProcessingService;
 import com.riskwarning.processing.config.P2ProcessingProperties;
 import com.riskwarning.processing.entity.dto.ProcessedDocument;
-import com.riskwarning.common.utils.KafkaUtils;
+import com.riskwarning.common.reliability.KafkaOutbox;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
@@ -75,6 +75,7 @@ class MessageTaskScopeTest {
 
         IndicatorCalculationTaskMessage next = MessageTask.createIndicatorMessage(source);
 
+        assertEquals("message:indicator", next.getMessageId());
         assertEquals(Long.valueOf(10L), next.getProjectId());
         assertEquals(Long.valueOf(20L), next.getAssessmentId());
         assertEquals("run-1", next.getAnalysisRunId());
@@ -104,7 +105,7 @@ class MessageTaskScopeTest {
         BehaviorProcessingService behaviorProcessingService = mock(BehaviorProcessingService.class);
         P2RetrievalProcessingService retrievalProcessingService = mock(P2RetrievalProcessingService.class);
         AnalysisRunFailureService failureService = mock(AnalysisRunFailureService.class);
-        KafkaUtils kafkaUtils = mock(KafkaUtils.class);
+        KafkaOutbox kafkaOutbox = mock(KafkaOutbox.class);
         P2ProcessingProperties properties = new P2ProcessingProperties();
         org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor executor =
                 new org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor();
@@ -117,14 +118,15 @@ class MessageTaskScopeTest {
             ReflectionTestUtils.setField(task, "p2RetrievalProcessingService", retrievalProcessingService);
             ReflectionTestUtils.setField(task, "analysisRunFailureService", failureService);
             ReflectionTestUtils.setField(task, "behaviorThreadPoolExecutor", executor);
-            ReflectionTestUtils.setField(task, "kafkaUtils", kafkaUtils);
+            ReflectionTestUtils.setField(task, "kafkaOutbox", kafkaOutbox);
             ReflectionTestUtils.setField(task, "p2Properties", properties);
             IndicatorCalculationTaskMessage message = new IndicatorCalculationTaskMessage(
                     "message", "timestamp", "trace", 1L, 10L, 20L, "run-1");
 
             task.onMessage(message);
 
-            verify(behaviorProcessingService, timeout(1000)).processProjectBehaviors(1L, 10L, 20L, "run-1");
+            verify(behaviorProcessingService, timeout(1000))
+                    .processProjectBehaviors(1L, 10L, 20L, "run-1", "message");
             verifyNoInteractions(retrievalProcessingService);
 
             properties.setMode(P2ProcessingProperties.Mode.P2);
@@ -132,8 +134,9 @@ class MessageTaskScopeTest {
 
             verify(retrievalProcessingService, timeout(1000))
                     .process(any(IndicatorCalculationTaskMessage.class), eq(new AnalysisScope(10L, 20L, "run-1")));
-            verify(behaviorProcessingService, times(1)).processProjectBehaviors(any(), any(), any(), any());
-            verifyNoInteractions(kafkaUtils);
+            verify(behaviorProcessingService, times(1))
+                    .processProjectBehaviors(any(), any(), any(), any(), any());
+            verifyNoInteractions(kafkaOutbox);
         } finally {
             executor.shutdown();
         }
@@ -144,7 +147,7 @@ class MessageTaskScopeTest {
         BehaviorProcessingService behaviorProcessingService = mock(BehaviorProcessingService.class);
         AnalysisRunFailureService failureService = mock(AnalysisRunFailureService.class);
         doThrow(new RuntimeException("指标计算异常")).when(behaviorProcessingService)
-                .processProjectBehaviors(1L, 10L, 20L, "run-1");
+                .processProjectBehaviors(1L, 10L, 20L, "run-1", "message");
         org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor executor =
                 new org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor();
         executor.setCorePoolSize(1);
@@ -172,7 +175,7 @@ class MessageTaskScopeTest {
         EvidenceExtractionService evidenceService = mock(EvidenceExtractionService.class);
         FactExtractionPipeline pipeline = mock(FactExtractionPipeline.class);
         AnalysisRunFailureService failureService = mock(AnalysisRunFailureService.class);
-        KafkaUtils kafkaUtils = mock(KafkaUtils.class);
+        KafkaOutbox kafkaOutbox = mock(KafkaOutbox.class);
         org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor executor =
                 new org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor();
         executor.setCorePoolSize(1);
@@ -197,12 +200,12 @@ class MessageTaskScopeTest {
         ReflectionTestUtils.setField(task, "factExtractionPipeline", pipeline);
         ReflectionTestUtils.setField(task, "analysisRunFailureService", failureService);
         ReflectionTestUtils.setField(task, "fileThreadPoolExecutor", executor);
-        ReflectionTestUtils.setField(task, "kafkaUtils", kafkaUtils);
+        ReflectionTestUtils.setField(task, "kafkaOutbox", kafkaOutbox);
         try {
             task.onMessage(message);
 
             verify(pipeline, timeout(2000)).process(scope, Collections.singletonList(document));
-            verify(kafkaUtils, timeout(2000)).sendMessage(any(IndicatorCalculationTaskMessage.class));
+            verify(kafkaOutbox, timeout(2000)).enqueue(any(IndicatorCalculationTaskMessage.class));
         } finally {
             executor.shutdown();
         }
@@ -215,7 +218,7 @@ class MessageTaskScopeTest {
         EvidenceExtractionService evidenceService = mock(EvidenceExtractionService.class);
         FactExtractionPipeline pipeline = mock(FactExtractionPipeline.class);
         AnalysisRunFailureService failureService = mock(AnalysisRunFailureService.class);
-        KafkaUtils kafkaUtils = mock(KafkaUtils.class);
+        KafkaOutbox kafkaOutbox = mock(KafkaOutbox.class);
         AtomicReference<Throwable> workerFailure = new AtomicReference<>();
         CountDownLatch workerCompleted = new CountDownLatch(1);
         org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor executor =
@@ -256,14 +259,14 @@ class MessageTaskScopeTest {
         ReflectionTestUtils.setField(task, "factExtractionPipeline", pipeline);
         ReflectionTestUtils.setField(task, "analysisRunFailureService", failureService);
         ReflectionTestUtils.setField(task, "fileThreadPoolExecutor", executor);
-        ReflectionTestUtils.setField(task, "kafkaUtils", kafkaUtils);
+        ReflectionTestUtils.setField(task, "kafkaOutbox", kafkaOutbox);
         try {
             task.onMessage(message);
 
             assertTrue(workerCompleted.await(2, TimeUnit.SECONDS));
             assertNull(workerFailure.get(), "FILE_UPLOAD 失败终态不得从工作任务重新抛出");
             verify(failureService).markFailed(eq(scope), any());
-            verifyNoInteractions(kafkaUtils);
+            verifyNoInteractions(kafkaOutbox);
         } finally {
             executor.shutdown();
         }

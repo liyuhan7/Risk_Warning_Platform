@@ -5,10 +5,10 @@ import com.riskwarning.common.dto.retrieval.*;
 import com.riskwarning.common.enums.AnalysisRunStatus;
 import com.riskwarning.common.enums.analysis.*;
 import com.riskwarning.common.message.IndicatorCalculationTaskMessage;
+import com.riskwarning.common.observability.AssessmentFlowLogger;
 import com.riskwarning.common.po.analysis.AnalysisRun;
 import com.riskwarning.common.po.behavior.Behavior;
 import com.riskwarning.common.po.evidence.EvidenceChunk;
-import com.riskwarning.common.utils.KafkaUtils;
 import com.riskwarning.processing.client.RetrievalClient;
 import com.riskwarning.processing.config.P2ProcessingProperties;
 import com.riskwarning.processing.repository.*;
@@ -26,14 +26,14 @@ class RetrievalProcessingServiceTest {
     private final RetrievalClient retrieval = mock(RetrievalClient.class);
     private final RetrievalAuditService audits = mock(RetrievalAuditService.class);
     private final AnalysisRunRepository runs = mock(AnalysisRunRepository.class);
-    private final AnalysisRunNoDecisionService noDecision = mock(AnalysisRunNoDecisionService.class);
-    private final KafkaUtils kafka = mock(KafkaUtils.class);
+    private final P2CompletionService completion = mock(P2CompletionService.class);
     private final P2ProcessingProperties properties = new P2ProcessingProperties();
     private final AnalysisScope scope = new AnalysisScope(7L, 90L, "real-run");
     private final IndicatorCalculationTaskMessage message = new IndicatorCalculationTaskMessage(
             "message", "time", "trace", 5L, 7L, 90L, "real-run");
     private final P2RetrievalProcessingService service = new P2RetrievalProcessingService(
-            behaviors, evidence, retrieval, audits, runs, noDecision, new BehaviorQueryTextBuilder(), properties, kafka);
+            behaviors, evidence, retrieval, audits, runs, completion,
+            new BehaviorQueryTextBuilder(), properties, mock(AssessmentFlowLogger.class));
     private AnalysisRun run;
     private Behavior behavior;
 
@@ -55,8 +55,7 @@ class RetrievalProcessingServiceTest {
         verify(audits).save(argThat(a -> a.getRetrievalStatus() == RetrievalAuditStatus.SUCCESS
                 && a.getAnalysisStatus() == AnalysisAuditStatus.WAITING_P3 && a.getCandidates().size() == 1
                 && !a.getFilterEnabled() && !a.getFilterApplied()));
-        verify(noDecision).complete(scope);
-        verify(kafka).sendMessage(any());
+        verify(completion).complete(message, scope);
         verify(retrieval).retrieve(argThat(request -> request.getRequests().get(0).getQueryText()
                 .equals("公司留存采购审批意见 留存 审批意见")));
     }
@@ -92,7 +91,7 @@ class RetrievalProcessingServiceTest {
     @Test void completedRunReplayDoesNotOverwriteSnapshots() {
         run.completeWithoutDecision(LocalDateTime.now());
         service.process(message, scope);
-        verifyNoInteractions(behaviors, evidence, retrieval, audits, noDecision, kafka);
+        verifyNoInteractions(behaviors, evidence, retrieval, audits, completion);
     }
 
     @Test void noCandidatesIsNotAZeroRiskConclusion() {
@@ -101,7 +100,7 @@ class RetrievalProcessingServiceTest {
         verify(audits).save(argThat(a -> a.getRetrievalStatus() == RetrievalAuditStatus.NO_CANDIDATES
                 && a.getAnalysisStatus() == AnalysisAuditStatus.NOT_ATTEMPTED
                 && "BAAI/bge-m3".equals(a.getEmbeddingModel()) && "v1".equals(a.getEmbeddingVersion())));
-        verify(noDecision).complete(scope);
+        verify(completion).complete(message, scope);
     }
 
     @Test void missingEvidenceStillHasExplicitDegradedContext() {
@@ -124,8 +123,9 @@ class RetrievalProcessingServiceTest {
         response("b", RetrievalBatchStatus.SUCCESS, Collections.singletonList(candidate));
         assertThrows(IllegalStateException.class, () -> service.process(message, scope));
         verify(audits).save(argThat(a -> a.getRetrievalStatus() == RetrievalAuditStatus.FAILED));
-        verifyNoInteractions(noDecision, kafka);
+        verifyNoInteractions(completion);
     }
+
     @Test void unavailableSnapshotKeepsScoredCandidateAndNeverBecomesNoCandidates() {
         RetrievalCandidateSnapshot candidate = candidate("b"); candidate.setName(null);
         response("b", RetrievalBatchStatus.SNAPSHOT_UNAVAILABLE, Collections.singletonList(candidate));
@@ -140,7 +140,7 @@ class RetrievalProcessingServiceTest {
         response("b", RetrievalBatchStatus.SUCCESS, Collections.singletonList(candidate));
         assertThrows(IllegalStateException.class, () -> service.process(message, scope));
         verify(audits).save(argThat(a -> a.getRetrievalStatus() == RetrievalAuditStatus.FAILED));
-        verifyNoInteractions(noDecision, kafka);
+        verifyNoInteractions(completion);
     }
 
     @Test void laterBatchFailureDoesNotRewriteEarlierSuccessfulAudit() {
@@ -158,14 +158,15 @@ class RetrievalProcessingServiceTest {
         verify(audits).save(argThat(a -> "c".equals(a.getBehaviorId()) && a.getRetrievalStatus() == RetrievalAuditStatus.FAILED
                 && !a.getErrorMessage().contains("secret")));
         verify(audits, times(2)).save(any());
-        verifyNoInteractions(noDecision, kafka);
+        verifyNoInteractions(completion);
     }
 
     @Test void sameRunReplayAfterCompletionKeepsTheOriginalAudit() {
+        // 完成服务内部推进运行状态；mock 中模拟事务提交后的终态变更
         doAnswer(invocation -> {
             run.completeWithoutDecision(LocalDateTime.now());
             return null;
-        }).when(noDecision).complete(scope);
+        }).when(completion).complete(message, scope);
         response("b", RetrievalBatchStatus.SUCCESS, Collections.singletonList(candidate("b")));
 
         service.process(message, scope);
@@ -173,8 +174,7 @@ class RetrievalProcessingServiceTest {
 
         verify(runs, times(2)).findByAnalysisRunIdAndAssessmentIdAndProjectId("real-run", 90L, 7L);
         verify(audits, times(1)).save(any());
-        verify(noDecision, times(1)).complete(scope);
-        verify(kafka, times(1)).sendMessage(any());
+        verify(completion, times(1)).complete(message, scope);
     }
 
     @Test void failingNewRunOnSameAssessmentLeavesPreviousRunAuditsUntouched() {
@@ -195,14 +195,14 @@ class RetrievalProcessingServiceTest {
         verify(audits, times(1)).save(argThat(a -> "next-run".equals(a.getAnalysisRunId())
                 && a.getRetrievalStatus() == RetrievalAuditStatus.FAILED
                 && a.getAnalysisStatus() == AnalysisAuditStatus.NOT_ATTEMPTED));
-        verify(noDecision, never()).complete(nextScope);
+        verify(completion, never()).complete(nextMessage, nextScope);
         assertEquals(AnalysisRunStatus.COMPLETED_WITHOUT_DECISION, run.getStatus());
     }
 
     @Test void foreignBehaviorIsRejectedBeforeEvidenceOrRetrieval() {
         behavior.setAssessmentId(91L);
         assertThrows(IllegalStateException.class, () -> service.process(message, scope));
-        verifyNoInteractions(evidence, retrieval, audits, noDecision, kafka);
+        verifyNoInteractions(evidence, retrieval, audits, completion);
     }
 
     private void response(String id, RetrievalBatchStatus status, List<RetrievalCandidateSnapshot> candidates) {

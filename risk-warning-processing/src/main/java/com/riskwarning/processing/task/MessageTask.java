@@ -6,7 +6,7 @@ import com.riskwarning.common.dto.analysis.SourceDocumentRef;
 import com.riskwarning.common.message.BehaviorProcessingTaskMessage;
 import com.riskwarning.common.message.IndicatorCalculationTaskMessage;
 import com.riskwarning.common.message.Message;
-import com.riskwarning.common.utils.KafkaUtils;
+import com.riskwarning.common.reliability.KafkaOutbox;
 import com.riskwarning.common.utils.StringUtils;
 import com.riskwarning.processing.entity.dto.ProcessedDocument;
 import com.riskwarning.processing.service.AnalysisRunFailureService;
@@ -20,6 +20,7 @@ import com.riskwarning.processing.config.P2ProcessingProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
@@ -29,8 +30,15 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 兼容 Kafka 消费者：未启用可靠链（assessment.reliability.enabled=false）时，
+ * 沿用原有本地线程池处理流程；启用后由 DurableProcessingMessageTask 与
+ * WorkHandler 接管，两者不会同时消费同一 topic。
+ */
 @Component
 @Slf4j
+@ConditionalOnProperty(prefix = "assessment.reliability", name = "enabled",
+        havingValue = "false", matchIfMissing = true)
 public class MessageTask {
 
     @Autowired
@@ -60,7 +68,7 @@ public class MessageTask {
     private ThreadPoolTaskExecutor behaviorThreadPoolExecutor;
 
     @Autowired
-    private KafkaUtils kafkaUtils;
+    private KafkaOutbox kafkaOutbox;
 
     @Autowired
     private P2RetrievalProcessingService p2RetrievalProcessingService;
@@ -69,7 +77,8 @@ public class MessageTask {
     private P2ProcessingProperties p2Properties = new P2ProcessingProperties();
 
 
-    @KafkaListener(topics = "behavior_processing_tasks", groupId = "test-consumer")
+    @KafkaListener(topics = "behavior_processing_tasks", groupId = "test-consumer",
+            containerFactory = "durableKafkaListenerContainerFactory")
     public void onMessage(BehaviorProcessingTaskMessage message) {
         AnalysisScope analysisScope = requireScope(message);
         log.info("========================================");
@@ -120,8 +129,8 @@ public class MessageTask {
                             // ✅ 创建指标计算任务消息
                             IndicatorCalculationTaskMessage indicatorMessage = createIndicatorMessage(message);
 
-                            // ✅ 发送到 indicator_calculation_tasks topic
-                            kafkaUtils.sendMessage(indicatorMessage);
+                            // 通过 Outbox 投递，与业务结果同事务可靠落库
+                            kafkaOutbox.enqueue(indicatorMessage);
                             log.info("✓ 步骤 3/3 完成: 已发送指标计算任务消息, assessmentId={}", assessmentId);
 
 
@@ -177,7 +186,8 @@ public class MessageTask {
         log.info("========================================");
     }
 
-    @KafkaListener(topics = "indicator_calculation_tasks", groupId = "indicator-calculation-consumer")
+    @KafkaListener(topics = "indicator_calculation_tasks", groupId = "indicator-calculation-consumer",
+            containerFactory = "durableKafkaListenerContainerFactory")
     public void onMessage(IndicatorCalculationTaskMessage message) {
 
         AnalysisScope analysisScope = requireScope(message);
@@ -199,7 +209,7 @@ public class MessageTask {
                 } else {
                     behaviorProcessingService.processProjectBehaviors(
                             message.getUserId(), message.getProjectId(), message.getAssessmentId(),
-                            analysisScope.getAnalysisRunId());
+                            analysisScope.getAnalysisRunId(), message.getMessageId());
                 }
             } catch (Exception e) {
                 log.error("✗ 指标计算任务失败: projectId={}, assessmentId={}, error={}",
@@ -220,7 +230,7 @@ public class MessageTask {
     static IndicatorCalculationTaskMessage createIndicatorMessage(BehaviorProcessingTaskMessage message) {
         AnalysisScope scope = requireScope(message);
         return new IndicatorCalculationTaskMessage(
-                StringUtils.generateMessageId(),
+                StringUtils.deriveMessageId(message.getMessageId(), "indicator"),
                 String.valueOf(System.currentTimeMillis()),
                 message.getTraceId(),
                 message.getUserId(),

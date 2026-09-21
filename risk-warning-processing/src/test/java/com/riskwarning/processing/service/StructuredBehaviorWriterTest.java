@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -20,19 +19,22 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+/**
+ * Behavior 写入前置条件测试：分类或向量任一环节失败必须失败整批写入，
+ * 防止无向量 Behavior 进入 LEGACY 指标链后把失败误判为成功。
+ */
 class StructuredBehaviorWriterTest {
+
+    private final BehaviorDocumentRepository repository = mock(BehaviorDocumentRepository.class);
+    private final ClassifierClient classifier = mock(ClassifierClient.class);
+    private final VectorizationClient vectorization = mock(VectorizationClient.class);
 
     @Test
     void enrichesBeforeWriting() {
-        BehaviorDocumentRepository repository = mock(BehaviorDocumentRepository.class);
-        ClassifierClient classifier = mock(ClassifierClient.class);
-        VectorizationClient vectorization = mock(VectorizationClient.class);
         Behavior behavior = Behavior.builder().id("stable-id").description("企业完成审查").build();
         when(classifier.classifyBatch(any())).thenReturn(classification("定量", "环境"));
-        Map<String, Object> vectorResponse = new HashMap<>();
-        vectorResponse.put("success", true);
-        vectorResponse.put("vectors", Collections.singletonList(Arrays.asList(0.1D, 0.2D)));
-        when(vectorization.batchVectorize(any())).thenReturn(vectorResponse);
+        when(vectorization.batchVectorize(any())).thenReturn(vectorResponse(true,
+                Collections.singletonList(Arrays.asList(0.1D, 0.2D))));
 
         new StructuredBehaviorWriter(repository, classifier, vectorization)
                 .enrichAndWrite(Collections.singletonList(behavior));
@@ -45,26 +47,90 @@ class StructuredBehaviorWriterTest {
     }
 
     @Test
-    void vectorFailureDoesNotBlockBehaviorWrite() {
-        BehaviorDocumentRepository repository = mock(BehaviorDocumentRepository.class);
-        ClassifierClient classifier = mock(ClassifierClient.class);
-        VectorizationClient vectorization = mock(VectorizationClient.class);
+    void vectorServiceFailureBlocksBehaviorWrite() {
         Behavior behavior = Behavior.builder().id("stable-id").description("企业完成审查").build();
         when(classifier.classifyBatch(any())).thenReturn(classification("定性", "治理"));
         when(vectorization.batchVectorize(any())).thenThrow(new RuntimeException("服务不可用"));
 
-        new StructuredBehaviorWriter(repository, classifier, vectorization)
-                .enrichAndWrite(Collections.singletonList(behavior));
+        assertThrows(IllegalStateException.class, () -> new StructuredBehaviorWriter(
+                repository, classifier, vectorization).enrichAndWrite(
+                Collections.singletonList(behavior)));
 
-        assertNull(behavior.getDescriptionVector());
-        verify(repository).writeAll(Collections.singletonList(behavior));
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void vectorServiceUnsuccessResponseBlocksBehaviorWrite() {
+        Behavior behavior = Behavior.builder().id("stable-id").description("企业完成审查").build();
+        when(classifier.classifyBatch(any())).thenReturn(classification("定性", "治理"));
+        when(vectorization.batchVectorize(any())).thenReturn(vectorResponse(false,
+                Collections.singletonList(Arrays.asList(0.1D))));
+
+        assertThrows(IllegalStateException.class, () -> new StructuredBehaviorWriter(
+                repository, classifier, vectorization).enrichAndWrite(
+                Collections.singletonList(behavior)));
+
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void vectorCountMismatchBlocksBehaviorWrite() {
+        Behavior first = Behavior.builder().id("stable-id-1").description("企业完成审查").build();
+        Behavior second = Behavior.builder().id("stable-id-2").description("企业提交报告").build();
+        when(classifier.classifyBatch(any())).thenReturn(classification("定性", "治理"));
+        when(vectorization.batchVectorize(any())).thenReturn(vectorResponse(true,
+                Collections.singletonList(Arrays.asList(0.1D))));
+
+        assertThrows(IllegalStateException.class, () -> new StructuredBehaviorWriter(
+                repository, classifier, vectorization).enrichAndWrite(Arrays.asList(first, second)));
+
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void nullOrEmptyVectorBlocksBehaviorWrite() {
+        Behavior nullVector = Behavior.builder().id("stable-id-1").description("企业完成审查").build();
+        Behavior emptyVector = Behavior.builder().id("stable-id-2").description("企业提交报告").build();
+        when(classifier.classifyBatch(any())).thenReturn(classification("定性", "治理"));
+        when(vectorization.batchVectorize(any())).thenReturn(vectorResponse(true, Arrays.asList(
+                null,
+                Collections.emptyList())));
+
+        assertThrows(IllegalStateException.class, () -> new StructuredBehaviorWriter(
+                repository, classifier, vectorization).enrichAndWrite(Arrays.asList(nullVector, emptyVector)));
+
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void invalidVectorValueBlocksBehaviorWrite() {
+        Behavior behavior = Behavior.builder().id("stable-id").description("企业完成审查").build();
+        when(classifier.classifyBatch(any())).thenReturn(classification("定性", "治理"));
+        when(vectorization.batchVectorize(any())).thenReturn(vectorResponse(true,
+                Collections.singletonList(Arrays.asList(0.1D, Double.NaN))));
+
+        assertThrows(IllegalStateException.class, () -> new StructuredBehaviorWriter(
+                repository, classifier, vectorization).enrichAndWrite(
+                Collections.singletonList(behavior)));
+
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void behaviorWithoutVectorIsRejectedBeforeWrite() {
+        Behavior behavior = Behavior.builder().id("stable-id").description("企业完成审查").build();
+        behavior.setType("定性");
+        behavior.setDimension("治理");
+
+        assertThrows(IllegalStateException.class, () -> new StructuredBehaviorWriter(
+                repository, classifier, vectorization).enrichAndWrite(
+                Collections.singletonList(behavior)));
+
+        verifyNoInteractions(vectorization, repository);
     }
 
     @Test
     void classificationEmptyResponseBlocksBehaviorWrite() {
-        BehaviorDocumentRepository repository = mock(BehaviorDocumentRepository.class);
-        ClassifierClient classifier = mock(ClassifierClient.class);
-        VectorizationClient vectorization = mock(VectorizationClient.class);
         Behavior behavior = Behavior.builder().id("stable-id").description("企业完成审查").build();
         when(classifier.classifyBatch(any())).thenReturn(null);
 
@@ -77,9 +143,6 @@ class StructuredBehaviorWriterTest {
 
     @Test
     void classificationResultCountMismatchBlocksBehaviorWrite() {
-        BehaviorDocumentRepository repository = mock(BehaviorDocumentRepository.class);
-        ClassifierClient classifier = mock(ClassifierClient.class);
-        VectorizationClient vectorization = mock(VectorizationClient.class);
         Behavior first = Behavior.builder().id("stable-id-1").description("企业完成审查").build();
         Behavior second = Behavior.builder().id("stable-id-2").description("企业提交报告").build();
         when(classifier.classifyBatch(any())).thenReturn(classification("定性", "治理"));
@@ -88,6 +151,13 @@ class StructuredBehaviorWriterTest {
                 repository, classifier, vectorization).enrichAndWrite(Arrays.asList(first, second)));
 
         verifyNoInteractions(vectorization, repository);
+    }
+
+    private Map<String, Object> vectorResponse(boolean success, Object vectors) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", success);
+        response.put("vectors", vectors);
+        return response;
     }
 
     private Map<String, Object> classification(String type, String dimension) {

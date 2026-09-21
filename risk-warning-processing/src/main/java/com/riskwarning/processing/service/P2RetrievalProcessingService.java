@@ -5,13 +5,14 @@ import com.riskwarning.common.dto.retrieval.*;
 import com.riskwarning.common.enums.AnalysisRunStatus;
 import com.riskwarning.common.enums.analysis.*;
 import com.riskwarning.common.message.IndicatorCalculationTaskMessage;
-import com.riskwarning.common.message.NotificationMessage;
+import com.riskwarning.common.observability.AssessmentFlowEvent;
+import com.riskwarning.common.observability.AssessmentFlowLogger;
+import com.riskwarning.common.observability.AssessmentFlowStage;
+import com.riskwarning.common.observability.AssessmentFlowStatus;
 import com.riskwarning.common.po.analysis.AnalysisRun;
 import com.riskwarning.common.po.analysis.RetrievalAudit;
 import com.riskwarning.common.po.behavior.Behavior;
 import com.riskwarning.common.po.evidence.EvidenceChunk;
-import com.riskwarning.common.utils.KafkaUtils;
-import com.riskwarning.common.utils.StringUtils;
 import com.riskwarning.processing.client.RetrievalClient;
 import com.riskwarning.processing.config.P2ProcessingProperties;
 import com.riskwarning.processing.repository.AnalysisRunRepository;
@@ -20,10 +21,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
-/** 真实 P2 只保存证据与检索上下文，不生成合规判断或风险结果。 */
+/**
+ * 真实 P2 只保存证据与检索上下文，不生成合规判断或风险结果。
+ * 检索与审计全部成功后交给 P2CompletionService，在单一事务内
+ * 完成 AnalysisRun 状态推进与完成通知入箱，本服务不直接投递 Kafka。
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -33,10 +37,10 @@ public class P2RetrievalProcessingService {
     private final RetrievalClient retrievalClient;
     private final RetrievalAuditService auditService;
     private final AnalysisRunRepository runs;
-    private final AnalysisRunNoDecisionService noDecision;
+    private final P2CompletionService completion;
     private final BehaviorQueryTextBuilder queryBuilder;
     private final P2ProcessingProperties properties;
-    private final KafkaUtils kafka;
+    private final AssessmentFlowLogger flowLogger;
 
     /** 校验三重作用域后逐批检索；已结束运行重投不重写历史快照。 */
     public void process(IndicatorCalculationTaskMessage message, AnalysisScope scope) {
@@ -67,10 +71,15 @@ public class P2RetrievalProcessingService {
         for (int from = 0; from < scoped.size(); from += properties.getBatchSize()) {
             List<Behavior> batch = scoped.subList(from, Math.min(scoped.size(), from + properties.getBatchSize()));
             List<RetrievalAudit> prepared;
+            long batchStartedAt = System.currentTimeMillis();
             try {
                 prepared = retrieveBatch(scope, batch);
+                flowLogger.info(retrievalBatchEvent(scope, AssessmentFlowStatus.SUCCEEDED,
+                        System.currentTimeMillis() - batchStartedAt, null));
             } catch (RuntimeException failure) {
                 failed = true;
+                flowLogger.error(retrievalBatchEvent(scope, AssessmentFlowStatus.FAILED,
+                        System.currentTimeMillis() - batchStartedAt, failure));
                 prepared = new ArrayList<>();
                 // 失败只影响当前批次，已完成批次的候选与审计不被全局异常覆盖。
                 for (Behavior behavior : batch) {
@@ -84,13 +93,20 @@ public class P2RetrievalProcessingService {
                 }
             }
             // 持久化异常由外层运行失败处理器接管，不能冒充检索异常重写审计。
-            for (RetrievalAudit audit : prepared) { auditService.save(audit); }
+            for (RetrievalAudit audit : prepared) {
+                auditService.save(audit);
+                flowLogger.info(AssessmentFlowEvent.builder(
+                                AssessmentFlowStage.RETRIEVAL_AUDIT, AssessmentFlowStatus.SUCCEEDED)
+                        .projectId(scope.getProjectId()).assessmentId(scope.getAssessmentId())
+                        .analysisRunId(scope.getAnalysisRunId())
+                        .behaviorId(audit.getBehaviorId())
+                        .build());
+            }
         }
         if (failed) { throw new IllegalStateException("当前运行存在失败的检索批次"); }
-        noDecision.complete(scope);
+        completion.complete(message, scope);
         log.info("[P2 Retrieval Completed] projectId={}, assessmentId={}, analysisRunId={}, behaviorCount={}, runStatus=COMPLETED_WITHOUT_DECISION，事实与候选已就绪，等待 P3 合规判断",
                 scope.getProjectId(), scope.getAssessmentId(), scope.getAnalysisRunId(), scoped.size());
-        notifyCompleted(message, scope);
     }
 
     private List<RetrievalAudit> retrieveBatch(AnalysisScope scope, List<Behavior> batch) {
@@ -237,19 +253,14 @@ public class P2RetrievalProcessingService {
                 .filterExpression("[]").build();
     }
 
-    private void notifyCompleted(IndicatorCalculationTaskMessage message, AnalysisScope scope) {
-        try {
-            NotificationMessage notification = new NotificationMessage(StringUtils.generateMessageId(),
-                    LocalDateTime.now().toString(), StringUtils.generateTraceId(), message.getUserId(),
-                    scope.getProjectId(), scope.getAssessmentId(), NotificationMessage.NotificationType.ASSESSMENT_COMPLETED,
-                    "检索完成通知", "材料检索已完成，合规判断等待后续分析，请查看事实与候选依据。");
-            notification.setExtraData("{\"displayStatus\":\"COMPLETED_WITHOUT_DECISION\",\"analysisStage\":\"P2\"}");
-            kafka.sendMessage(notification);
-            log.info("[P2 Completion Notification Sent] projectId={}, assessmentId={}, analysisRunId={}, messageId={}",
-                    scope.getProjectId(), scope.getAssessmentId(), scope.getAnalysisRunId(), notification.getMessageId());
-        } catch (RuntimeException failure) {
-            log.warn("检索完成通知发送失败: assessmentId={}, run={}", scope.getAssessmentId(), scope.getAnalysisRunId());
-        }
+    private AssessmentFlowEvent retrievalBatchEvent(AnalysisScope scope, AssessmentFlowStatus status,
+                                                    long elapsedMs, Throwable failure) {
+        // 批次为多 Behavior 身份，事件不携带单个 behaviorId
+        return AssessmentFlowEvent.builder(AssessmentFlowStage.RETRIEVAL_BATCH, status)
+                .projectId(scope.getProjectId()).assessmentId(scope.getAssessmentId())
+                .analysisRunId(scope.getAnalysisRunId())
+                .elapsedMs(elapsedMs).failure(failure)
+                .build();
     }
 
     private static boolean hasText(String value) { return value != null && !value.trim().isEmpty(); }

@@ -15,7 +15,7 @@ import com.riskwarning.common.po.report.Assessment;
 import com.riskwarning.common.po.risk.RelatedBehavior;
 import com.riskwarning.common.po.risk.RelatedIndicator;
 import com.riskwarning.common.po.risk.RelatedRegulation;
-import com.riskwarning.common.utils.KafkaUtils;
+import com.riskwarning.common.reliability.KafkaOutbox;
 import com.riskwarning.common.utils.RedisUtil;
 import com.riskwarning.common.utils.StringUtils;
 import com.riskwarning.processing.entity.dto.DocumentProcessingResult;
@@ -47,6 +47,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -95,7 +96,7 @@ public class BehaviorProcessingService {
     private RedisUtil redisUtil;
 
     @Autowired
-    private KafkaUtils kafkaUtils;
+    private KafkaOutbox kafkaOutbox;
 
     @Autowired
     private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
@@ -177,6 +178,13 @@ public class BehaviorProcessingService {
      * @param assessmentId 评估ID（由调用方创建并传入）
      */
     public void processProjectBehaviors(Long userId, Long projectId, Long assessmentId, String analysisRunId) {
+        processProjectBehaviors(userId, projectId, assessmentId, analysisRunId,
+                StringUtils.deriveMessageId(analysisRunId, "indicator"));
+    }
+
+    /** Kafka 链路传入指标任务消息 ID，确保完成事件可由上游消息稳定派生。 */
+    public void processProjectBehaviors(Long userId, Long projectId, Long assessmentId,
+                                        String analysisRunId, String indicatorMessageId) {
         if (analysisRunId == null || analysisRunId.trim().isEmpty()) {
             throw new IllegalArgumentException("analysisRunId must not be blank");
         }
@@ -193,6 +201,9 @@ public class BehaviorProcessingService {
                     + ", assessmentId=" + assessmentId + ", analysisRunId=" + analysisRunId);
         }
         int totalBehaviorCount = allBehaviors.size();
+        // 任何 Behavior 缺少可用向量都会让该行为无法计算候选，
+        // 且 Indicator 任务重试无法补齐向量，必须在派发前统一失败
+        requireProcessableBehaviors(allBehaviors);
 
         log.info("[Processing Behaviors] 开始进行指标计算分发，projectId={}, behaviorCount={}", projectId, totalBehaviorCount);
         
@@ -208,6 +219,8 @@ public class BehaviorProcessingService {
         
         // 4. 统计处理数量
         AtomicInteger processedCount = new AtomicInteger(0);
+        // 并发失败必须阻断完成流程：任一行为计算失败都禁止落库与发送完成事件
+        List<String> failureMessages = new CopyOnWriteArrayList<>();
 
         log.info("[Processing Start] 开始处理 {} 个行为，使用线程池大小：{}", 
                 totalBehaviorCount, behaviorThreadPoolExecutor.getCorePoolSize());
@@ -221,116 +234,129 @@ public class BehaviorProcessingService {
         for (int i = 0; i < allBehaviors.size(); i++) {
             final Behavior behavior = allBehaviors.get(i);
             final int behaviorIndex = i;
-            
-            behaviorThreadPoolExecutor.execute(() -> {
-                try {
-                    log.info("[Behavior Processing] 开始处理第 {} 个行为，behaviorId={}", 
-                            behaviorIndex + 1, behavior.getId());
-                    
-                    // 并发进行计算：获取候选指标和法规
-                    log.debug("[Behavior Processing] 正在获取候选指标和法规，behaviorId={}", behavior.getId());
-                    List<Scored<Indicator>> indicators = fetchTopIndicators(behavior, 6);
-                    List<Scored<Regulation>> regulations = fetchTopRegulations(behavior, 10);
-                    log.debug("[Behavior Processing] 获取到 {} 个指标和 {} 个法规，behaviorId={}", 
-                            indicators.size(), regulations.size(), behavior.getId());
 
-                    // 只计算，不保存
-                    log.debug("[Behavior Processing] 正在计算映射结果，behaviorId={}", behavior.getId());
-                    DocumentProcessingResult.MappingResult result = computeMappingFromCandidates(behavior, indicators, regulations);
-                    log.debug("[Behavior Processing] 计算完成，result={}, behaviorId={}", 
-                            result != null ? "有结果" : "无结果", behavior.getId());
+            try {
+                behaviorThreadPoolExecutor.execute(() -> {
+                    try {
+                        log.info("[Behavior Processing] 开始处理第 {} 个行为，behaviorId={}",
+                                behaviorIndex + 1, behavior.getId());
 
-                    if (result != null && result.getRelatedIndicators() != null) {
-                        // 提取元数据
-                        for (Scored<Indicator> s : indicators) {
-                            if (s.getItem() != null && s.getItem().getId() != null) {
-                                Indicator ind = s.getItem();
-                                indicatorMetadataMap.putIfAbsent(ind.getId(), new IndicatorMetadataDTO(
-                                    ind.getId(),
-                                    ind.getName(),
-                                    ind.getIndicatorLevel(),
-                                    ind.getDimension(),
-                                    ind.getType(),
-                                    ind.getMaxScore()
-                                ));
+                        // 并发进行计算：获取候选指标和法规
+                        log.debug("[Behavior Processing] 正在获取候选指标和法规，behaviorId={}", behavior.getId());
+                        List<Scored<Indicator>> indicators = fetchTopIndicators(behavior, 6);
+                        List<Scored<Regulation>> regulations = fetchTopRegulations(behavior, 10);
+                        log.debug("[Behavior Processing] 获取到 {} 个指标和 {} 个法规，behaviorId={}",
+                                indicators.size(), regulations.size(), behavior.getId());
+
+                        // 只计算，不保存
+                        log.debug("[Behavior Processing] 正在计算映射结果，behaviorId={}", behavior.getId());
+                        DocumentProcessingResult.MappingResult result = computeMappingFromCandidates(behavior, indicators, regulations);
+                        log.debug("[Behavior Processing] 计算完成，result={}, behaviorId={}",
+                                result != null ? "有结果" : "无结果", behavior.getId());
+
+                        if (result != null && result.getRelatedIndicators() != null) {
+                            // 提取元数据
+                            for (Scored<Indicator> s : indicators) {
+                                if (s.getItem() != null && s.getItem().getId() != null) {
+                                    Indicator ind = s.getItem();
+                                    indicatorMetadataMap.putIfAbsent(ind.getId(), new IndicatorMetadataDTO(
+                                        ind.getId(),
+                                        ind.getName(),
+                                        ind.getIndicatorLevel(),
+                                        ind.getDimension(),
+                                        ind.getType(),
+                                        ind.getMaxScore()
+                                    ));
+                                }
                             }
+
+                            // 收集计算结果到 Map 中
+                            int relatedCount = result.getRelatedIndicators().size();
+                            for (Map.Entry<String, RelatedIndicator> entry : result.getRelatedIndicators().entrySet()) {
+                                String indicatorId = entry.getKey();
+                                RelatedIndicator ri = entry.getValue();
+
+                                indicatorResultsMap.computeIfAbsent(indicatorId, k -> new CopyOnWriteArrayList<>())
+                                                  .add(ri);
+                            }
+                            log.info("[Behavior Processing] 收集到 {} 个相关指标，behaviorId={}",
+                                    relatedCount, behavior.getId());
+                        } else {
+                            log.info("[Behavior Processing] 无相关指标，behaviorId={}", behavior.getId());
                         }
-                        
-                        // 收集计算结果到 Map 中
-                        int relatedCount = result.getRelatedIndicators().size();
-                        for (Map.Entry<String, RelatedIndicator> entry : result.getRelatedIndicators().entrySet()) {
-                            String indicatorId = entry.getKey();
-                            RelatedIndicator ri = entry.getValue();
-                            
-                            indicatorResultsMap.computeIfAbsent(indicatorId, k -> new CopyOnWriteArrayList<>())
-                                              .add(ri);
+
+                        // 检查是否需要批量处理
+                        int currentCount = processedCount.incrementAndGet();
+                        if (currentCount % 10 == 0) {
+                            log.info("[Progress] 已处理 {}/{} 个行为，完成率：{:.2f}%，活跃线程数：{}",
+                                    currentCount, totalBehaviorCount,
+                                    (currentCount * 100.0) / totalBehaviorCount,
+                                    behaviorThreadPoolExecutor.getActiveCount());
                         }
-                        log.info("[Behavior Processing] 收集到 {} 个相关指标，behaviorId={}", 
-                                relatedCount, behavior.getId());
-                    } else {
-                        log.info("[Behavior Processing] 无相关指标，behaviorId={}", behavior.getId());
+
+                        // 移除此处的破坏性多线程阶段保存逻辑
+                        // 所有的结果将安全地累积到线程安全的 indicatorResultsMap 中，并在所有计算（比如620条）都完成后的主线程 [Final Batch Processing] 中一次性集中落库。
+                        // 这将彻底杜绝 JPA NonUniqueResultException 并保证平均分计算完全准确。
+
+                        log.info("[Behavior Processing] 完成处理第 {} 个行为，behaviorId={}",
+                                behaviorIndex + 1, behavior.getId());
+
+                    } catch (Exception e) {
+                        // 失败只记录不冒泡会让 0 结果伪装成成功完成，必须传回主线程
+                        log.error("[Behavior Processing Failed] behaviorId={}", behavior.getId(), e);
+                        failureMessages.add("behaviorId=" + behavior.getId() + ": " + e.getMessage());
+                    } finally {
+                        latch.countDown();
                     }
-                    
-                    // 检查是否需要批量处理
-                    int currentCount = processedCount.incrementAndGet();
-                    if (currentCount % 10 == 0) {
-                        log.info("[Progress] 已处理 {}/{} 个行为，完成率：{:.2f}%，活跃线程数：{}", 
-                                currentCount, totalBehaviorCount, 
-                                (currentCount * 100.0) / totalBehaviorCount,
-                                behaviorThreadPoolExecutor.getActiveCount());
-                    }
-                    
-                    // 移除此处的破坏性多线程阶段保存逻辑
-                    // 所有的结果将安全地累积到线程安全的 indicatorResultsMap 中，并在所有计算（比如620条）都完成后的主线程 [Final Batch Processing] 中一次性集中落库。
-                    // 这将彻底杜绝 JPA NonUniqueResultException 并保证平均分计算完全准确。
-                    
-                    log.info("[Behavior Processing] 完成处理第 {} 个行为，behaviorId={}", 
-                            behaviorIndex + 1, behavior.getId());
-                    
-                } catch (Exception e) {
-                    log.error("[Behavior Processing Failed] behaviorId={}, error={}", behavior.getId(), e.getMessage(), e);
-                } finally {
-                    long remaining = latch.getCount();
-                    latch.countDown();
-                    log.debug("[CountDown] 剩余 {} 个行为待处理", latch.getCount());
-                }
-            });
+                });
+            } catch (RejectedExecutionException rejection) {
+                // 拒绝任务也必须计入失败，否则 latch 永远无法归零
+                log.error("[Behavior Processing Rejected] behaviorId={}", behavior.getId(), rejection);
+                failureMessages.add("behaviorId=" + behavior.getId() + ": 线程池拒绝任务");
+                latch.countDown();
+            }
         }
 
         // 5. 等待所有行为处理完成
         try {
             log.info("[Waiting] 等待所有行为处理完成，总行为数：{}", totalBehaviorCount);
-            
+
             // 定期输出等待状态
             long startTime = System.currentTimeMillis();
             while (latch.getCount() > 0) {
                 boolean completed = latch.await(30, TimeUnit.SECONDS); // 每30秒检查一次
-                
+
                 long elapsed = (System.currentTimeMillis() - startTime) / 1000;
                 long remaining = latch.getCount();
                 int processed = totalBehaviorCount - (int)remaining;
-                
-                log.info("[Waiting Status] 已处理 {}/{} 个行为，剩余 {} 个，已等待 {} 秒，活跃线程数：{}", 
-                        processed, totalBehaviorCount, remaining, elapsed, 
+
+                log.info("[Waiting Status] 已处理 {}/{} 个行为，剩余 {} 个，已等待 {} 秒，活跃线程数：{}",
+                        processed, totalBehaviorCount, remaining, elapsed,
                         behaviorThreadPoolExecutor.getActiveCount());
-                
+
                 if (completed) {
                     break;
                 }
-                
-                // 如果等待超过30分钟，强制退出
+
+                // 超时必须失败：带着部分结果继续会误报完成
                 if (elapsed > 1800) {
-                    log.error("[Waiting Timeout] 等待超时（30分钟），强制退出");
-                    break;
+                    throw new IllegalStateException("行为并发处理等待超时，禁止带部分结果完成: projectId="
+                            + projectId + ", assessmentId=" + assessmentId + ", analysisRunId=" + analysisRunId);
                 }
             }
-            
+
             if (latch.getCount() == 0) {
                 log.info("[All Behaviors Processed] 共处理 {} 个行为，全部完成", totalBehaviorCount);
             } else {
                 log.warn("[Processing Timeout] 处理超时，可能有行为未完成处理，剩余 {} 个", latch.getCount());
             }
-            
+
+            if (!failureMessages.isEmpty()) {
+                // 任一行为失败都交回 Durable Work retry，禁止发送完成事件
+                throw new IllegalStateException("行为指标计算存在失败项，本次运行不得完成: "
+                        + String.join("; ", failureMessages));
+            }
+
             // 6. 处理剩余的结果（不足 batchSize 的部分）
             if (!indicatorResultsMap.isEmpty()) {
                 int remainingCount = indicatorResultsMap.size();
@@ -339,105 +365,147 @@ public class BehaviorProcessingService {
                         projectId, assessmentId, analysisRunId);
                 log.info("[Final Batch Processing] 剩余结果处理完成");
             } else {
-                log.info("[Final Batch Processing] 无剩余结果需要处理");
+                // 0 结果不是成功：不发完成事件，交回重试以便排查上游问题
+                throw new IllegalStateException("本次计算没有任何指标结果，禁止发送完成事件: projectId="
+                        + projectId + ", assessmentId=" + assessmentId + ", analysisRunId=" + analysisRunId);
             }
-            
+
             // 7. 完成评估
             log.info("[Assessment Completing] 开始完成评估流程");
-            completeAssessmentIfNeeded(userId, projectId, assessmentId, analysisRunId);
+            completeAssessmentIfNeeded(userId, projectId, assessmentId, analysisRunId,
+                    indicatorMessageId);
             log.info("[Assessment Completed] 评估流程已完成");
-            
+
         } catch (InterruptedException e) {
-            log.error("[Process Interrupted] projectId={}, error={}", projectId, e.getMessage());
             Thread.currentThread().interrupt();
+            throw new IllegalStateException("行为处理等待被中断，任务交回重试", e);
+        }
+    }
+
+    /** 派发前统一校验：向量缺失或包含无效数值的行为直接失败，不进入线程池。 */
+    void requireProcessableBehaviors(List<Behavior> behaviors) {
+        for (Behavior behavior : behaviors) {
+            if (behavior == null || behavior.getId() == null || behavior.getId().trim().isEmpty()) {
+                throw new IllegalStateException("Behavior 缺少稳定 ID，无法进入指标计算");
+            }
+            List<Float> vector = behavior.getDescriptionVector();
+            if (vector == null || vector.isEmpty()) {
+                throw new IllegalStateException("Behavior 缺少描述向量，禁止进入指标计算: behaviorId="
+                        + behavior.getId());
+            }
+            for (Float value : vector) {
+                if (value == null || Float.isNaN(value) || Float.isInfinite(value)) {
+                    throw new IllegalStateException("Behavior 描述向量包含无效数值，禁止进入指标计算: behaviorId="
+                            + behavior.getId());
+                }
+            }
         }
     }
     
     /**
-     * 批量保存指标结果
+     * 批量保存指标结果：saveAllAndFlush 保证关键结果落库可见，
+     * 失败直接上抛交由 Durable Work retry；返回本次预期持久化的指标 ID 集合，
+     * 供完成前与数据库回读结果核对，防止 0 结果或部分丢失被误判为成功。
      */
-    void batchSaveIndicatorResults(Map<String, List<RelatedIndicator>> indicatorResultsMap,
-                                   Map<String, IndicatorMetadataDTO> indicatorMetadataMap,
-                                   Long projectId, Long assessmentId, String analysisRunId) {
-        if (indicatorResultsMap.isEmpty()) {
-            log.info("[Batch Save] 无指标结果需要保存");
-            return;
+    Set<String> batchSaveIndicatorResults(Map<String, List<RelatedIndicator>> indicatorResultsMap,
+                                          Map<String, IndicatorMetadataDTO> indicatorMetadataMap,
+                                          Long projectId, Long assessmentId, String analysisRunId) {
+        if (indicatorResultsMap == null || indicatorResultsMap.isEmpty()) {
+            throw new IllegalStateException("批量保存收到空指标结果集合，禁止空落库");
         }
-        
-        try {
-            log.info("[Batch Save] 开始批量保存，共 {} 个指标", indicatorResultsMap.size());
-            List<IndicatorResult> resultsToSave = new ArrayList<>();
-            
-            int processedIndicators = 0;
-            for (Map.Entry<String, List<RelatedIndicator>> entry : indicatorResultsMap.entrySet()) {
-                String indicatorId = entry.getKey();
-                List<RelatedIndicator> relatedIndicators = entry.getValue();
-                
-                if (relatedIndicators.isEmpty()) {
-                    continue;
-                }
-                
-                processedIndicators++;
-                if (processedIndicators % 10 == 0) {
-                    log.info("[Batch Save] 已处理 {} 个指标", processedIndicators);
-                }
-                
-                // 计算平均得分
-                double totalScore = 0;
-                for (RelatedIndicator ri : relatedIndicators) {
-                    totalScore += ri.getScore();
-                }
-                double avgScore = totalScore / relatedIndicators.size();
-                
-                // 获取指标元数据
-                IndicatorMetadataDTO metadata = indicatorMetadataMap.get(indicatorId);
-                double maxPossible = 100.0;
-                if (metadata != null && metadata.maxScore != null && metadata.maxScore > 0) {
-                    maxPossible = metadata.maxScore;
-                }
-                double absoluteScore = avgScore * maxPossible;
-                
-                // 检查是否已存在
-                Optional<IndicatorResult> existingResult = indicatorResultRepository
-                        .findByAssessmentIdAndAnalysisRunIdAndIndicatorEsId(
-                                assessmentId, analysisRunId, indicatorId);
-                
-                IndicatorResult result = existingResult.orElseGet(IndicatorResult::new);
-                result.setProjectId(projectId);
-                result.setAssessmentId(assessmentId);
-                result.setAnalysisRunId(analysisRunId);
-                result.setIndicatorEsId(indicatorId);
-                result.setIndicatorName(metadata != null ? metadata.name : indicatorId);
-                result.setIndicatorLevel(metadata != null && metadata.indicatorLevel != null
-                        ? metadata.indicatorLevel : 0);
-                result.setDimension(metadata != null ? metadata.dimension : null);
-                result.setType(metadata != null ? metadata.type : null);
-                result.setCalculatedScore(absoluteScore);
-                result.setMaxPossibleScore(maxPossible);
-                result.setUsedCalculationRuleType("auto");
-                result.setCalculationDetails(IndicatorResultDetail.builder()
-                        .relatedIndicators(new ArrayList<>(relatedIndicators))
-                        .build());
-                result.setRiskTriggered(false);
-                result.setRiskStatus(IndicatorRiskStatus.fromCode("NOT_EVALUATED"));
-                result.setCalculatedAt(LocalDateTime.now());
-                if (result.getCreatedAt() == null) {
-                    result.setCreatedAt(LocalDateTime.now());
-                }
-                resultsToSave.add(result);
+
+        log.info("[Batch Save] 开始批量保存，共 {} 个指标", indicatorResultsMap.size());
+        List<IndicatorResult> resultsToSave = new ArrayList<>();
+        Set<String> expectedIndicatorIds = new LinkedHashSet<>();
+
+        int processedIndicators = 0;
+        for (Map.Entry<String, List<RelatedIndicator>> entry : indicatorResultsMap.entrySet()) {
+            String indicatorId = entry.getKey();
+            List<RelatedIndicator> relatedIndicators = entry.getValue();
+
+            if (relatedIndicators == null || relatedIndicators.isEmpty()) {
+                continue;
             }
-            
-            // 批量保存
-            if (!resultsToSave.isEmpty()) {
-                log.info("[Batch Save] 准备保存 {} 个指标结果", resultsToSave.size());
-                indicatorResultRepository.saveAll(resultsToSave);
-                log.info("[Batch Save Success] 保存了 {} 个指标结果", resultsToSave.size());
-            } else {
-                log.info("[Batch Save] 无指标结果需要保存");
+
+            processedIndicators++;
+            if (processedIndicators % 10 == 0) {
+                log.info("[Batch Save] 已处理 {} 个指标", processedIndicators);
             }
-            
-        } catch (Exception e) {
-            log.error("[Batch Save Failed] error={}", e.getMessage(), e);
+
+            // 计算平均得分
+            double totalScore = 0;
+            for (RelatedIndicator ri : relatedIndicators) {
+                totalScore += ri.getScore();
+            }
+            double avgScore = totalScore / relatedIndicators.size();
+
+            // 获取指标元数据
+            IndicatorMetadataDTO metadata = indicatorMetadataMap.get(indicatorId);
+            double maxPossible = 100.0;
+            if (metadata != null && metadata.maxScore != null && metadata.maxScore > 0) {
+                maxPossible = metadata.maxScore;
+            }
+            double absoluteScore = avgScore * maxPossible;
+
+            // 检查是否已存在
+            Optional<IndicatorResult> existingResult = indicatorResultRepository
+                    .findByAssessmentIdAndAnalysisRunIdAndIndicatorEsId(
+                            assessmentId, analysisRunId, indicatorId);
+
+            IndicatorResult result = existingResult.orElseGet(IndicatorResult::new);
+            result.setProjectId(projectId);
+            result.setAssessmentId(assessmentId);
+            result.setAnalysisRunId(analysisRunId);
+            result.setIndicatorEsId(indicatorId);
+            result.setIndicatorName(metadata != null ? metadata.name : indicatorId);
+            result.setIndicatorLevel(metadata != null && metadata.indicatorLevel != null
+                    ? metadata.indicatorLevel : 0);
+            result.setDimension(metadata != null ? metadata.dimension : null);
+            result.setType(metadata != null ? metadata.type : null);
+            result.setCalculatedScore(absoluteScore);
+            result.setMaxPossibleScore(maxPossible);
+            result.setUsedCalculationRuleType("auto");
+            result.setCalculationDetails(IndicatorResultDetail.builder()
+                    .relatedIndicators(new ArrayList<>(relatedIndicators))
+                    .build());
+            result.setRiskTriggered(false);
+            result.setRiskStatus(IndicatorRiskStatus.fromCode("NOT_EVALUATED"));
+            result.setCalculatedAt(LocalDateTime.now());
+            if (result.getCreatedAt() == null) {
+                result.setCreatedAt(LocalDateTime.now());
+            }
+            resultsToSave.add(result);
+            expectedIndicatorIds.add(indicatorId);
+        }
+
+        if (resultsToSave.isEmpty()) {
+            throw new IllegalStateException("指标结果全部为空列表，禁止在无落库的情况下完成评估");
+        }
+
+        // 关键结果必须 flush 落库后才能发送完成事件
+        log.info("[Batch Save] 准备保存 {} 个指标结果", resultsToSave.size());
+        indicatorResultRepository.saveAllAndFlush(resultsToSave);
+        log.info("[Batch Save Success] 保存了 {} 个指标结果", resultsToSave.size());
+
+        verifyPersistedResults(assessmentId, analysisRunId, expectedIndicatorIds);
+        return expectedIndicatorIds;
+    }
+
+    /** flush 后按运行作用域回读核对：数量与指标 ID 一致才允许进入完成流程。 */
+    private void verifyPersistedResults(Long assessmentId, String analysisRunId,
+                                        Set<String> expectedIndicatorIds) {
+        List<IndicatorResult> persisted = indicatorResultRepository
+                .findByAssessmentIdAndAnalysisRunId(assessmentId, analysisRunId);
+        Set<String> persistedIds = new HashSet<>();
+        for (IndicatorResult result : persisted) {
+            if (result.getIndicatorEsId() != null) {
+                persistedIds.add(result.getIndicatorEsId());
+            }
+        }
+        if (persistedIds.size() != expectedIndicatorIds.size()
+                || !persistedIds.containsAll(expectedIndicatorIds)) {
+            throw new IllegalStateException("指标结果落库校验失败: expected=" + expectedIndicatorIds.size()
+                    + ", persisted=" + persistedIds.size() + ", analysisRunId=" + analysisRunId);
         }
     }
 
@@ -562,9 +630,12 @@ public class BehaviorProcessingService {
     }
 
     private void completeAssessmentIfNeeded(Long userId, Long projectId, Long assessmentId,
-                                            String analysisRunId) {
+                                            String analysisRunId, String indicatorMessageId) {
+        if (indicatorMessageId == null || indicatorMessageId.trim().isEmpty()) {
+            throw new IllegalArgumentException("indicatorMessageId must not be blank");
+        }
         AssessmentCompletedEventMessage assessmentCompletedEventMessage = new AssessmentCompletedEventMessage(
-                StringUtils.generateMessageId(),
+                StringUtils.deriveMessageId(indicatorMessageId, "assessment-completed"),
                 String.valueOf(System.currentTimeMillis()),
                 StringUtils.generateTraceId(),
                 userId,
@@ -572,7 +643,8 @@ public class BehaviorProcessingService {
                 assessmentId,
                 analysisRunId
         );
-        kafkaUtils.sendMessage(assessmentCompletedEventMessage);
+        // LEGACY 完成事件通过 Outbox 投递，消息先持久化再发送
+        kafkaOutbox.enqueue(assessmentCompletedEventMessage);
         log.info("[Assessment Completed] projectId={}, assessmentId={}", projectId, assessmentId);
     }
 
@@ -785,9 +857,11 @@ public class BehaviorProcessingService {
     /**
      * 从 ES 中获取指定项目、评估和运行的行为。
      * 旧文档没有 assessmentId 或 analysisRunId 时天然不命中，禁止回退到项目级查询。
-     * 加固：查询前显式刷新索引，空结果时带间隔重试，避免行为刚写入尚未可见导致的偶发空结果
+     * 加固：查询前显式刷新索引，空结果时带间隔重试，避免行为刚写入尚未可见导致的偶发空结果；
+     * 重试耗尽后直接失败，交由 Durable Work retry，不得把异常伪装成空结果继续完成。
+     * 包可见以便测试用 spy 替换取数结果。
      */
-    private List<Behavior> fetchBehaviors(Long projectId, Long assessmentId, String analysisRunId) {
+    List<Behavior> fetchBehaviors(Long projectId, Long assessmentId, String analysisRunId) {
         buildBehaviorScopeQuery(projectId, assessmentId, analysisRunId);
         // 查询前先触发一次索引刷新，确保刚写入的行为立即可见（刷新失败不阻断查询）
         try {
@@ -810,21 +884,22 @@ public class BehaviorProcessingService {
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                log.warn("[Fetch Behaviors] 取数重试被中断: {}", e.getMessage());
-                return Collections.emptyList();
-            } catch (Exception e) {
-                log.error("[Fetch Behaviors Failed] error={}", e.getMessage());
+                throw new IllegalStateException("行为取数被中断，任务交回重试", e);
+            } catch (IOException | RuntimeException e) {
                 if (attempt == maxAttempts) {
-                    return Collections.emptyList();
+                    throw new IllegalStateException("行为取数重试耗尽: projectId=" + projectId
+                            + ", assessmentId=" + assessmentId + ", analysisRunId=" + analysisRunId, e);
                 }
+                log.error("[Fetch Behaviors Failed] 第 {} 次：{}", attempt, e.getMessage());
                 try {
                     Thread.sleep(BEHAVIOR_FETCH_RETRY_INTERVAL_MS);
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
-                    return Collections.emptyList();
+                    throw new IllegalStateException("行为取数重试被中断，任务交回重试", ie);
                 }
             }
         }
+        // 真实查询均成功但确实无数据：由调用方按空结果语义处理
         return Collections.emptyList();
     }
 
@@ -867,20 +942,24 @@ public class BehaviorProcessingService {
 
 
 
+    /** 缺失向量无法进行候选检索，且 Indicator 任务重试无法补齐向量，必须直接失败。 */
+    private void requireVectorForCandidateFetch(Behavior behavior) {
+        if (behavior.getDescriptionVector() == null || behavior.getDescriptionVector().isEmpty()) {
+            throw new IllegalStateException("Behavior 缺少描述向量，无法检索候选: behaviorId="
+                    + behavior.getId());
+        }
+    }
+
     // 新增：从 ES 拉取候选指标：简单的文本多字段匹配，返回 ES hit score 作为相似度
     public List<Scored<Indicator>> fetchTopIndicators(Behavior behavior, int candidateSize) {
+        requireVectorForCandidateFetch(behavior);
+        String text = (behavior.getDescription() == null ? "" : behavior.getDescription())
+                + " " + (behavior.getTags() == null ? "" : String.join(" ", behavior.getTags()));
+
+        log.info("[Fetching Indicator Candidates] behaviorId={}, candidateSize={}, queryText='{}'",
+                behavior.getId(), candidateSize, text);
+
         try {
-            String text = (behavior.getDescription() == null ? "" : behavior.getDescription())
-                    + " " + (behavior.getTags() == null ? "" : String.join(" ", behavior.getTags()));
-
-            log.info("[Fetching Indicator Candidates] behaviorId={}, candidateSize={}, queryText='{}'",
-                    behavior.getId(), candidateSize, text);
-
-            if (behavior.getDescriptionVector() == null || behavior.getDescriptionVector().isEmpty()) {
-                log.warn("[Fetch Indicator Candidates Skipped] No vector found for behaviorId={}", behavior.getId());
-                return Collections.emptyList();
-            }
-
             SearchResponse<Indicator> resp = esClient.search(s -> s
                             .index(ElasticSearchConfig.INDICATOR_INDEX)
                             .size(candidateSize)
@@ -904,21 +983,17 @@ public class BehaviorProcessingService {
                 }
             }
             return out;
-        } catch (Exception ex) {
-            log.error("[Fetch Indicator Candidates Failed] behaviorId={}, error", behavior.getId(), ex);
-            return Collections.emptyList();
+        } catch (IOException | RuntimeException ex) {
+            // ES 查询失败不能伪装成无候选继续完成，交给 Durable Work retry
+            throw new IllegalStateException("指标候选检索失败: behaviorId=" + behavior.getId(), ex);
         }
     }
 
     // 新增：从 ES 拉取候选法规
     public List<Scored<Regulation>> fetchTopRegulations(Behavior behavior, int candidateSize) {
+        requireVectorForCandidateFetch(behavior);
+
         try {
-
-            if (behavior.getDescriptionVector() == null || behavior.getDescriptionVector().isEmpty()) {
-                log.warn("[Fetch Regulation Candidates Skipped] No vector found for behaviorId={}", behavior.getId());
-                return Collections.emptyList();
-            }
-
             SearchResponse<Regulation> resp = esClient.search(s -> s
                             .index(ElasticSearchConfig.REGULATION_INDEX)
                             .size(candidateSize)
@@ -941,9 +1016,9 @@ public class BehaviorProcessingService {
                 }
             }
             return out;
-        } catch (Exception ex) {
-            log.error("[Fetch Regulation Candidates Failed] behaviorId={}, error", behavior.getId(), ex);
-            return Collections.emptyList();
+        } catch (IOException | RuntimeException ex) {
+            // ES 查询失败直接上抛，禁止在局部 catch 后继续完成评估
+            throw new IllegalStateException("法规候选检索失败: behaviorId=" + behavior.getId(), ex);
         }
     }
 

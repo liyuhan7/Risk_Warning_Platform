@@ -5,6 +5,7 @@ import com.riskwarning.common.dto.analysis.SourceDocumentRef;
 import com.riskwarning.common.dto.fact.FactExtractionCallMetadata;
 import com.riskwarning.common.dto.fact.FactExtractionResult;
 import com.riskwarning.common.po.behavior.Behavior;
+import com.riskwarning.common.observability.AssessmentFlowLogger;
 import com.riskwarning.common.po.evidence.EvidenceChunk;
 import com.riskwarning.processing.fact.FactExtractionException;
 import com.riskwarning.processing.repository.BehaviorDocumentRepository;
@@ -46,7 +47,8 @@ class FactExtractionPipelineTest {
         when(extractionService.extract(scope, Collections.singletonList(secondEvidence)))
                 .thenReturn(success(second));
         FactExtractionPipeline pipeline = new FactExtractionPipeline(
-                evidenceService, extractionService, writer, repository);
+                evidenceService, extractionService, writer, repository,
+                mock(AssessmentFlowLogger.class));
 
         List<Behavior> result = pipeline.process(scope, Arrays.asList(
                 new SourceDocumentRef(101L, "first.pdf"),
@@ -72,7 +74,8 @@ class FactExtractionPipelineTest {
         when(extractionService.extract(scope, Collections.singletonList(evidence)))
                 .thenReturn(success(Behavior.builder().id("b1").build()));
         FactExtractionPipeline pipeline = new FactExtractionPipeline(
-                evidenceService, extractionService, writer, repository);
+                evidenceService, extractionService, writer, repository,
+                mock(AssessmentFlowLogger.class));
 
         pipeline.process(scope, Collections.singletonList(new SourceDocumentRef(101L, "source.pdf")));
 
@@ -96,7 +99,8 @@ class FactExtractionPipelineTest {
                         new FactExtractionResult(Collections.emptyList(), Collections.emptyList(),
                                 new FactExtractionCallMetadata("stub", "v1", 1, 2, 1))));
         FactExtractionPipeline pipeline = new FactExtractionPipeline(
-                evidenceService, extractionService, writer, repository);
+                evidenceService, extractionService, writer, repository,
+                mock(AssessmentFlowLogger.class));
 
         assertThrows(FactExtractionException.class, () -> pipeline.process(scope,
                 Collections.singletonList(new SourceDocumentRef(101L, "source.pdf"))));

@@ -13,7 +13,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** 为新抽取事实补齐分类与向量，并使用稳定 ID 写入 t_behavior。 */
+/**
+ * 为新抽取事实补齐分类与向量，并使用稳定 ID 写入 t_behavior。
+ * 分类或向量任一环节失败都必须失败整批写入：无向量的 Behavior
+ * 会让 LEGACY 指标链无法计算候选，而 Indicator 任务重试无法补齐向量，
+ * 只有让 Behavior Durable Work 重试才能恢复。
+ */
 @Service
 @Slf4j
 public class StructuredBehaviorWriter {
@@ -39,6 +44,7 @@ public class StructuredBehaviorWriter {
         }
         classify(behaviors);
         vectorize(behaviors);
+        requireVectors(behaviors);
         behaviorDocumentRepository.writeAll(behaviors);
     }
 
@@ -76,49 +82,54 @@ public class StructuredBehaviorWriter {
         }
     }
 
+    /** 向量化属于写入前置条件：任何失败都阻止 ES 写入并向上抛出。 */
     private void vectorize(List<Behavior> behaviors) {
         List<String> texts = new ArrayList<>();
         for (Behavior behavior : behaviors) {
             texts.add(behavior.getDescription());
         }
+        Map<String, List<String>> request = new HashMap<>();
+        request.put("texts", texts);
+        Map<String, Object> response;
         try {
-            Map<String, List<String>> request = new HashMap<>();
-            request.put("texts", texts);
-            Map<String, Object> response = vectorizationClient.batchVectorize(request);
-            if (response == null || !Boolean.TRUE.equals(response.get("success"))) {
-                log.warn("向量化服务未成功，Behavior 将不带 descriptionVector");
-                return;
+            response = vectorizationClient.batchVectorize(request);
+        } catch (RuntimeException exception) {
+            throw new IllegalStateException("向量化服务调用失败，Behavior 不写入", exception);
+        }
+        if (response == null || !Boolean.TRUE.equals(response.get("success"))) {
+            throw new IllegalStateException("向量化服务未成功，Behavior 不写入");
+        }
+        @SuppressWarnings("unchecked")
+        List<List<Number>> vectors = (List<List<Number>>) response.get("vectors");
+        if (vectors == null || vectors.size() != behaviors.size()) {
+            throw new IllegalStateException("向量数量与 Behavior 数量不一致，Behavior 不写入");
+        }
+        for (int index = 0; index < behaviors.size(); index++) {
+            List<Number> vector = vectors.get(index);
+            if (vector == null || vector.isEmpty()) {
+                throw new IllegalStateException("第 " + index + " 条向量为空，Behavior 不写入");
             }
-            @SuppressWarnings("unchecked")
-            List<List<Number>> vectors = (List<List<Number>>) response.get("vectors");
-            if (vectors == null || vectors.size() != behaviors.size()) {
-                log.warn("向量数量与 Behavior 数量不一致，Behavior 将不带 descriptionVector");
-                return;
+            List<Float> values = new ArrayList<>(vector.size());
+            for (Number number : vector) {
+                float value = number == null ? Float.NaN : number.floatValue();
+                if (Float.isNaN(value) || Float.isInfinite(value)) {
+                    throw new IllegalStateException("第 " + index + " 条向量包含无效数值，Behavior 不写入");
+                }
+                values.add(value);
             }
-            for (int index = 0; index < behaviors.size(); index++) {
-                List<Number> vector = vectors.get(index);
-                if (vector == null) {
-                    log.warn("第 {} 条向量为空，Behavior 将不带 descriptionVector", index);
-                    continue;
-                }
-                List<Float> values = new ArrayList<>(vector.size());
-                boolean valid = true;
-                for (Number number : vector) {
-                    float value = number == null ? Float.NaN : number.floatValue();
-                    if (Float.isNaN(value) || Float.isInfinite(value)) {
-                        valid = false;
-                        break;
-                    }
-                    values.add(value);
-                }
-                if (valid) {
-                    behaviors.get(index).setDescriptionVector(values);
-                } else {
-                    log.warn("第 {} 条向量包含无效数值，Behavior 将不带 descriptionVector", index);
-                }
+            behaviors.get(index).setDescriptionVector(values);
+        }
+    }
+
+    /** 写入前再校验一次向量，防止历史对象绕过 vectorize 进入写库路径。 */
+    private void requireVectors(List<Behavior> behaviors) {
+        for (int index = 0; index < behaviors.size(); index++) {
+            Behavior behavior = behaviors.get(index);
+            List<Float> vector = behavior.getDescriptionVector();
+            if (vector == null || vector.isEmpty()) {
+                throw new IllegalStateException(
+                        "Behavior 缺少描述向量，禁止写入: behaviorId=" + behavior.getId());
             }
-        } catch (Exception exception) {
-            log.warn("向量化调用失败，Behavior 将不带 descriptionVector", exception);
         }
     }
 

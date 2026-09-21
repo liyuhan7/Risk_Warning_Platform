@@ -1,6 +1,10 @@
 server:
   port: 8095
 
+assessment:
+  reliability:
+    enabled: ${ASSESSMENT_RELIABILITY_ENABLED:true}
+
 org:
   upload:
     queue-key: ${UPLOAD_CONFIRM_QUEUE_KEY:file:confirmed:queue}

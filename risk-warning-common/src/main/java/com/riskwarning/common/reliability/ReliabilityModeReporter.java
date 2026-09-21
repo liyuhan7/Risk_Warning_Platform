@@ -37,7 +37,7 @@ public class ReliabilityModeReporter implements ApplicationListener<ContextRefre
                 "assessment.reliability.namespace", event.getApplicationContext().getId());
         if (enabled) {
             log.info("[可靠链模式] ENABLED namespace={}，Durable Inbox/Outbox/Worker 已启用，"
-                    + "数据库迁移 009/010/011 已通过启动校验", namespace);
+                    + "数据库结构已通过启动校验", namespace);
         } else {
             log.warn("[可靠链模式] COMPATIBLE namespace={}，显式关闭可靠链，当前运行兼容消费者与"
                     + "AfterCommit Kafka 投递", namespace);

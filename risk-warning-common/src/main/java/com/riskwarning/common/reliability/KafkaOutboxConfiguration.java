@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 public class KafkaOutboxConfiguration {
 
     @Bean
+    @ConditionalOnProperty(prefix = "assessment.reliability", name = "enabled", havingValue = "true")
     public KafkaOutboxCodec kafkaOutboxCodec() {
         return new KafkaOutboxCodec();
     }
@@ -34,8 +35,9 @@ public class KafkaOutboxConfiguration {
         return new AfterCommitKafkaOutbox(kafkaUtils, flowLogger);
     }
 
-    /** 未启用可靠链时闲置，启用后由 DurableWorker 领取 KAFKA_OUTBOX 任务。 */
+    /** 启用可靠链后由 DurableWorker 领取 KAFKA_OUTBOX 任务。 */
     @Bean
+    @ConditionalOnProperty(prefix = "assessment.reliability", name = "enabled", havingValue = "true")
     public KafkaOutboxHandler kafkaOutboxHandler(KafkaUtils kafkaUtils, KafkaOutboxCodec kafkaOutboxCodec) {
         return new KafkaOutboxHandler(kafkaUtils, kafkaOutboxCodec);
     }

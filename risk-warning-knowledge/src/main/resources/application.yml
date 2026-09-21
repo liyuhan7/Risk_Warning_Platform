@@ -1,6 +1,10 @@
 server:
   port: 8089
 
+assessment:
+  reliability:
+    enabled: false
+
 # Milvus向量数据库配置
 milvus:
   host: localhost

@@ -1,2 +1,6 @@
 server:
   port: 8093
+
+assessment:
+  reliability:
+    enabled: ${ASSESSMENT_RELIABILITY_ENABLED:true}

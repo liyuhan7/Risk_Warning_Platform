@@ -27,9 +27,9 @@ class KafkaOutboxConfigurationTest {
     @Test
     void keepsCompatibleDeliveryWhenReliabilityDisabled() {
         context.run(result -> {
-            assertThat(result).hasSingleBean(KafkaOutboxCodec.class);
+            assertThat(result).doesNotHaveBean(KafkaOutboxCodec.class);
             assertThat(result).getBean(KafkaOutbox.class).isInstanceOf(AfterCommitKafkaOutbox.class);
-            assertThat(result).hasSingleBean(KafkaOutboxHandler.class);
+            assertThat(result).doesNotHaveBean(KafkaOutboxHandler.class);
         });
     }
 

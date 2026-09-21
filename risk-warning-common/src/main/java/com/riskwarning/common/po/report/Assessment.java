@@ -29,6 +29,10 @@ public class Assessment {
 
     private Long projectId;
 
+    /** 创建本评估的上传确认稳定任务标识；唯一索引阻止同一上传任务重复建档。历史记录允许为空。 */
+    @Column(name = "source_task_id", length = 160)
+    private String sourceTaskId;
+
     private LocalDateTime assessmentDate;
 
     private Double overallScore;

@@ -62,6 +62,9 @@ public class FileUtils {
             throw new BusinessException("目录不存在或不是一个目录");
         }
         File[] fileList = dir.listFiles();
+        if (fileList == null || fileList.length == 0) {
+            throw new BusinessException("分片目录为空");
+        }
 
         // todo: 保存到远程存储需要改造
         File targetFile = new File(toFilePath);
@@ -70,10 +73,13 @@ public class FileUtils {
             targetParentDir.mkdirs();
         }
         try(RandomAccessFile writeFile = new RandomAccessFile(targetFile, "rw")) {
-            // 因为可能乱序到达，需要先排序
+            // 重试始终覆盖同一稳定目标文件，不能向上一次的结果继续追加。
+            writeFile.setLength(0);
+            // 分片文件名是数字索引，字符串排序会把 10 排在 2 前面。
             Arrays.sort(fileList, new Comparator<File>() {
-                public  int compare(File o1, File o2) {
-                    return o1.getName().compareTo(o2.getName());
+                public int compare(File o1, File o2) {
+                    return Integer.compare(Integer.parseInt(o1.getName()),
+                            Integer.parseInt(o2.getName()));
                 }
             });
             for(File file : fileList){

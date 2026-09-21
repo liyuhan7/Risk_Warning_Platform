@@ -58,6 +58,18 @@ spring:
     username: default
     password: 123456
 
+assessment:
+  reliability:
+    # 默认启用；启动守卫会校验 009/010/011，紧急回退可显式设置为 false。
+    enabled: ${ASSESSMENT_RELIABILITY_ENABLED:true}
+    namespace: ${ASSESSMENT_WORK_NAMESPACE:${spring.application.name}}
+    poll-interval: ${ASSESSMENT_WORK_POLL_INTERVAL:2s}
+    lease-duration: ${ASSESSMENT_WORK_LEASE_DURATION:15m}
+    heartbeat-interval: ${ASSESSMENT_WORK_HEARTBEAT_INTERVAL:60s}
+    default-max-attempts: ${ASSESSMENT_WORK_MAX_ATTEMPTS:3}
+    retry-delay: ${ASSESSMENT_WORK_RETRY_DELAY:30s}
+    worker-threads: ${ASSESSMENT_WORKER_THREADS:2}
+
 logging:
   file:
     name: ${spring.application.name}/out/app.log

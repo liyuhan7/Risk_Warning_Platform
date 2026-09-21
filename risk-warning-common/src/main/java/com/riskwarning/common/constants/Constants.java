@@ -22,8 +22,6 @@ public class Constants {
 
     public static final Integer FILE_AMOUNT_LIMIT = 5;
 
-    public static final Integer UPLOAD_CONFIRM_RETRY_LIMIT = 3;
-
 
     public static String getTempFileDirPath(Long projectId, String uploadId) {
         return new File("").getAbsolutePath() + File.separator + Constants.FILE_TEMP_DIR + File.separator + projectId + File.separator + uploadId;

@@ -91,6 +91,11 @@ public class IndicatorResult implements Serializable {
     @Column(name = "risk_triggered", nullable = false)
     private Boolean riskTriggered;
 
+    /** 规则计算冻结的风险等级；待审结果不提供风险等级。 */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "risk_level", length = 32)
+    private com.riskwarning.common.enums.risk.RiskLevelEnum riskLevel;
+
     // risk_status indicator_risk_status_enum NOT NULL DEFAULT '未评估'
     @Type(type = "pgsql_enum")
     @Enumerated(EnumType.STRING)

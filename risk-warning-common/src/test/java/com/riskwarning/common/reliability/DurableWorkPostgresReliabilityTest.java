@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * R1-03 Step C：真实 PostgreSQL 验证 Durable Work 状态机、
+ * 真实 PostgreSQL 验证 Durable Work 状态机、
  * lease 接管、并发竞争与重试耗尽。SQL 全部走生产 DurableWorkStore 实现。
  */
 @EnabledIfEnvironmentVariable(named = "R1_03_IT_ENABLED", matches = "true")

@@ -27,7 +27,7 @@ public enum AssessmentFlowStage {
     RETRIEVAL_BATCH,
     RETRIEVAL_AUDIT,
 
-    P2_COMPLETE,
+    RETRIEVAL_COMPLETE,
     REPORT_AGGREGATE,
     REPORT_COMPLETE
 }

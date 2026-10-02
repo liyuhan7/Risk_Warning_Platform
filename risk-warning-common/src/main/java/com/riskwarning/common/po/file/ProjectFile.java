@@ -9,7 +9,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * 上传文件记录，一文件一行（P0-11 决议 3.1）。
+ * 上传文件记录，一文件一行（ 决议 3.1）。
  * id 即 sourceDocumentId 锚点，指向唯一物理文件。
  */
 @Data

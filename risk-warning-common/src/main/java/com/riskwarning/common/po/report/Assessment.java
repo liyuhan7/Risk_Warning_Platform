@@ -37,7 +37,7 @@ public class Assessment {
 
     private Double overallScore;
 
-    /** STRING 持久化（P0-11 决议 2.4）：列已由 INT 改 VARCHAR，枚举序号不再入库 */
+    /** STRING 持久化（ 决议 2.4）：列已由 INT 改 VARCHAR，枚举序号不再入库 */
     @Enumerated(EnumType.STRING)
     private RiskLevelEnum overallRiskLevel;
 

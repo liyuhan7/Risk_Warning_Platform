@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * RiskDimensionEnum 取值与 ES 存量维度名一致性的回归测试。
- * ES 侧 t_indicator 的 dimension 取值是权威事实源（D-28），
+ * ES 侧 t_indicator 的 dimension 取值是权威事实源（），
  * 枚举 description 必须逐字一致，fromValue 不得依赖任何运行时特例分支
  */
 class RiskDimensionEnumTest {

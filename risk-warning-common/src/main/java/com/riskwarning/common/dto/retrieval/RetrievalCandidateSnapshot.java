@@ -18,4 +18,6 @@ public class RetrievalCandidateSnapshot {
     private String dimension;
     private String type;
     private Double maxScore;
+    /** 指标检索时冻结的规则来源；历史候选与法规候选允许为空。 */
+    private com.fasterxml.jackson.databind.JsonNode sourceRule;
 }

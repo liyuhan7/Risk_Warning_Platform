@@ -58,7 +58,7 @@ class IndicatorResultDetailContractTest {
         assertTrue(trace.has("candidates"));
 
         JsonNode rule = trace.get("ruleEvaluation");
-        assertEquals("p2_mock_fixture_v1", rule.get("ruleVersion").asText());
+        assertEquals("controlled_mock_fixture_v1", rule.get("ruleVersion").asText());
         assertEquals("RISK", rule.get("decision").asText());
         assertEquals(2.0, rule.get("maxPossibleScore").asDouble());
         assertEquals("MEDIUM_RISK", rule.get("riskLevel").asText());
@@ -103,7 +103,7 @@ class IndicatorResultDetailContractTest {
                 .indicatorId("ind-1").indicatorName("指标").score(1.0).maxScore(2.0)
                 .relatedBehaviors(Collections.singletonList(behavior)).isPrimaryTrigger(true).build();
         RuleEvaluation rule = RuleEvaluation.builder()
-                .ruleVersion("p2_mock_fixture_v1").decision("RISK").calculatedScore(0.0)
+                .ruleVersion("controlled_mock_fixture_v1").decision("RISK").calculatedScore(0.0)
                 .maxPossibleScore(2.0).riskTriggered(true).riskLevel(RiskLevelEnum.MEDIUM_RISK).build();
         AnalysisTrace trace = AnalysisTrace.builder()
                 .behaviorId("behavior-1").evidenceIds(Collections.singletonList("evidence-1"))

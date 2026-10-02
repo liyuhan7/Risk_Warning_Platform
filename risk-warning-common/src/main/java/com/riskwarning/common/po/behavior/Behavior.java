@@ -32,7 +32,7 @@ public class Behavior {
 
     private String description;
 
-    /** 企业事实三元组，旧 Batch 链路暂不填充。 */
+    /** 企业事实三元组。 */
     private String subject;
 
     private String action;
@@ -49,18 +49,18 @@ public class Behavior {
 
     private Double quantitativeData;
 
-    /** 数值事实的单位；仅在 quantitativeData 有值时由新抽取链填充。 */
+    /** 数值事实的单位；仅在 quantitativeData 有值时填充。 */
     private String quantitativeUnit;
 
     private LocalDateTime behaviorDate;
 
-    /** 抽取置信度；旧链产物暂不填充。 */
+    /** 事实抽取置信度。 */
     private Double confidence;
 
-    /** 对应 EvidenceChunk 的稳定 ID；引用完整性由新抽取链校验。 */
+    /** 对应 EvidenceChunk 的稳定 ID；引用完整性由事实抽取服务校验。 */
     private List<String> evidenceIds;
 
-    /** 事实抽取使用的模型和 Prompt 版本；旧链产物暂不填充。 */
+    /** 事实抽取使用的模型和 Prompt 版本。 */
     private String extractionModel;
 
     private String extractionPromptVersion;

@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * R1-03 Step B：真实 Redis 验证可靠队列原语。
+ * 真实 Redis 验证可靠队列原语。
  * claim 后不 ACK 模拟崩溃恢复、poison payload 进入 DEAD、
  * DEAD 化后合法任务继续消费。
  */

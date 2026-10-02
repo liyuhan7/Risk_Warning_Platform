@@ -1,6 +1,5 @@
 -- Supabase/PostgreSQL Schema for 风险合规预警系统
--- Version: 1.4
--- Last Updated: 2025-11-05
+-- 当前开发基线：在空数据库中一次创建全部表、约束和索引。
 
 -- Definding ENUM types for better data integrity
 
@@ -151,13 +150,25 @@ ON public.t_assessment_result(id, project_id);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_assessment_source_task
 ON public.t_assessment_result(source_task_id);
 
--- 独立分析运行（P1/P2）
+-- 独立分析运行及创建时声明的处理模式
 CREATE TABLE IF NOT EXISTS public.t_analysis_run (
     analysis_run_id VARCHAR(64) PRIMARY KEY,
     assessment_id BIGINT NOT NULL,
     project_id BIGINT NOT NULL,
     status VARCHAR(32) NOT NULL CONSTRAINT ck_analysis_run_status CHECK (
         status IN ('RUNNING', 'SUCCEEDED', 'COMPLETED_WITHOUT_DECISION', 'FAILED')),
+    execution_mode VARCHAR(16) NOT NULL DEFAULT 'REASONING' CONSTRAINT ck_analysis_run_mode CHECK (
+        execution_mode = 'REASONING'),
+    expected_behavior_ids JSONB,
+    behavior_input_hash VARCHAR(64) CONSTRAINT ck_analysis_run_behavior_hash CHECK (
+        behavior_input_hash IS NULL OR behavior_input_hash ~ '^[a-f0-9]{64}$'),
+    analysis_summary JSONB,
+    CONSTRAINT ck_analysis_run_analysis_summary CHECK (analysis_summary IS NULL OR
+        (execution_mode IS NOT NULL AND execution_mode = 'REASONING' AND jsonb_typeof(analysis_summary) = 'object')),
+    CONSTRAINT ck_analysis_run_behaviors CHECK (expected_behavior_ids IS NULL OR
+        (execution_mode IS NOT NULL AND execution_mode = 'REASONING'
+         AND jsonb_typeof(expected_behavior_ids) = 'array'
+         AND expected_behavior_ids <> '[]'::jsonb)),
     started_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     finished_at TIMESTAMP WITHOUT TIME ZONE,
     version BIGINT NOT NULL DEFAULT 0,
@@ -209,6 +220,7 @@ CREATE TABLE IF NOT EXISTS public.t_indicator_result (
     matched_behaviors_ids TEXT[],
     -- 是否触发了风险规则
     risk_triggered BOOLEAN NOT NULL DEFAULT FALSE,
+    risk_level VARCHAR(32) CHECK (risk_level IS NULL OR risk_level IN ('NO_RISK', 'LOW_RISK', 'MEDIUM_RISK', 'HIGH_RISK')),
     -- 风险是否已评估
     risk_status indicator_risk_status_enum NOT NULL DEFAULT '未评估',
     -- 计算时间
@@ -231,7 +243,7 @@ COMMENT ON COLUMN public.t_indicator_result.risk_triggered IS '是否触发了�
 -- P2 合规分析权威结果
 CREATE TABLE IF NOT EXISTS public.t_analysis_result (
     id VARCHAR(64) PRIMARY KEY,
-    schema_version VARCHAR(8) NOT NULL CHECK (schema_version = '1.0'),
+    schema_version VARCHAR(8) NOT NULL CONSTRAINT ck_analysis_result_schema_version CHECK (schema_version IN ('1.0', '1.1')),
     analysis_run_id VARCHAR(64) NOT NULL REFERENCES public.t_analysis_run(analysis_run_id),
     assessment_id BIGINT NOT NULL REFERENCES public.t_assessment_result(id) ON DELETE CASCADE,
     behavior_id VARCHAR(128) NOT NULL,
@@ -248,6 +260,9 @@ CREATE TABLE IF NOT EXISTS public.t_analysis_result (
         'QUANTITATIVE_EXCESS', 'DOCUMENTATION_GAP')),
     gap_value DOUBLE PRECISION,
     gap_unit TEXT,
+    condition_met BOOLEAN,
+    observed_value DOUBLE PRECISION,
+    observed_unit TEXT,
     confidence DOUBLE PRECISION NOT NULL CHECK (confidence BETWEEN 0 AND 1),
     reasoning TEXT NOT NULL,
     model_version TEXT NOT NULL,
@@ -256,10 +271,69 @@ CREATE TABLE IF NOT EXISTS public.t_analysis_result (
     CONSTRAINT uq_analysis_result_run_behavior_indicator UNIQUE (analysis_run_id, behavior_id, indicator_id),
     CONSTRAINT fk_analysis_result_run_scope FOREIGN KEY (analysis_run_id, assessment_id)
         REFERENCES public.t_analysis_run(analysis_run_id, assessment_id),
+    CONSTRAINT ck_analysis_result_bridge CHECK (
+        schema_version = '1.0' OR (
+            (observed_value IS NULL OR (observed_unit IS NOT NULL AND btrim(observed_unit) <> ''
+                AND observed_value > '-Infinity'::float8 AND observed_value < 'Infinity'::float8))
+            AND (condition_met IS NULL OR (observed_value IS NULL AND observed_unit IS NULL))
+            AND (observed_unit IS NULL OR observed_value IS NOT NULL))),
+    CONSTRAINT ck_analysis_result_unknown CHECK (
+        schema_version = '1.0' OR applicable <> 'UNKNOWN'
+        OR compliance_status IN ('INSUFFICIENT_EVIDENCE', 'NEEDS_REVIEW')),
     CONSTRAINT ck_analysis_result_gap CHECK (
         (compliance_status <> 'NON_COMPLIANT' OR gap_type IS NOT NULL)
         AND (gap_value IS NULL OR gap_unit IS NOT NULL))
 );
+
+-- 模型调用审计不保存完整 Prompt，重试序号按 Run/Behavior 分配。
+CREATE TABLE IF NOT EXISTS public.t_analysis_attempt (
+    id BIGSERIAL PRIMARY KEY,
+    project_id BIGINT NOT NULL,
+    assessment_id BIGINT NOT NULL,
+    analysis_run_id VARCHAR(64) NOT NULL,
+    behavior_id VARCHAR(128) NOT NULL,
+    attempt_no INTEGER NOT NULL CHECK (attempt_no >= 1),
+    context_hash VARCHAR(64) NOT NULL,
+    model_version TEXT NOT NULL,
+    prompt_version TEXT NOT NULL,
+    raw_response TEXT,
+    validation_errors JSONB CHECK (validation_errors IS NULL OR jsonb_typeof(validation_errors) = 'array'),
+    status VARCHAR(32) NOT NULL CHECK (status IN ('VALID', 'INVALID', 'PROVIDER_FAILED')),
+    error_code TEXT,
+    error_message TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT uq_analysis_attempt UNIQUE (analysis_run_id, behavior_id, attempt_no),
+    CONSTRAINT fk_analysis_attempt_scope FOREIGN KEY (analysis_run_id, assessment_id, project_id)
+        REFERENCES public.t_analysis_run(analysis_run_id, assessment_id, project_id)
+);
+
+-- 规则未登记或输入无效时，版本及计算详情允许为空，错误原因仍须记录。
+CREATE TABLE IF NOT EXISTS public.t_rule_evaluation_audit (
+    id BIGSERIAL PRIMARY KEY,
+    project_id BIGINT NOT NULL,
+    assessment_id BIGINT NOT NULL,
+    analysis_run_id VARCHAR(64) NOT NULL,
+    indicator_id VARCHAR(128) NOT NULL,
+    input_hash VARCHAR(64) NOT NULL,
+    rule_version TEXT,
+    threshold_version TEXT,
+    aggregation_operator TEXT,
+    status VARCHAR(32) NOT NULL CHECK (status IN (
+        'DECIDED', 'DECIDED_WITH_CONFLICT', 'UNSUPPORTED_RULE', 'INVALID_INPUT', 'NEEDS_REVIEW')),
+    calculation_details JSONB CHECK (calculation_details IS NULL OR jsonb_typeof(calculation_details) = 'object'),
+    conflict BOOLEAN NOT NULL,
+    error_code TEXT,
+    error_message TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT uq_rule_evaluation_audit UNIQUE (analysis_run_id, indicator_id),
+    CONSTRAINT fk_rule_evaluation_audit_scope FOREIGN KEY (analysis_run_id, assessment_id, project_id)
+        REFERENCES public.t_analysis_run(analysis_run_id, assessment_id, project_id)
+);
+CREATE INDEX IF NOT EXISTS ix_analysis_attempt_scope
+ON public.t_analysis_attempt(assessment_id, analysis_run_id);
+CREATE INDEX IF NOT EXISTS ix_rule_evaluation_audit_scope
+ON public.t_rule_evaluation_audit(assessment_id, analysis_run_id);
 
 -- P2 检索与固定分析逐 Behavior 审计
 CREATE TABLE IF NOT EXISTS public.t_retrieval_audit (
@@ -278,8 +352,9 @@ CREATE TABLE IF NOT EXISTS public.t_retrieval_audit (
     embedding_version TEXT,
     retrieval_status VARCHAR(32) NOT NULL CHECK (
         retrieval_status IN ('SUCCESS', 'NO_CANDIDATES', 'FAILED', 'SNAPSHOT_UNAVAILABLE')),
-    analysis_status VARCHAR(32) NOT NULL CHECK (
-        analysis_status IN ('NOT_ATTEMPTED', 'SUCCESS', 'RECALL_GAP', 'INSUFFICIENT_EVIDENCE', 'NOT_DEMO_INPUT', 'WAITING_P3')),
+    analysis_status VARCHAR(32) NOT NULL CONSTRAINT ck_retrieval_audit_analysis_status CHECK (
+        analysis_status IN ('NOT_ATTEMPTED', 'SUCCESS', 'RECALL_GAP', 'INSUFFICIENT_EVIDENCE', 'NOT_DEMO_INPUT', 'WAITING_ANALYSIS',
+            'ANALYZED', 'NO_APPLICABLE_CANDIDATE', 'NEEDS_REVIEW')),
     candidates JSONB CHECK (candidates IS NULL OR jsonb_typeof(candidates) = 'array'),
     error_code TEXT,
     error_type TEXT,
@@ -388,7 +463,8 @@ CREATE TABLE IF NOT EXISTS public.t_project_file (
     assessment_id BIGINT REFERENCES public.t_assessment_result(id) ON DELETE CASCADE,
     file_path TEXT,
     original_file_name VARCHAR(512),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT uq_project_file_id_project_assessment UNIQUE (id, project_id, assessment_id)
 );
 
 COMMENT ON TABLE public.t_project_file IS '项目上传文件记录表，一份物理文件对应一行';
@@ -401,6 +477,43 @@ COMMENT ON COLUMN public.t_project_file.original_file_name IS '用户上传时�
 -- 项目文件表索引
 CREATE INDEX IF NOT EXISTS idx_project_file_project_id 
 ON public.t_project_file(project_id);
+
+-- 文档级原文证据；以文件作用域约束阻止跨项目或跨评估引用。
+CREATE TABLE IF NOT EXISTS public.t_evidence_chunk (
+    id VARCHAR(32) PRIMARY KEY,
+    schema_version VARCHAR(8) NOT NULL DEFAULT '1.0',
+    source_document_id BIGINT NOT NULL,
+    project_id BIGINT NOT NULL,
+    assessment_id BIGINT NOT NULL,
+    source_file_name VARCHAR(512) NOT NULL,
+    page_number INTEGER,
+    segment_index INTEGER NOT NULL,
+    char_start INTEGER,
+    char_end INTEGER,
+    text TEXT NOT NULL,
+    text_hash VARCHAR(64) NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT ck_evidence_schema_version CHECK (schema_version = '1.0'),
+    CONSTRAINT ck_evidence_id_hex CHECK (id ~ '^[0-9a-f]{32}$'),
+    CONSTRAINT ck_evidence_text_hash_hex CHECK (text_hash ~ '^[0-9a-f]{64}$'),
+    CONSTRAINT ck_evidence_page CHECK (page_number IS NULL OR page_number >= 1),
+    CONSTRAINT ck_evidence_segment CHECK (segment_index >= 0),
+    CONSTRAINT ck_evidence_char_range CHECK (
+        (char_start IS NULL AND char_end IS NULL)
+        OR (char_start IS NOT NULL AND char_end IS NOT NULL AND char_start >= 0 AND char_end > char_start)
+    ),
+    CONSTRAINT ck_evidence_text_not_blank CHECK (btrim(text) <> ''),
+    CONSTRAINT fk_evidence_source_document_scope
+        FOREIGN KEY (source_document_id, project_id, assessment_id)
+        REFERENCES public.t_project_file (id, project_id, assessment_id)
+        ON DELETE RESTRICT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_evidence_source_position
+    ON public.t_evidence_chunk (source_document_id, COALESCE(page_number, -1), segment_index);
+CREATE INDEX IF NOT EXISTS ix_evidence_source_document
+    ON public.t_evidence_chunk (source_document_id, page_number, segment_index);
+COMMENT ON TABLE public.t_evidence_chunk IS '文档级权威证据；不含分析运行身份';
+COMMENT ON COLUMN public.t_evidence_chunk.assessment_id IS '文件上传所属评估，不是分析运行';
 
 -- 10. Lease 模式持久任务表
 CREATE TABLE IF NOT EXISTS public.t_durable_work (

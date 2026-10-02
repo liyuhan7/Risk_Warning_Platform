@@ -13,7 +13,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class IndicatorCalculationTaskMessage extends Message{
-    /** P2 demo 用于重新校验文件哈希；旧消息允许为空。 */
+    /** Retrieval demo 用于重新校验文件哈希；旧消息允许为空。 */
     private List<SourceDocumentRef> documents;
 
     public IndicatorCalculationTaskMessage(String messageId, String timestamp, String traceId, Long userId, Long projectId, Long assessmentId) {

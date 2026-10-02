@@ -23,7 +23,7 @@ public class Indicator {
     private Integer indicatorLevel;
     private String parentIndicatorId;
     private String dimension;
-    /** P0-11 决议 3.2：语义为合规领域，ES 字段已改名 complianceDomain */
+    /**  决议 3.2：语义为合规领域，ES 字段已改名 complianceDomain */
     private List<String> complianceDomain;
     private String region;
     private List<String> tags;

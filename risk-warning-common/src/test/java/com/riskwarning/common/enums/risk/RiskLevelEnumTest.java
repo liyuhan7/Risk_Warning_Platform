@@ -9,12 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * 风险等级聚合的边界行为验证。
  *
  * 覆盖 PLAN.md:180「对零风险集合运行聚合单元测试，确认不会产生错误风险等级」，
- * 对应缺陷 D-09。
+ * 对应缺陷 。
  */
 class RiskLevelEnumTest {
 
     /**
-     * 三个计数器全为 0 表示没有任何指标触发风险，属最好情况，返回 NO_RISK（P0-11 决议 2.4）。
+     * 三个计数器全为 0 表示没有任何指标触发风险，属最好情况，返回 NO_RISK（ 决议 2.4）。
      * 修复前分母为 0 得到 NaN，经 getByScoreRatio 落入 else 分支被判为高风险。
      */
     @Test

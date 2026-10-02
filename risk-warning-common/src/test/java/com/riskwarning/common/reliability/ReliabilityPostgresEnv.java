@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * R1-03 真实 PostgreSQL 隔离环境。
- * 使用独立数据库 risk_warning_reliability_test，只执行 test/r1-03 下的幂等 DDL；
+ * 真实 PostgreSQL 隔离环境。
+ * 使用独立数据库 risk_warning_reliability_test，只执行 test/fixtures/reliability 下的幂等 DDL；
  * 测试数据按 namespace 或 assessmentId 精确清理，不触碰 risk_warning_platform。
  */
 public final class ReliabilityPostgresEnv {
@@ -99,7 +99,7 @@ public final class ReliabilityPostgresEnv {
              Statement statement = connection.createStatement()) {
             statement.execute(sql);
         } catch (Exception exception) {
-            throw new IllegalStateException("R1-03 测试 schema 执行失败", exception);
+            throw new IllegalStateException("测试 schema 执行失败", exception);
         }
     }
 
@@ -109,15 +109,15 @@ public final class ReliabilityPostgresEnv {
         try {
             sql = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
         } catch (IOException exception) {
-            throw new IllegalStateException("无法读取 R1-03 测试 schema: " + file, exception);
+            throw new IllegalStateException("无法读取 测试 schema: " + file, exception);
         }
         applySchema(jdbcTemplate, sql);
     }
 
     private static Path locateSchemaFile() {
         List<Path> candidates = java.util.Arrays.asList(
-                Paths.get("..", "test", "r1-03", "reliability-test-schema.sql"),
-                Paths.get("test", "r1-03", "reliability-test-schema.sql"));
+                Paths.get("..", "test", "fixtures", "reliability", "reliability-test-schema.sql"),
+                Paths.get("test", "fixtures", "reliability", "reliability-test-schema.sql"));
         for (Path candidate : candidates) {
             if (Files.exists(candidate)) { return candidate; }
         }

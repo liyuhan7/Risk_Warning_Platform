@@ -32,9 +32,9 @@ class ReliabilityServiceOptInConfigurationTest {
     }
 
     @Test
-    void processingBusinessModeKeepsLocalFallbackAndUsesServiceConfigurationForP2() throws IOException {
-        assertThat(property("risk-warning-processing/src/main/resources/application.yml", "p2.mode"))
-                .isEqualTo("${P2_PROCESSING_MODE:LEGACY}");
+    void processingHasNoLegacyModeSwitch() throws IOException {
+        assertThat(property("risk-warning-processing/src/main/resources/application.yml", "analysis.processing.mode"))
+                .isNull();
     }
 
     @Test

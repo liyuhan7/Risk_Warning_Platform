@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * R1-03 Step E：真实 PostgreSQL + Kafka 验证 Transactional Outbox。
+ * 真实 PostgreSQL + Kafka 验证 Transactional Outbox。
  * DB 提交后 Kafka 不可用时任务保留并重试；发送成功但状态更新失败时
  * 重复物理消息使用同一稳定 messageId；同一 messageId 重复入箱幂等。
  */

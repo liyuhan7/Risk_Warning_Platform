@@ -100,7 +100,7 @@ class AssessmentFlowLoggerTest {
     @Test
     void normalEventIsLoggedAtInfoLevel() {
         AssessmentFlowEvent event = AssessmentFlowEvent.builder(
-                        AssessmentFlowStage.P2_COMPLETE, AssessmentFlowStatus.SUCCEEDED)
+                        AssessmentFlowStage.RETRIEVAL_COMPLETE, AssessmentFlowStatus.SUCCEEDED)
                 .analysisRunId("run-1").elapsedMs(12L).build();
 
         logger.info(event);

@@ -55,7 +55,7 @@ class KafkaOutboxCodecTest {
     @Test
     void roundTripsNotificationAndAssessmentCompletedMessages() {
         NotificationMessage notification = new NotificationMessage(
-                "run-1:p2-completed-notification", "timestamp", "trace", 1L, 10L, 20L,
+                "run-1:retrieval-completed-notification", "timestamp", "trace", 1L, 10L, 20L,
                 NotificationMessage.NotificationType.ASSESSMENT_COMPLETED, "标题", "内容");
         notification.setExtraData("{\"displayStatus\":\"COMPLETED_WITHOUT_DECISION\"}");
 

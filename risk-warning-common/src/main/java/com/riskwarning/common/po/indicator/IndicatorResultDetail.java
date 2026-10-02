@@ -23,4 +23,6 @@ public class IndicatorResultDetail {
     private FixtureDescriptor fixture;
     private List<RelatedIndicator> relatedIndicators;
     private List<AnalysisTrace> traces;
+    /** 1.1/Reasoning 必填；1.0 保留原有字段和默认版本。 */
+    private com.riskwarning.common.dto.analysis.RuleCalculationDetail ruleCalculation;
 }

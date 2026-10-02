@@ -10,7 +10,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/** P0 冻结的合规分析结果，PostgreSQL 为权威存储。 */
+/** 合规分析结果，兼容 1.0 与 1.1；PostgreSQL 为权威存储。 */
 @Data
 @Builder
 @NoArgsConstructor
@@ -55,6 +55,14 @@ public class AnalysisResult {
     private Double gapValue;
     @Column(name = "gap_unit")
     private String gapUnit;
+    /** Binary 条件值，不得由分数反推。 */
+    @Column(name = "condition_met")
+    private Boolean conditionMet;
+    /** Range 实际观测值，与差距值分别存储。 */
+    @Column(name = "observed_value")
+    private Double observedValue;
+    @Column(name = "observed_unit")
+    private String observedUnit;
     @Column(nullable = false)
     private Double confidence;
     @Column(nullable = false, columnDefinition = "TEXT")

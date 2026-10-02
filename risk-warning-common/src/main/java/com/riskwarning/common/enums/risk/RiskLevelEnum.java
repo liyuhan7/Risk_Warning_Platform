@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum RiskLevelEnum {
 
-    /** 无任何指标触发风险（P0-11 决议 2.4 新增，区分「零触发」与「确有低风险」） */
+    /** 无任何指标触发风险（ 决议 2.4 新增，区分「零触发」与「确有低风险」） */
     NO_RISK("NO_RISK", "无风险"),
 
     LOW_RISK("LOW_RISK", "低风险"),
@@ -81,7 +81,7 @@ public enum RiskLevelEnum {
      * 按各等级的风险数量聚合总体风险等级。
      *
      * 三个入参统计的是**已触发风险**的指标数量，因此全为 0 表示没有任何指标触发风险，
-     * 须返回 NO_RISK（P0-11 决议 2.4）；不可让分母为 0 得到 NaN 后落入最高档。
+     * 须返回 NO_RISK（ 决议 2.4）；不可让分母为 0 得到 NaN 后落入最高档。
      *
      * @param lowRiskCount 低风险指标数
      * @param mediumRiskCount 中风险指标数

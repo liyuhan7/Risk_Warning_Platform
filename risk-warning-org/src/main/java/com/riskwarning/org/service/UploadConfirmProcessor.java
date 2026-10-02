@@ -135,7 +135,7 @@ public class UploadConfirmProcessor {
             documents.add(new SourceDocumentRef(projectFile.getId(), targetFilePath));
         }
         if (documents.isEmpty()) {
-            throw new BusinessException("本次评估没有可处理的源文件");
+            throw new BusinessException(409, "本次评估没有可处理的源文件");
         }
 
         AnalysisScope analysisScope = new AnalysisScope(
@@ -181,7 +181,7 @@ public class UploadConfirmProcessor {
         Map<Object, Object> uploadFileMap = redisUtil.hmget(
                 String.format(RedisKey.REDIS_KEY_FILE_UPLOAD_INFO, task.getProjectId()));
         if (uploadFileMap == null || uploadFileMap.isEmpty()) {
-            throw new BusinessException("上传任务不存在或已过期");
+            throw new BusinessException(404, "上传任务不存在或已过期");
         }
         List<UploadFileDto> files = new ArrayList<>();
         for (Object value : uploadFileMap.values()) {
@@ -200,8 +200,8 @@ public class UploadConfirmProcessor {
     }
 
     private void requireProject(UploadConfirmDto task) {
-        if (task == null || task.getProjectId() == null) {
-            throw new BusinessException("上传确认任务缺少项目标识");
+        if (task == null || task.getProjectId() == null || task.getProjectId() <= 0) {
+            throw new BusinessException(400, "上传确认任务需要有效项目标识");
         }
     }
 

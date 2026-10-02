@@ -17,6 +17,7 @@ import com.riskwarning.org.service.ProjectService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import javax.validation.Valid;
 
 
 /**
@@ -40,7 +41,7 @@ public class ProjectController {
      */
     @PostMapping
     @AuthRequired
-    public Result<Project> createProject(@RequestBody ProjectCreateRequest req) {
+    public Result<Project> createProject(@Valid @RequestBody ProjectCreateRequest req) {
         Project p = new Project();
         p.setEnterpriseId(req.getEnterpriseId());
         p.setName(req.getName());

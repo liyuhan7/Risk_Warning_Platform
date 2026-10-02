@@ -6,7 +6,6 @@ import com.riskwarning.common.result.Result;
 import com.riskwarning.processing.dto.EvidenceVO;
 import com.riskwarning.processing.service.EvidenceQueryService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,9 +19,8 @@ import java.util.stream.Collectors;
  * 证据回溯只读接口。
  *
  * 供评估结果页展示“行为引用了哪些原文”，查询一律需要项目与评估身份；
- * 参数不合法返回 400，归属或完整性校验失败返回 500，不返回可疑数据。
+ * 参数不合法返回 400，归属不符返回 403，完整性失败返回 500，不返回可疑数据。
  */
-@Slf4j
 @RestController
 @RequestMapping("/evidence")
 @RequiredArgsConstructor
@@ -35,18 +33,7 @@ public class EvidenceQueryController {
     public Result<List<EvidenceVO>> list(@RequestParam Long projectId,
                                          @RequestParam Long assessmentId,
                                          @RequestParam(required = false) Long sourceDocumentId) {
-        try {
-            return Result.success(toVOs(
-                    evidenceQueryService.listByScope(projectId, assessmentId, sourceDocumentId)));
-        } catch (IllegalArgumentException e) {
-            log.warn("[Evidence Query] 参数错误: projectId={}, assessmentId={}, error={}",
-                    projectId, assessmentId, e.getMessage());
-            return Result.fail(400, e.getMessage());
-        } catch (IllegalStateException e) {
-            log.error("[Evidence Query] 证据校验失败: projectId={}, assessmentId={}, error={}",
-                    projectId, assessmentId, e.getMessage());
-            return Result.fail(500, e.getMessage());
-        }
+        return Result.success(toVOs(evidenceQueryService.listByScope(projectId, assessmentId, sourceDocumentId)));
     }
 
     @GetMapping("/by-ids")
@@ -54,18 +41,7 @@ public class EvidenceQueryController {
     public Result<List<EvidenceVO>> byIds(@RequestParam String ids,
                                           @RequestParam Long projectId,
                                           @RequestParam Long assessmentId) {
-        try {
-            return Result.success(toVOs(
-                    evidenceQueryService.listByIds(parseIds(ids), projectId, assessmentId)));
-        } catch (IllegalArgumentException e) {
-            log.warn("[Evidence Query] 参数错误: projectId={}, assessmentId={}, error={}",
-                    projectId, assessmentId, e.getMessage());
-            return Result.fail(400, e.getMessage());
-        } catch (IllegalStateException e) {
-            log.error("[Evidence Query] 证据校验失败: projectId={}, assessmentId={}, error={}",
-                    projectId, assessmentId, e.getMessage());
-            return Result.fail(500, e.getMessage());
-        }
+        return Result.success(toVOs(evidenceQueryService.listByIds(parseIds(ids), projectId, assessmentId)));
     }
 
     private List<String> parseIds(String ids) {

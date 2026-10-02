@@ -22,7 +22,7 @@ bert:
     enabled: true
     # 依赖导入和本地权重加载计入冷启动等待，单次健康请求仍保持短超时。
     startup-timeout: ${BERT_STARTUP_TIMEOUT:180000}
-    # 8000 被向量化容器 bert-service 占用，分类子进程改用 8002
+    # Python 分类子进程监听端口
     port: 8002  # Python服务监听端口
     host: 0.0.0.0
     healthcheck:
@@ -38,7 +38,3 @@ bert:
     script: bert-service/bert_service.py  # 默认：从 risk-warning-bert 目录运行时使用
     # 如果从项目根目录运行，可以使用: risk-warning-bert/bert-service/bert_service.py
   
-  # BERT模型配置
-  model:
-    name: bert-base-chinese  # 模型名称
-

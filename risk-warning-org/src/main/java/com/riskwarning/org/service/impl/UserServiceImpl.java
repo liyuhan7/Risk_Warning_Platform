@@ -1,6 +1,7 @@
 package com.riskwarning.org.service.impl;
 
 import com.riskwarning.common.dto.*;
+import com.riskwarning.common.exception.BusinessException;
 import com.riskwarning.common.po.user.User;
 import com.riskwarning.common.utils.JwtUtils;
 import com.riskwarning.common.utils.PasswordUtils;
@@ -29,9 +30,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse register(RegisterRequest registerRequest) {
+        if (registerRequest == null) throw new IllegalArgumentException("注册信息不能为空");
         // 检查邮箱是否已存在
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new RuntimeException("邮箱已被注册");
+            throw new BusinessException(409, "邮箱已被注册");
         }
 
         // 创建用户
@@ -51,13 +53,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
+        if (loginRequest == null) throw new IllegalArgumentException("登录信息不能为空");
         // 根据邮箱查找用户
         User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("用户不存在"));
+                .orElseThrow(() -> new BusinessException(401, "用户不存在"));
 
         // 验证密码
         if (!passwordUtils.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new RuntimeException("密码错误");
+            throw new BusinessException(401, "密码错误");
         }
 
         // 生成JWT token
@@ -70,15 +73,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getUserById(Long userId) {
+        requireUserId(userId);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("用户不存在"));
+                .orElseThrow(() -> new BusinessException(404, "用户不存在"));
         return convertToUserResponse(user);
     }
 
     @Override
     public UserResponse getUserByEmail(String email) {
+        if (email == null || email.trim().isEmpty()) throw new IllegalArgumentException("邮箱不能为空");
         User user=userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("用户不存在"));
+                .orElseThrow(() -> new BusinessException(404, "用户不存在"));
             return convertToUserResponse(user);
 
     }
@@ -86,8 +91,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse updateUser(Long userId, UserResponse updateRequest) {
+        requireUserId(userId);
+        if (updateRequest == null) throw new IllegalArgumentException("更新信息不能为空");
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("用户不存在"));
+                .orElseThrow(() -> new BusinessException(404, "用户不存在"));
 
         // 更新用户信息
         if (updateRequest.getFullName() != null) {
@@ -115,6 +122,10 @@ public class UserServiceImpl implements UserService {
         UserResponse response = new UserResponse();
         BeanUtils.copyProperties(user, response);
         return response;
+    }
+
+    private void requireUserId(Long userId) {
+        if (userId == null || userId <= 0) throw new IllegalArgumentException("用户 ID 必须为正数");
     }
 
 

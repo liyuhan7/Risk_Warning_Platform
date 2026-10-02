@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * R1-03 真实 PostgreSQL 隔离环境（org 模块副本）。
+ * 真实 PostgreSQL 隔离环境（org 模块副本）。
  * 与 common 模块共用同一隔离库与 DDL 文件；测试类不能跨模块共享，
  * 只保留本模块用到的连接与清理能力。
  */
@@ -96,14 +96,14 @@ public final class ReliabilityPostgresEnv {
              Statement statement = connection.createStatement()) {
             statement.execute(sql);
         } catch (Exception exception) {
-            throw new IllegalStateException("R1-03 测试 schema 执行失败", exception);
+            throw new IllegalStateException("测试 schema 执行失败", exception);
         }
     }
 
     private static Path locateSchemaFile() {
         List<Path> candidates = Arrays.asList(
-                Paths.get("..", "test", "r1-03", "reliability-test-schema.sql"),
-                Paths.get("test", "r1-03", "reliability-test-schema.sql"));
+                Paths.get("..", "test", "fixtures", "reliability", "reliability-test-schema.sql"),
+                Paths.get("test", "fixtures", "reliability", "reliability-test-schema.sql"));
         for (Path candidate : candidates) {
             if (Files.exists(candidate)) { return candidate; }
         }
@@ -116,7 +116,7 @@ public final class ReliabilityPostgresEnv {
         try {
             applySchema(jdbcTemplate, new String(Files.readAllBytes(file), StandardCharsets.UTF_8));
         } catch (java.io.IOException exception) {
-            throw new IllegalStateException("无法读取 R1-03 测试 schema: " + file, exception);
+            throw new IllegalStateException("无法读取 测试 schema: " + file, exception);
         }
         schemaReady = true;
     }

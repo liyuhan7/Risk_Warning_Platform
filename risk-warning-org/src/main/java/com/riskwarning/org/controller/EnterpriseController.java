@@ -10,6 +10,7 @@ import com.riskwarning.org.service.EnterpriseService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import javax.validation.Valid;
 
 
 /**
@@ -33,7 +34,7 @@ public class EnterpriseController {
      */
     @PostMapping
     @AuthRequired
-    public Result<Enterprise> createEnterprise(@RequestBody EnterpriseCreateRequest req) {
+    public Result<Enterprise> createEnterprise(@Valid @RequestBody EnterpriseCreateRequest req) {
         Enterprise e = new Enterprise();
         e.setName(req.getName());
         e.setCreditCode(req.getCreditCode());
@@ -70,8 +71,6 @@ public class EnterpriseController {
      */
     @GetMapping
     public Result<List<Enterprise>> getAllEnterprises() {
-        // This method would call a service method to retrieve all enterprises
-        // For demonstration, returning an empty list
         return Result.success(enterpriseService.getAllEnterprises());
     }
 
@@ -82,8 +81,6 @@ public class EnterpriseController {
      */
     @GetMapping("/{enterpriseId}/members")
     public Result<List<EnterpriseUserResponse>> getEnterpriseMembers(@PathVariable Long enterpriseId) {
-        // This method would call a service method to retrieve members of the enterprise
-        // For demonstration, returning an empty list
         List<EnterpriseUserResponse> users = enterpriseService.getUsersByEnterprise(enterpriseId);
         return Result.success(users);
     }

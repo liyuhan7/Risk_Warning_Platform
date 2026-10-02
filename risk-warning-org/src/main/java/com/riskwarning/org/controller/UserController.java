@@ -3,10 +3,10 @@ package com.riskwarning.org.controller;
 import com.riskwarning.common.annotation.AuthRequired;
 import com.riskwarning.common.context.UserContext;
 import com.riskwarning.common.dto.*;
+import com.riskwarning.common.exception.BusinessException;
 import com.riskwarning.common.result.Result;
 import com.riskwarning.org.service.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,7 +15,6 @@ import javax.validation.Valid;
 /**
  * 用户认证控制器
  */
-@Slf4j
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
@@ -31,13 +30,7 @@ public class UserController {
      */
     @PostMapping("/register")
     public Result<UserResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        try {
-            UserResponse userResponse = userService.register(registerRequest);
-            return Result.success(userResponse);
-        } catch (Exception e) {
-            log.error("用户注册失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
-        }
+        return Result.success(userService.register(registerRequest));
     }
 
     /**
@@ -48,13 +41,7 @@ public class UserController {
      */
     @PostMapping("/login")
     public Result<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        try {
-            LoginResponse loginResponse = userService.login(loginRequest);
-            return Result.success(loginResponse);
-        } catch (Exception e) {
-            log.error("用户登录失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
-        }
+        return Result.success(userService.login(loginRequest));
     }
 
     /**
@@ -66,13 +53,7 @@ public class UserController {
     @GetMapping("/profile")
     @AuthRequired
     public Result<UserResponse> getCurrentUser(HttpServletRequest request) {
-        try {
-            UserResponse userResponse = userService.getUserById(UserContext.getUser().getId());
-            return Result.success(userResponse);
-        } catch (Exception e) {
-            log.error("获取用户信息失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
-        }
+        return Result.success(userService.getUserById(currentUserId()));
     }
 
     /**
@@ -83,13 +64,7 @@ public class UserController {
      */
     @GetMapping("/{userId}")
     public Result<UserResponse> getUserById(@PathVariable Long userId) {
-        try {
-            UserResponse userResponse = userService.getUserById(userId);
-            return Result.success(userResponse);
-        } catch (Exception e) {
-            log.error("获取用户信息失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
-        }
+        return Result.success(userService.getUserById(userId));
     }
 
     /**
@@ -103,13 +78,7 @@ public class UserController {
     @AuthRequired
     public Result<UserResponse> updateProfile(@RequestBody UserResponse updateRequest,
                                                   HttpServletRequest request) {
-        try {
-            UserResponse userResponse = userService.updateUser(UserContext.getUser().getId(), updateRequest);
-            return Result.success(userResponse);
-        } catch (Exception e) {
-            log.error("更新用户信息失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
-        }
+        return Result.success(userService.updateUser(currentUserId(), updateRequest));
     }
 
     /**
@@ -120,13 +89,13 @@ public class UserController {
      */
     @GetMapping("/email")
     public Result<UserResponse> getUserByEmail(@RequestParam String email) {
-        try {
-            UserResponse userResponse = userService.getUserByEmail(email);
-            return Result.success(userResponse);
-        } catch (Exception e) {
-            log.error("根据邮箱获取用户信息失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
-        }
+        return Result.success(userService.getUserByEmail(email));
+    }
+
+    private Long currentUserId() {
+        if (UserContext.getUser() == null || UserContext.getUser().getId() == null || UserContext.getUser().getId() <= 0)
+            throw new BusinessException(401, "请登录后再访问用户资料");
+        return UserContext.getUser().getId();
     }
 
 

@@ -1,6 +1,7 @@
 package com.riskwarning.org.service.impl;
 
 import com.riskwarning.common.context.UserContext;
+import com.riskwarning.common.exception.BusinessException;
 import com.riskwarning.common.dto.UserResponse;
 import com.riskwarning.common.dto.project.ProjectMemberResponse;
 import com.riskwarning.common.po.project.Project;
@@ -52,7 +53,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (ownerUserId != null) {
             User owner = em.find(User.class, ownerUserId);
             if (owner == null) {
-                throw new IllegalArgumentException("owner user not found: " + ownerUserId);
+                throw new BusinessException(404, "项目创建用户不存在");
             }
 
             ProjectMemberId id = new ProjectMemberId();
@@ -74,13 +75,14 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public void addUserToProject(Long projectId, Long userId, String role) {
-
+        requirePositiveId(projectId, "项目 ID");
+        requirePositiveId(userId, "用户 ID");
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("project not found: " + projectId));
+                .orElseThrow(() -> new BusinessException(404, "项目不存在"));
 
         User user = em.find(User.class, userId);
         if (user == null) {
-            throw new IllegalArgumentException("user not found: " + userId);
+            throw new BusinessException(404, "用户不存在");
         }
 
         ProjectRole roleEnum = ProjectRole.from(role);
@@ -107,8 +109,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public List<ProjectMemberResponse> getProjectMembers(Long projectId) {
+        requirePositiveId(projectId, "项目 ID");
         projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("project not found: " + projectId));
+                .orElseThrow(() -> new BusinessException(404, "项目不存在"));
 
         List<ProjectMember> all = projectMemberRepository.findAll();
 
@@ -138,10 +141,17 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional(readOnly = true)
     public Assessment getAssessmentByProjectId(Long projectId) {
+        requirePositiveId(projectId, "项目 ID");
         projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("project not found: " + projectId));
+                .orElseThrow(() -> new BusinessException(404, "项目不存在"));
 
         return assessmentRepository.findFirstByProjectIdOrderByIdDesc(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("assessment not found for project: " + projectId));
+                .orElseThrow(() -> new BusinessException(404, "项目评估不存在"));
+    }
+
+    private void requirePositiveId(Long id, String name) {
+        if (id == null || id <= 0) {
+            throw new BusinessException(400, name + " 必须为正数");
+        }
     }
 }

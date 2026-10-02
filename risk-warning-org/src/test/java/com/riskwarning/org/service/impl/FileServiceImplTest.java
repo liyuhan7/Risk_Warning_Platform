@@ -33,6 +33,35 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 class FileServiceImplTest {
+    @org.junit.jupiter.api.io.TempDir
+    Path chunkDirectory;
+
+    @Test
+    void failedChunkWriteReleasesMarkerAndPropagatesFailure() throws Exception {
+        RedisUtil redis = mock(RedisUtil.class);
+        when(redis.hget(anyString(), anyString())).thenReturn(UploadFileDto.builder()
+                .projectId(10L).uploadId("chunk-test").totalChunks(1).filePath(chunkDirectory.toString()).build());
+        when(redis.sSetAndTime(anyString(), anyLong(), (Object[]) any())).thenReturn(1L);
+        org.springframework.web.multipart.MultipartFile file = mock(org.springframework.web.multipart.MultipartFile.class);
+        doThrow(new java.io.IOException("controlled write failure")).when(file).transferTo(any(File.class));
+        IllegalStateException failure = assertThrows(IllegalStateException.class,
+                () -> service(redis).uploadChunk(10L, "chunk-test", 0, file));
+        assertEquals("文件分片写入失败", failure.getMessage());
+        verify(redis).setRemove(String.format(RedisKey.REDIS_KEY_UPLOAD_CHUNKS, "chunk-test"), 0);
+    }
+
+    @Test
+    void successfulChunkWritePersistsActualBytes() throws Exception {
+        RedisUtil redis = mock(RedisUtil.class);
+        when(redis.hget(anyString(), anyString())).thenReturn(UploadFileDto.builder()
+                .projectId(10L).uploadId("chunk-test").totalChunks(1).filePath(chunkDirectory.toString()).build());
+        when(redis.sSetAndTime(anyString(), anyLong(), (Object[]) any())).thenReturn(1L);
+        byte[] bytes = new byte[]{1, 2, 3};
+        service(redis).uploadChunk(10L, "chunk-test", 0,
+                new org.springframework.mock.web.MockMultipartFile("chunkData", bytes));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(bytes, Files.readAllBytes(chunkDirectory.resolve("0")));
+        verify(redis, never()).setRemove(anyString(), any());
+    }
 
     @AfterEach
     void clearUserContext() {
@@ -45,6 +74,7 @@ class FileServiceImplTest {
         when(redisUtil.sHasKey(anyString(), any())).thenReturn(false);
         when(redisUtil.sGetSetSize(anyString())).thenReturn(0L);
         when(redisUtil.sSetAndTime(anyString(), anyLong(), (Object[]) any())).thenReturn(1L);
+        when(redisUtil.hset(anyString(), anyString(), any(), anyLong())).thenReturn(true);
         FileServiceImpl service = service(redisUtil);
         User user = new User();
         user.setId(88L);

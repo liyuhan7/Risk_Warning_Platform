@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * R1-03 Step B：真实 Redis + PostgreSQL 验证上传移交链。
+ * 真实 Redis + PostgreSQL 验证上传移交链。
  * claim 后崩溃可恢复、poison 进入 DEAD 不阻塞队列、
  * Durable Work 入库失败不 ACK。
  */

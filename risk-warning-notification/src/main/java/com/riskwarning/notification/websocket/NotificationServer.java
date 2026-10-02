@@ -3,6 +3,7 @@ package com.riskwarning.notification.websocket;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.sctp.nio.NioSctpServerChannel;
@@ -46,12 +47,7 @@ public class NotificationServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline()
-                                    .addLast(new HttpServerCodec())
-                                    .addLast(new HttpObjectAggregator(65536))
-                                    .addLast(new ChunkedWriteHandler())
-                                    .addLast(new WebSocketServerProtocolHandler("/ws"))
-                                    .addLast(webSocketHandler);
+                            configurePipeline(ch.pipeline());
                         }
                     });
 
@@ -65,6 +61,16 @@ public class NotificationServer {
             boss.shutdownGracefully();
             worker.shutdownGracefully();
         }
+    }
+
+    /** 握手错误适配位于编解码器之后，覆盖聚合器与 WebSocket 协议的错误响应。 */
+    void configurePipeline(ChannelPipeline pipeline) {
+        pipeline.addLast(new HttpServerCodec())
+                .addLast(new NotificationHttpHandler())
+                .addLast(new HttpObjectAggregator(65536))
+                .addLast(new ChunkedWriteHandler())
+                .addLast(new WebSocketServerProtocolHandler("/ws"))
+                .addLast(webSocketHandler);
     }
 
 

@@ -6,14 +6,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProjectCreateRequest {
+    @NotNull
+    @Positive
     private Long enterpriseId;
     
     
+    @NotBlank
     private String name;
 
     /**

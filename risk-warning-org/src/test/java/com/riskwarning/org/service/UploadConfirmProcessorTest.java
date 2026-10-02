@@ -241,6 +241,22 @@ class UploadConfirmProcessorTest {
                 .files(Arrays.asList(upload)).build();
     }
 
+    @Test
+    void rejectsInvalidProjectBeforeStorageOrTransaction() {
+        assertEquals(400, assertThrows(BusinessException.class, () -> processor.process(null)).getCode());
+        assertEquals(400, assertThrows(BusinessException.class,
+                () -> processor.process(UploadConfirmDto.builder().projectId(0L).build())).getCode());
+        org.mockito.Mockito.verifyNoInteractions(redisUtil, assessments, files, runs, dispatcher);
+    }
+
+    @Test
+    void missingLegacyUploadMetadataIsNotFoundBeforeBusinessTransaction() {
+        assertEquals(404, assertThrows(BusinessException.class,
+                () -> processor.process(UploadConfirmDto.builder().projectId(PROJECT_ID).build())).getCode());
+        verify(transactionManager, never()).getTransaction(any());
+        org.mockito.Mockito.verifyNoInteractions(assessments, files, runs, dispatcher);
+    }
+
     private Path chunkDirectory(String uploadId, String content) throws Exception {
         Path dir = Paths.get(Constants.getTempFileDirPath(PROJECT_ID, uploadId));
         Files.createDirectories(dir);

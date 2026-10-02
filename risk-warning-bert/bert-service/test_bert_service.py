@@ -1,20 +1,22 @@
 """
 BERT 服务测试代码
-测试分类功能和向量化功能
+测试分类功能
 """
 import unittest
+import os
 import json
 import requests
 import time
 from pathlib import Path
 
 
+@unittest.skipUnless(os.getenv("BERT_MODEL_HTTP_TEST") == "true", "真实模型验收需显式设置 BERT_MODEL_HTTP_TEST=true")
 class TestBERTService(unittest.TestCase):
     """BERT 服务测试类"""
 
     def setUp(self):
         """测试前准备"""
-        self.base_url = "http://localhost:8000"
+        self.base_url = os.getenv("BERT_TEST_URL", "http://localhost:8002")
         self.timeout = 30
 
     def test_health_check(self):
@@ -27,11 +29,7 @@ class TestBERTService(unittest.TestCase):
 
         data = response.json()
         self.assertEqual(data["status"], "ok")
-        self.assertIn("bert_model_loaded", data)
         self.assertIn("classifier_model_loaded", data)
-
-        print(f"✓ 健康检查通过 - BERT 模型：{data['bert_model_loaded']}, "
-              f"分类模型：{data['classifier_model_loaded']}")
 
     def test_classify_health(self):
         """测试分类服务健康检查"""
@@ -197,31 +195,6 @@ class TestBERTService(unittest.TestCase):
         for i, item_result in enumerate(result["results"]):
             print(f"  [{i+1}] 标签：{item_result['tags']}, 类型：{item_result['type']}")
 
-    def test_vectorize_single(self):
-        """测试单个文本向量化"""
-        test_data = {
-            "text": "这是一个测试文本"
-        }
-
-        response = requests.post(
-            f"{self.base_url}/vectorize-single",
-            json=test_data,
-            timeout=self.timeout
-        )
-
-        self.assertEqual(response.status_code, 200)
-        result = response.json()
-
-        # 验证返回结果结构
-        self.assertIn("vector", result)
-        self.assertIn("dimension", result)
-        self.assertEqual(result["dimension"], 768)  # BERT base 的输出维度
-        self.assertEqual(len(result["vector"]), 768)
-
-        print(f"✓ 单文本向量化测试通过:")
-        print(f"  向量维度：{result['dimension']}")
-        print(f"  向量前 5 维：{result['vector'][:5]}")
-
     def test_encode_batch(self):
         """测试批量向量化"""
         test_data = {
@@ -289,12 +262,13 @@ def run_tests():
     print()
     print("=" * 60)
     print(f"测试完成：{result.testsRun} 个测试")
-    print(f"成功：{result.testsRun - len(result.failures) - len(result.errors)}")
+    print(f"成功：{result.testsRun - len(result.failures) - len(result.errors) - len(result.skipped)}")
+    print(f"跳过：{len(result.skipped)}")
     print(f"失败：{len(result.failures)}")
     print(f"错误：{len(result.errors)}")
     print("=" * 60)
 
-    return result.wasSuccessful()
+    return result.wasSuccessful() and not result.skipped
 
 
 if __name__ == '__main__':

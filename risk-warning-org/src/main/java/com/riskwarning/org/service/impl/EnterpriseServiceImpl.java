@@ -1,6 +1,7 @@
 package com.riskwarning.org.service.impl;
 
 import com.riskwarning.common.context.UserContext;
+import com.riskwarning.common.exception.BusinessException;
 import com.riskwarning.common.dto.UserResponse;
 import com.riskwarning.common.dto.enterprise.EnterpriseUserResponse;
 import com.riskwarning.common.enums.EnterpriseRole;
@@ -40,7 +41,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         String creditCode = enterprise.getCreditCode();
 
         if (creditCode != null && enterpriseRepository.findByCreditCode(creditCode).isPresent()) {
-            throw new IllegalArgumentException("creditCode already exists: " + creditCode);
+            throw new BusinessException(409, "企业信用代码已存在");
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -54,7 +55,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         if (ownerUserId != null) {
             User owner = em.find(User.class, ownerUserId);
             if (owner == null) {
-                throw new IllegalArgumentException("owner user not found: " + ownerUserId);
+                throw new BusinessException(404, "企业创建用户不存在");
             }
 
             EnterpriseUserId id = new EnterpriseUserId();
@@ -76,14 +77,16 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Override
     @Transactional
     public void addUserToEnterprise(Long enterpriseId, Long userId, String role) {
+        requirePositiveId(enterpriseId, "企业 ID");
+        requirePositiveId(userId, "用户 ID");
         // 确保企业存在
         Enterprise enterprise = enterpriseRepository.findById(enterpriseId)
-                .orElseThrow(() -> new IllegalArgumentException("enterprise not found: " + enterpriseId));
+                .orElseThrow(() -> new BusinessException(404, "企业不存在"));
 
         // 获取 user 引用（如果不存在会返回 null）
         User user = em.find(User.class, userId);
         if (user == null) {
-            throw new IllegalArgumentException("user not found: " + userId);
+            throw new BusinessException(404, "用户不存在");
         }
         EnterpriseRole roleEnum = EnterpriseRole.from(role);
 
@@ -108,12 +111,12 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     }
 
 
-    // java
     @Override
     @Transactional
     public List<EnterpriseUserResponse> getUsersByEnterprise(Long enterpriseId) {
+        requirePositiveId(enterpriseId, "企业 ID");
         enterpriseRepository.findById(enterpriseId)
-                .orElseThrow(() -> new IllegalArgumentException("enterprise not found: " + enterpriseId));
+                .orElseThrow(() -> new BusinessException(404, "企业不存在"));
 
         List<EnterpriseUser> all = enterpriseUserRepository.findAll();
 
@@ -141,6 +144,12 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                     return new EnterpriseUserResponse(ur, roleCode);
                 })
                 .collect(Collectors.toList());
+    }
+
+    private void requirePositiveId(Long id, String name) {
+        if (id == null || id <= 0) {
+            throw new BusinessException(400, name + " 必须为正数");
+        }
     }
 
 }

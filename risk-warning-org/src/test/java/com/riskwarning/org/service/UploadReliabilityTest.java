@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * R1-03 Step D：真实 PostgreSQL 验证上传确认链。
+ * 真实 PostgreSQL 验证上传确认链。
  * DB 失败时业务事务完全回滚；文件重试覆盖稳定路径不追加；
  * 事务提交后重试由 sourceTaskId 幂等命中；cleanup 失败可继续重试。
  */

@@ -1,11 +1,10 @@
 """
-BERT向量化服务 + 分类服务
-提供HTTP接口，将文本转换为768维向量，以及文本分类
+事实分类服务
+提供 HTTP 分类与健康检查接口
 """
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from transformers import AutoTokenizer, AutoModel
-import torch
+from werkzeug.exceptions import BadRequest, HTTPException, ServiceUnavailable
 import logging
 import os
 import sys
@@ -37,21 +36,8 @@ except Exception as e:
 app = Flask(__name__)
 CORS(app)  # 允许跨域
 
-# 全局变量存储模型
-tokenizer = None
-model = None
 classifier_loader = None
 
-def load_model():
-    """加载BERT模型"""
-    global tokenizer, model
-    try:
-        model_name = os.getenv("BERT_MODEL_NAME", "bert-base-chinese")
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModel.from_pretrained(model_name)
-        model.eval()  # 设置为评估模式
-    except Exception as e:
-        raise
 
 def load_classifier():
     """加载分类模型"""
@@ -80,170 +66,105 @@ def load_classifier():
         logger.info("Classifier model loaded successfully")
     except Exception as e:
         logger.error(f"Failed to load classifier model: {e}", exc_info=True)
-        # 分类模型加载失败不影响BERT服务运行
+        # 分类不可用时保留健康查询，分类请求返回服务不可用
         classifier_loader = None
+
+def error_response(status, message):
+    """错误状态与 envelope 保持一致，不暴露内部异常或模型输入。"""
+    return jsonify({"code": status, "message": message, "data": None}), status
+
+
+@app.errorhandler(HTTPException)
+def handle_http_error(error):
+    messages = {
+        400: "请求参数或 JSON 格式错误",
+        404: "请求的资源不存在",
+        405: "请求方法不支持",
+        415: "请求内容类型不支持",
+        503: "模型服务暂时不可用",
+    }
+    response, status = error_response(error.code, messages.get(error.code, "请求处理失败"))
+    # 保留方法不支持等框架响应的协议头，内容类型由 JSON envelope 决定。
+    for name, value in error.get_headers():
+        if name.lower() != "content-type":
+            response.headers.add(name, value)
+    return response, status
+
+
+@app.errorhandler(Exception)
+def handle_execution_error(error):
+    logger.exception("模型服务请求执行失败")
+    return error_response(500, "请求处理失败")
+
+
+def json_object():
+    """保留框架对格式错误和内容类型的 400/415 区分。"""
+    data = request.get_json()
+    if not isinstance(data, dict):
+        raise BadRequest()
+    return data
+
+
+def classification_item(item):
+    """批量仍跳过空文本或不支持类型，错误字段类型不能进入模型。"""
+    if not isinstance(item, dict):
+        raise BadRequest()
+    text = item.get("text", "")
+    input_type = item.get("input_type", "behavior")
+    if not isinstance(text, str) or not isinstance(input_type, str):
+        raise BadRequest()
+    return text.strip(), input_type.strip().lower()
+
 
 @app.route('/health', methods=['GET'])
 def health():
-    """健康检查"""
+    """健康入口报告加载状态，未加载模型不影响状态查询。"""
     return jsonify({
         "status": "ok",
-        "bert_model_loaded": model is not None,
         "classifier_model_loaded": classifier_loader is not None
     })
 
-@app.route('/encode', methods=['POST'])
-def encode():
-    try:
-        if model is None or tokenizer is None:
-            return jsonify({"error": "模型未加载"}), 500
-        
-        data = request.json
-        if not data or 'texts' not in data:
-            return jsonify({"error": "请求格式错误，需要 'texts' 字段"}), 400
-        
-        texts = data['texts']
-        if not isinstance(texts, list) or len(texts) == 0:
-            return jsonify({"error": "'texts' 必须是非空数组"}), 400
-        
-        vectors = []
-        for i, text in enumerate(texts):
-            if not isinstance(text, str):
-                continue
-            
-            # Tokenize
-            inputs = tokenizer(
-                text,
-                return_tensors="pt",
-                padding=True,
-                truncation=True,
-                max_length=512
-            )
-            
-            # 推理
-            with torch.no_grad():
-                outputs = model(**inputs)
-            
-            # 提取 [CLS] token 的向量（第一个token）
-            cls_vector = outputs.last_hidden_state[0][0].cpu().numpy().tolist()
-            vectors.append(cls_vector)
-
-        return jsonify(vectors)
-        
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/vectorize-single', methods=['POST'])
-def vectorize_single():
-    try:
-        data = request.json
-        if not data or 'text' not in data:
-            return jsonify({"error": "请求格式错误，需要 'text' 字段"}), 400
-        
-        texts = [data['text']]
-        result = encode()
-        if isinstance(result, tuple):
-            return result  # 返回错误
-        
-        vectors = result.get_json()
-        if vectors and len(vectors) > 0:
-            return jsonify({"vector": vectors[0], "dimension": len(vectors[0])})
-        else:
-            return jsonify({"error": "向量化失败"}), 500
-            
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ==================== 分类服务路由 ====================
-# 注意：更具体的路由（/classify/health）要放在更通用的路由（/classify）之前
 
 @app.route('/classify/health', methods=['GET'], strict_slashes=False)
 def classify_health():
-    """分类服务健康检查"""
-    return jsonify({
-        "status": "ok",
-        "model_loaded": classifier_loader is not None
-    })
+    return jsonify({"status": "ok", "model_loaded": classifier_loader is not None})
+
 
 @app.route('/classify/batch', methods=['POST'], strict_slashes=False)
 def classify_batch():
-    """批量分类接口"""
-    try:
-        if classifier_loader is None:
-            return jsonify({"error": "分类模型未加载"}), 500
-        
-        data = request.json
-        if not data:
-            return jsonify({"error": "请求体为空"}), 400
-        
-        items = data.get('items', [])
-        if not isinstance(items, list) or len(items) == 0:
-            return jsonify({"error": "items必须是非空数组"}), 400
-        
-        # 提取文本和类型
-        texts = []
-        input_types = []
-        for item in items:
-            text = item.get('text', '').strip()
-            input_type = item.get('input_type', 'behavior').strip().lower()
-            
-            if not text:
-                continue
-            
-            if input_type not in ['behavior', 'indicator', 'regulation']:
-                continue
-            
+    items = json_object().get("items")
+    if not isinstance(items, list) or not items:
+        raise BadRequest()
+    texts = []
+    input_types = []
+    for item in items:
+        text, input_type = classification_item(item)
+        if text and input_type in ("behavior", "indicator", "regulation"):
             texts.append(text)
             input_types.append(input_type)
-        
-        if not texts:
-            return jsonify({"error": "没有有效的文本"}), 400
-        
-        # 批量分类
-        results = classifier_loader.classify_batch(texts, input_types)
-        
-        return jsonify({"results": results})
-        
-    except Exception as e:
-        logger.error(f"Batch classification error: {e}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
+    if not texts:
+        raise BadRequest()
+    if classifier_loader is None:
+        raise ServiceUnavailable()
+    results = classifier_loader.classify_batch(texts, input_types)
+    if not isinstance(results, list) or len(results) != len(texts):
+        raise RuntimeError("分类结果数量与有效输入不符")
+    return jsonify({"results": results})
+
 
 @app.route('/classify', methods=['POST'], strict_slashes=False)
 def classify():
-    """分类接口"""
-    try:
-        if classifier_loader is None:
-            return jsonify({"error": "分类模型未加载"}), 500
-        
-        data = request.json
-        if not data:
-            return jsonify({"error": "请求体为空"}), 400
-        
-        text = data.get('text', '').strip()
-        input_type = data.get('input_type', 'behavior').strip().lower()
-        
-        # 验证输入
-        if not text:
-            return jsonify({"error": "文本不能为空"}), 400
-        
-        if input_type not in ['behavior', 'indicator', 'regulation']:
-            return jsonify({
-                "error": f"input_type必须是 behavior、indicator 或 regulation，当前为: {input_type}"
-            }), 400
-        
-        # 分类
-        result = classifier_loader.classify(text, input_type)
-        
-        return jsonify(result)
-        
-    except Exception as e:
-        logger.error(f"Classification error: {e}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
+    text, input_type = classification_item(json_object())
+    if not text or input_type not in ("behavior", "indicator", "regulation"):
+        raise BadRequest()
+    if classifier_loader is None:
+        raise ServiceUnavailable()
+    result = classifier_loader.classify(text, input_type)
+    if not isinstance(result, dict):
+        raise RuntimeError("分类结果必须为对象")
+    return jsonify(result)
 
 if __name__ == '__main__':
-    # 加载BERT模型
-    load_model()
-    
     # 加载分类模型
     load_classifier()
     

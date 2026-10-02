@@ -8,21 +8,25 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.validation.constraints.Positive;
 
 @Data
 public class FileUploadInitRequest {
 
     @NotNull
+    @Positive
     private Long projectId;
 
     @NotBlank
     private String fileHash;
 
     @NotNull
+    @Positive
     @Max(1024 * 1024 * 10) // 最大10MB
     private Long fileSize;
 
     @NotNull
+    @Positive
     private Integer totalChunks;
 
     @NotBlank

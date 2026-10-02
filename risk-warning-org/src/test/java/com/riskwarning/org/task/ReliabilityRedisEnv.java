@@ -7,7 +7,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
- * R1-03 真实 Redis 隔离环境（org 模块副本）。
+ * 真实 Redis 隔离环境（org 模块副本）。
  * 使用独立 DB 与测试 key 前缀；与生产一致的默认 RedisTemplate（JDK 序列化）。
  */
 public final class ReliabilityRedisEnv {

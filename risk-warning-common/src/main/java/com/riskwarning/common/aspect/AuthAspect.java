@@ -4,9 +4,9 @@ package com.riskwarning.common.aspect;
 import com.riskwarning.common.context.UserContext;
 import com.riskwarning.common.po.user.User;
 import com.riskwarning.common.utils.JwtUtils;
+import com.riskwarning.common.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,29 +31,31 @@ public class AuthAspect {
 
     @Around("@annotation(com.riskwarning.common.annotation.AuthRequired)")
     public Object aroundAuthRequired(ProceedingJoinPoint joinPoint) throws Throwable {
+        UserContext.clear();
         ServletRequestAttributes attributes =
                 (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
         if (attributes == null) {
-            throw new RuntimeException("无法获取请求信息");
+            throw new BusinessException(401, "请求缺少认证上下文");
         }
 
         HttpServletRequest request = attributes.getRequest();
 
-        // 读取 header
-        Long userId = jwtUtils.getUserIdFromToken(request.getHeader("Authorization"));
-        if (userId == null) {
-            log.warn("AuthAspect: 缺少 user_id 请求头，禁止访问");
-            throw new RuntimeException("缺少 user_id 请求头，禁止访问");
-        }
+        String authorization = request.getHeader("Authorization");
+        if (authorization == null || !authorization.startsWith("Bearer ") || authorization.substring(7).trim().isEmpty())
+            throw new BusinessException(401, "缺少或错误的认证令牌");
+        Long userId;
+        try { userId = jwtUtils.getUserIdFromToken(authorization); }
+        catch (RuntimeException invalidToken) { throw new BusinessException(401, "认证令牌无效或已过期"); }
+        if (userId == null || userId <= 0) throw new BusinessException(401, "认证令牌缺少有效用户身份");
 
-        log.info("AuthAspect: 通过 user_id={} 进行权限验证", userId);
+        log.debug("AuthAspect: 验证令牌用户身份 userId={}", userId);
 
         // 查询用户信息，放入UserContext
         User user = em.find(User.class, userId);
         if (user == null) {
             log.warn("AuthAspect: user not found for id={}, 禁止访问", userId);
-            throw new RuntimeException("user not found: " + userId);
+            throw new BusinessException(401, "认证用户不存在，请重新登录");
         }
 
         UserContext.setUser(user);
@@ -64,7 +66,4 @@ public class AuthAspect {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println("00011001".compareTo("011001"));
-    }
 }

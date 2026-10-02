@@ -33,9 +33,6 @@ public class PythonServiceManager {
     @Value("${bert.service.host:0.0.0.0}")
     private String serviceHost;
 
-    @Value("${bert.model.name:bert-base-chinese}")
-    private String modelName;
-
     @Value("${bert.service.enabled:true}")
     private boolean serviceEnabled;
 
@@ -85,7 +82,6 @@ public class PythonServiceManager {
             // 设置环境变量
             pb.environment().put("PORT", String.valueOf(servicePort));
             pb.environment().put("HOST", serviceHost);
-            pb.environment().put("BERT_MODEL_NAME", modelName);
             pb.environment().put("PYTHONUNBUFFERED", "1");
 
             pythonProcess = pb.start();

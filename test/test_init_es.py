@@ -3,6 +3,7 @@
 import copy
 import importlib.util
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 
@@ -24,6 +25,31 @@ def mapping_fixture(analyzer="ik_max_word"):
         }
         for index_name in init_es.ALLOWED_INDICES
     }
+
+
+class FreshInitializationTest(unittest.TestCase):
+    def test_existing_index_is_never_overwritten_or_seeded(self):
+        with patch.object(init_es, "http", return_value=(200, "")) as http, patch.object(init_es, "bulk_import") as seed:
+            init_es.initialize_missing_indices({"t_indicator": {}})
+            self.assertEqual(["HEAD"], [call.args[0] for call in http.call_args_list])
+            seed.assert_not_called()
+
+    def test_missing_knowledge_index_is_created_and_seeded(self):
+        with patch.object(init_es, "http", side_effect=[(404, ""), (200, "{}")]) as http, patch.object(init_es, "bulk_import") as seed:
+            init_es.initialize_missing_indices({"t_indicator": {}})
+            self.assertEqual(["HEAD", "PUT"], [call.args[0] for call in http.call_args_list])
+            seed.assert_called_once_with("t_indicator", init_es.INDEX_SEED_FILES["t_indicator"])
+
+    def test_missing_business_index_starts_empty(self):
+        with patch.object(init_es, "http", side_effect=[(404, ""), (200, "{}")]), patch.object(init_es, "bulk_import") as seed:
+            init_es.initialize_missing_indices({"t_behavior": {}})
+            seed.assert_not_called()
+
+    def test_connectivity_failure_stops_before_creation(self):
+        with patch.object(init_es, "http", return_value=(503, "unavailable")) as http:
+            with self.assertRaises(RuntimeError):
+                init_es.initialize_missing_indices({"t_indicator": {}})
+            self.assertEqual(1, http.call_count)
 
 
 class ApplyRetrievalAnalyzerTest(unittest.TestCase):

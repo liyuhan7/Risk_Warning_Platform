@@ -1,7 +1,7 @@
-"""P0-06 固定 Prompt 结构化 JSON 最小验证。
+"""固定 Prompt 结构化 JSON 最小验证。
 
-对应 PLAN.md 验收标准 5：固定 Prompt 至少连续验证 10 次，每次保留原始响应、校验结果
-和重试结果，失败不被静默吞掉。测试方式（PLAN.md:178）要求覆盖正常、缺字段、错枚举、
+固定 Prompt 至少连续验证 10 次，每次保留原始响应、校验结果
+和重试结果，失败不被静默吞掉。测试覆盖正常、缺字段、错枚举、
 额外文本、超时和无效 JSON 六类场景。
 
 真实调用只能产出"正常"与偶发偏差，后四类须构造注入，因此本脚本分两种模式：
@@ -36,7 +36,7 @@ REPO_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 PROMPT_DIR = os.path.join(HERE, "prompts")
 PROMPT_PATH = os.path.join(PROMPT_DIR, "compliance-reasoning-v1.0.txt")
 INPUT_PATH = os.path.join(PROMPT_DIR, "compliance-reasoning-input.json")
-OUTPUT_DIR = os.path.join(REPO_ROOT, "documents", "plan0", "baseline", "p0-06-samples")
+OUTPUT_DIR = os.path.join(REPO_ROOT, "documents", "local", "model-evaluation")
 
 # 端点与模型经环境变量注入，与 Java 侧 llm.base-url / llm.model 保持同一套配置口径，
 # 使更换供应商时脚本无需改动。默认值留空以强制显式配置。
@@ -424,7 +424,7 @@ def save(records, filename):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="P0-06 固定 Prompt JSON 验证")
+    parser = argparse.ArgumentParser(description="固定 Prompt JSON 验证")
     parser.add_argument("--mode", choices=["offline", "live"], default="offline")
     parser.add_argument("--runs", type=int, default=10, help="live 模式的调用次数")
     args = parser.parse_args()

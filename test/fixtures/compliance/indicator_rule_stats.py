@@ -1,4 +1,4 @@
-"""P0-04 Indicator 规则统计。
+"""Indicator 规则统计。
 
 只读脚本，不修改 ES 与任何数据文件。默认以 ES 索引 t_indicator 为权威数据源，
 并与导入源文件 documents/data/indicator.json 比对，暴露导入链路的丢失或漂移。
@@ -9,7 +9,7 @@
   RangeRule        minValue / maxValue / calculationMethod 齐备，且存在可用评分字段
   StaticThreshold  operator / thresholdValue / riskLevel 齐备
 
-字段读取一律按 camelCase。P0-02 已实测 t_indicator 文档为 camelCase，
+字段读取一律按 camelCase。t_indicator 文档使用 camelCase，
 snake_case 反查命中 0 条；此处不做兼容回退，以免掩盖命名不一致问题。
 
 用法：

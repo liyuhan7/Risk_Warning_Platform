@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 """按 documents/es_mappings.json 重建指定索引并灌入种子数据。
 
-安全入口（P2 阶段B迁移窗口）：
+安全入口：
   - 只允许重建 t_indicator / t_regulation；t_behavior / t_risk 硬编码禁止，
     防止整库重建误删行为与风险运行数据；
   - 必须显式指定 --indices，缺省不重建任何索引；
   - 删除重建属于破坏性操作，运行前必须完成可恢复备份
-    （documents/plan2/data/backup/pre_rebuild/）与 _id manifest 导出，
+    与 _id manifest 导出，
     并显式确认（--yes 跳过交互确认）；
   - 导入以种子 id 作为 ES `_id`，保证重建后 ID 不漂移，
     历史检索结果与标注引用保持有效；
   - 校验 bulk 逐条错误与导入后文档数，不接受 HTTP 200 作为验证依据。
 
 用法：
+  python test/init_es.py --create-only
   python test/init_es.py --indices t_indicator,t_regulation --yes
   python test/init_es.py --indices t_indicator,t_regulation --fallback-to-standard-without-ik --yes
 """
@@ -23,7 +24,7 @@ import sys
 from urllib import error as urlerror
 from urllib import request as urlrequest
 
-ES_BASE_URL = "http://localhost:9200"
+ES_BASE_URL = os.environ.get("ES_BASE_URL", "http://localhost:9200").rstrip("/")
 
 # 行为与风险数据含运行态标签与向量，不属于种子重建范围，硬编码保护
 ALLOWED_INDICES = ("t_indicator", "t_regulation")
@@ -102,7 +103,7 @@ def verify_index_mapping(index_name, expected_analyzer):
 
 def confirm(indices):
     print("即将删除并重建索引: %s" % ", ".join(indices))
-    print("该操作销毁上述索引存量数据；回滚依据 documents/plan2/data/backup/pre_rebuild/ 的全量导出。")
+    print("该操作销毁上述索引存量数据；请先保存可恢复的全量导出。")
     print("t_behavior / t_risk 不受影响。")
     answer = input("确认请输入大写 YES: ")
     if answer != "YES":
@@ -163,8 +164,25 @@ def bulk_import(index_name, file_path):
     print(f"{index_name}: 导入 {count} 条，文档数与种子一致")
 
 
+def initialize_missing_indices(mappings):
+    """创建全新环境的索引；已有索引保持原样，不覆盖业务数据。"""
+    for index_name, mapping in mappings.items():
+        status, text = http("HEAD", f"{ES_BASE_URL}/{index_name}")
+        if status == 200:
+            print(f"skip existing index: {index_name}")
+            continue
+        if status != 404:
+            raise RuntimeError(f"检查索引 {index_name} 失败: {status} {text[:300]}")
+        status, text = http("PUT", f"{ES_BASE_URL}/{index_name}", mapping)
+        if status != 200:
+            raise RuntimeError(f"创建索引 {index_name} 失败: {status} {text[:300]}")
+        if index_name in INDEX_SEED_FILES:
+            bulk_import(index_name, INDEX_SEED_FILES[index_name])
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--create-only", action="store_true", help="只创建缺失索引并导入知识种子，不删除或覆盖已有索引")
     parser.add_argument(
         "--indices",
         default="",
@@ -180,6 +198,13 @@ def main():
     )
     parser.add_argument("--yes", action="store_true", help="跳过交互确认")
     args = parser.parse_args()
+
+    if args.create_only:
+        if args.indices or args.yes:
+            parser.error("--create-only 不能与重建参数 --indices/--yes 混用")
+        analyzer = FALLBACK_ANALYZER if args.fallback_to_standard_without_ik else DEFAULT_ANALYZER
+        initialize_missing_indices(load_mappings(analyzer))
+        return 0
 
     if not args.indices:
         print("未指定 --indices，缺省不重建任何索引。")

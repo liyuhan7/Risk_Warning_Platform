@@ -25,7 +25,7 @@ services:
       - http.cors.allow-origin="*"
       - http.cors.allow-methods=OPTIONS,HEAD,GET,POST,PUT,DELETE
       - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length
-      # 快照仓库根目录；数据卷内路径，p0 迁移窗口的四索引备份依赖它
+      # 快照仓库根目录；数据卷内路径用于迁移前的索引备份
       - path.repo=/usr/share/elasticsearch/data/snapshots
     ulimits:
       memlock:

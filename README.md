@@ -2,239 +2,239 @@
 
 ## 系统概述
 
-风险合规预警系统是一个基于Spring Cloud微服务架构的企业合规风险评估平台，支持智能化的行为分析、指标计算和风险预警。
+本项目面向企业项目的风险合规评估，提供企业与项目管理、材料上传、事实分析、指标与法规检索、规则计算、报告和通知功能。后端采用 Java 8 Maven 多模块架构，前端采用 Vue 3。
+
+系统统一使用以下分析链路：
+
+**材料上传 → 证据落库 → 事实抽取与分类 → 指标/法规候选检索 → 模型条件判断 → 已审核规则计算 → 报告与通知**
+
+候选指标和法规用于辅助分析，评分以已审核规则为依据。证据不足或规则未审核时，系统保留相应状态，不生成占位评分。
 
 ## 技术架构
 
 ### 技术栈
-- **前端**: Vue.js
-- **后端**: Spring Cloud 2021.0.8 + Spring Boot 2.7.18
-- **注册中心**: Nacos
-- **API网关**: Spring Cloud Gateway
-- **数据库**: PostgreSQL (关系型)
-- **搜索引擎**: Elasticsearch 7.17.15
-- **向量数据库**: Milvus
-- **缓存**: Redis
-- **消息队列**: Kafka
-- **容器化**: Docker
-- **AI算法**: BERT (文本向量化)
+
+| 层次 | 技术 |
+| --- | --- |
+| 后端 | Java 8、Spring Boot 2.6.13、Spring Cloud 2021.0.5 |
+| 服务治理 | Spring Cloud Alibaba、Nacos 2.4.2 |
+| 数据存储 | PostgreSQL 13、Redis 6.2 |
+| 检索 | Elasticsearch 8.11.0、IK 分词、1024 维 Embedding |
+| 异步处理 | Kafka、持久化任务与 Outbox |
+| 模型服务 | Python 分类服务、OpenAI 兼容模型接口 |
+| 前端 | Vue 3、TypeScript、Element Plus、Vite |
 
 ### 微服务架构
 
-系统采用6个微服务构成：
+| 模块 | 职责 | 默认端口 |
+| --- | --- | --- |
+| `risk-warning-common` | 公共契约、实体、消息与基础组件 | — |
+| `risk-warning-gateway` | API 网关与请求路由 | 8088 |
+| `risk-warning-org` | 用户、企业、项目与材料管理 | 8095 |
+| `risk-warning-processing` | 事实抽取、分析编排与规则计算 | 8084 |
+| `risk-warning-knowledge` | 指标/法规检索、Embedding 与候选回填 | 8089 |
+| `risk-warning-bert` | 分类接口与 Python 子进程管理 | 8090 |
+| `risk-warning-report` | 评估报告与结果查询 | 8093 |
+| `risk-warning-notification` | 评估通知与消息处理 | 8091 |
 
-| 服务名称                      | 端口   | 职责           |
-|---------------------------|------|--------------|
-| risk-warning-gateway      | 8088 | API网关，统一入口   |
-| risk-warning-org          | 8095 | 用户、企业、项目管理   |
-| risk-warning-processing   | 8084 | 信息处理，风险分析    |
-| risk-warning-knowledge    | 8089 | 知识库管理(指标/法规) |
-| risk-warning-report       | 8093 | 评估报告生成       |
-| risk-warning-notification | 8091 | 通知和消息推送      |
+Python 分类子进程默认监听 `8002`，由 BERT Java 服务启动。
+
+## 项目结构
+
+```text
+Risk_Warning_Platform/
+├── risk-warning-common/          # 公共模块
+├── risk-warning-gateway/         # 网关服务
+├── risk-warning-org/             # 企业与项目服务
+├── risk-warning-processing/      # 合规分析服务
+├── risk-warning-knowledge/       # 知识检索服务
+├── risk-warning-bert/            # Java 分类接口与 Python 服务
+├── risk-warning-report/          # 报告服务
+├── risk-warning-notification/    # 通知服务
+├── Risk_Warning_Platform_Fr/     # Vue 前端
+├── build/                       # Docker、Nacos 与 ES 配置
+├── documents/                   # Schema、候选数据、字典与文档
+├── test/                        # 初始化工具与测试数据
+├── .env.example                 # 本地模型配置模板
+└── pom.xml                      # Maven 父工程
+```
 
 ## 快速启动
 
 ### 环境要求
 
-- Java 8
-- Maven 3.8+
-- Docker 20.10+
-- Docker Compose 2.0+
+- JDK 8，或支持 Java 8 编译的 JDK。
+- Maven、Python、Node.js 与 npm。
+- Docker 与 Docker Compose。
+- 可用的条件判断模型、Embedding 接口及本地分类模型权重。
 
-## 项目结构
+以下命令使用 PowerShell，除前端命令外均从仓库根目录执行。本地开发时由 Docker 提供基础设施，Java 服务在本机运行。
 
+### 1. 启动基础设施
+
+首次使用时创建 Compose 所需的外部数据卷，再启动依赖服务：
+
+```powershell
+docker volume create postgres-data
+docker volume create redis-data
+docker compose -f build/docker-compose.yml up -d zookeeper kafka postgres redis nacos
+docker compose -f build/docker-compose-elasticsearch.yml up -d elasticsearch
 ```
-Risk_Warning_Platform/
-├── docker-compose.yml              # Docker基础设施编排
-├── pom.xml                         # 父级Maven配置
-├── start.sh                        # 系统启动脚本
-├── stop.sh                         # 系统停止脚本
-├── README.md                       # 项目说明文档
-├── schema.sql                      # 数据库初始化脚本
-├── es_mappings.json               # Elasticsearch索引映射
-│
-├── risk-warning-common/           # 公共模块
-│   ├── src/main/java/
-│   │   └── com/riskwarning/common/
-│   │       ├── enums/             # 枚举类
-│   │       ├── exception/         # 异常处理
-│   │       └── result/            # 统一返回结果
-│   └── pom.xml
-│
-├── risk-warning-gateway/          # API网关服务
-├── risk-warning-registry/         # 服务注册中心
-├── risk-warning-user/             # 用户认证服务
-├── risk-warning-enterprise/       # 企业管理服务
-├── risk-warning-project/          # 项目管理服务
-├── risk-warning-data-collection/  # 数据收集服务
-├── risk-warning-behavior-processing/ # 行为处理服务
-├── risk-warning-knowledge/        # 知识库服务
-├── risk-warning-matching-calculation/ # 匹配计算服务
-├── risk-warning-risk-assessment/  # 风险评估服务
-├── risk-warning-report/           # 报告服务
-├── risk-warning-event/            # 事件服务
-├── risk-warning-visualization/    # 可视化服务
-└── risk-warning-notification/     # 通知服务
+
+| 组件 | 默认访问地址 |
+| --- | --- |
+| PostgreSQL | `localhost:5432` |
+| Redis | `localhost:6379` |
+| Kafka | `localhost:9092` |
+| Elasticsearch | `http://localhost:9200` |
+| Nacos 控制台 | `http://localhost:8848/nacos` |
+
+将 [common-dev.yaml](build/nacos/common-dev.yaml) 的内容发布到 Nacos：默认命名空间，Group 为 `DEFAULT_GROUP`，Data ID 为 `common-dev.yaml`。数据库、Redis、Kafka 和 ES 连接配置须与实际部署一致。
+
+### 2. 初始化数据库与候选索引
+
+[schema.sql](documents/schema.sql) 提供完整的当前表结构，只在空数据库执行。默认开发库为 `risk_warning_platform`，服务不会自动更新表结构。
+
+```powershell
+docker cp documents/schema.sql postgres-risk-warning:/tmp/schema.sql
+docker exec postgres-risk-warning psql -U postgres -d risk_warning_platform -v ON_ERROR_STOP=1 --single-transaction -f /tmp/schema.sql
+python test/init_es.py --create-only
 ```
+
+ES 初始化工具创建缺失索引，并为指标和法规索引导入候选数据；已有索引会跳过，行为和风险索引不灌入演示数据。
+
+| 文件 | 用途 |
+| --- | --- |
+| [schema.sql](documents/schema.sql) | 数据表、索引与约束 |
+| [es_mappings.json](documents/es_mappings.json) | Elasticsearch 字段与检索配置 |
+| [indicator.json](documents/data/indicator.json) | 指标候选数据 |
+| [regulation.json](documents/data/regulation.json) | 法规候选数据 |
+| [dicts](documents/dicts) | 地区、行业与领域字典 |
+
+### 3. 配置模型与分类环境
+
+首次配置时，复制模板并填写本机模型参数；已有 `.env` 时直接编辑：
+
+```powershell
+Copy-Item .env.example .env
+python -m pip install -r risk-warning-bert/bert-service/requirements.txt
+```
+
+| 配置项 | 说明 |
+| --- | --- |
+| `LLM_BASE_URL` | 完整的 OpenAI 兼容 `chat/completions` 端点 |
+| `LLM_MODEL`、`LLM_API_KEY` | 条件判断模型名称与凭据 |
+| `LLM_EXTRA_BODY` | 供应商可选请求参数，使用 JSON 字符串 |
+| `EMBEDDING_ENDPOINT`、`EMBEDDING_MODEL` | Embedding 接口与模型 |
+| `EMBEDDING_API_KEY` | Embedding 凭据 |
+
+Processing 默认启用真实模型，Knowledge 默认启用 Embedding 和检索。Embedding 输出必须与索引的 **1024 维**向量一致。
+
+分类模型权重放置在 `risk-warning-bert/classify-service/checkpoints/best_model.pt`。启动 BERT 服务的终端中，将 Python 路径设置为安装上述依赖的解释器，例如：
+
+```powershell
+$env:BERT_PYTHON_PATH = (Get-Command python).Source
+```
+
+密钥、模型权重和缓存不提交到仓库。
+
+### 4. 启动后端服务
+
+```powershell
+mvn clean package -DskipTests
+```
+
+按下面顺序，在不同终端中分别执行一条命令，保持工作目录为仓库根目录。Windows 启动时显式使用 UTF-8，以正确读取中文配置。
+
+```powershell
+java '-Dfile.encoding=UTF-8' -jar risk-warning-knowledge/target/risk-warning-knowledge-1.0.0.jar
+java '-Dfile.encoding=UTF-8' -jar risk-warning-bert/target/risk-warning-bert-1.0.0.jar
+java '-Dfile.encoding=UTF-8' -jar risk-warning-org/target/risk-warning-org-1.0.0.jar
+java '-Dfile.encoding=UTF-8' -jar risk-warning-processing/target/risk-warning-processing-1.0.0.jar
+java '-Dfile.encoding=UTF-8' -jar risk-warning-report/target/risk-warning-report-1.0.0.jar
+java '-Dfile.encoding=UTF-8' -jar risk-warning-notification/target/risk-warning-notification-1.0.0.jar
+java '-Dfile.encoding=UTF-8' -jar risk-warning-gateway/target/risk-warning-gateway-1.0.0.jar
+```
+
+也可以通过 IDE 运行各模块的入口类，工作目录同样设为仓库根目录，以加载根目录 `.env`。BERT 服务会自动定位仓库内的 Python 脚本；自定义脚本位置通过 `bert.python.script` 配置。
+
+### 5. 回填候选检索数据
+
+Knowledge 启动后，为指标和法规生成检索文本及向量：
+
+```powershell
+$body = '{"target":"both","indicatorIndex":"t_indicator","regulationIndex":"t_regulation","force":false}'
+Invoke-RestMethod -Method Post -Uri 'http://localhost:8089/retrieval/backfill' -ContentType 'application/json' -Body $body
+```
+
+回填完成后，检查 `failed=0`，核对 `updated/skipped` 与候选数量，并验证实际 ES 文档包含 `retrievalText`、`retrievalTextIk`、`retrievalVector` 和匹配的 Embedding 元数据。HTTP 200 本身不能证明候选已可检索。
+
+### 6. 启动前端
+
+```powershell
+cd Risk_Warning_Platform_Fr
+npm ci
+npm run dev
+```
+
+访问终端输出的开发地址。前端代理默认指向 `http://localhost:8088`，需要调整时在前端 `.env.development.local` 中配置 `API_PROXY_TARGET`。
 
 ## 核心功能模块
 
-### 1. 用户与权限管理
-- 用户注册、登录、权限控制
-- 企业级权限（admin/member）
-- 项目级权限（project_admin/editor/viewer）
-- JWT token认证
+| 功能 | 说明 |
+| --- | --- |
+| 用户、企业与项目管理 | 管理评估主体、项目信息与上传材料 |
+| 事实分析 | 保存材料证据，抽取事实并进行业务分类 |
+| 候选检索 | 使用向量检索与法规关键词检索匹配指标和法规 |
+| 条件判断与规则计算 | 模型判断适用条件，Java 执行已审核的确定性规则 |
+| 评估报告 | 展示运行状态、事实证据、待审事项与冻结的规则结果 |
+| 异步任务与通知 | 通过持久化任务、Outbox 和消息队列处理分析与通知 |
 
-### 2. 企业信息管理
-- 企业档案管理和认证
-- 统一社会信用代码验证
-- 企业成员和角色管理
-- 行业和地域配置
-
-### 3. 项目管理
-- 项目创建和配置
-- 项目生命周期管理
-- 团队协作和权限分配
-- 进度跟踪
-
-### 4. 行为信息处理
-- 文档上传和解析（PDF/Word/Excel）
-- 行为信息标准化
-- BERT向量化处理
-- Elasticsearch索引存储
-
-### 5. 智能匹配与计算
-- AI语义匹配（行为-指标-法规）
-- 动态指标计算引擎
-- 多种计算规则支持
-- 结果缓存和追溯
-
-### 6. 风险评估与预警
-- 风险规则引擎
-- 实时风险触发
-- 多级风险等级
-- 预警消息推送
-
-### 7. 评估报告
-- 多格式报告生成（PDF/Word/Excel）
-- 数据可视化图表
-- 报告分享和权限控制
-
-## API文档
-
-启动系统后，可以通过以下方式访问API文档：
-
-- Swagger UI: http://localhost:8080/doc.html
-- OpenAPI JSON: http://localhost:8080/v3/api-docs
-
-## 监控和日志
-
-### 服务监控
-- Spring Boot Actuator健康检查
-- 访问地址: http://localhost:[端口]/actuator/health
-
-### 日志文件
-```bash
-# 查看服务日志
-tail -f logs/risk-warning-gateway.log
-tail -f logs/risk-warning-user.log
-# ... 其他服务日志
-```
-
-### Nacos服务监控
-- 服务列表: http://localhost:8848/nacos/#/serviceManagement
-- 配置管理: http://localhost:8848/nacos/#/configurationManagement
+正式规则注册表位于 [verified-rules-v1.json](risk-warning-processing/src/main/resources/rules/verified-rules-v1.json)。当前正式注册表为空；上传材料可以完成分析链路，但未审核指标会返回待审，不能据此认定无风险。报告使用该次运行冻结的规则决定。
 
 ## 开发指南
 
-### 添加新的微服务
+### 构建与测试
 
-1. **创建模块目录**
-```bash
-mkdir risk-warning-new-service
+在仓库根目录执行后端与辅助工具测试：
+
+```powershell
+mvn test
+mvn -pl risk-warning-knowledge -am test
+python -m unittest discover -s test -p 'test_*.py'
+python -m pytest risk-warning-bert/bert-service
 ```
 
-2. **创建pom.xml**（参考现有服务）
+Python 分类测试依赖见 `risk-warning-bert/bert-service/requirements-dev.txt`。PostgreSQL、ES 集成测试需按测试类说明设置环境变量与启用开关，并提供隔离数据库或索引。涉及检索的验证应检查实际持久化覆盖率和查询结果。
 
-3. **创建启动类和配置文件**
+前端验证在前端目录执行：
 
-4. **在根pom.xml中添加模块**
-```xml
-<modules>
-    <module>risk-warning-new-service</module>
-</modules>
+```powershell
+npm run test:unit -- --run
+npm run build
 ```
 
-5. **在网关配置中添加路由规则**
+### 配置与日志
 
-### 数据库操作
-
-- PostgreSQL连接: `jdbc:postgresql://localhost:5432/risk_warning_platform`
-- 用户名/密码: postgres/password
-- JPA自动建表已开启
-
-### 缓存使用
-
-Redis数据库分配：
-- Database 0: 用户服务
-- Database 1: 企业服务  
-- Database 2: 行为处理服务
-- Database 3: 通知服务
-
-## 部署指南
-
-### Docker容器化部署
-
-每个服务都包含Dockerfile，可以构建为Docker镜像：
-
-```bash
-# 构建特定服务镜像
-docker build -t risk-warning-gateway:latest ./risk-warning-gateway/
-
-# 或构建所有服务
-./build-all-images.sh
-```
-
-### Kubernetes部署
-
-可以基于Docker镜像创建Kubernetes部署文件。
-
-### 生产环境配置
-
-1. **修改数据库配置**
-2. **配置邮件服务**  
-3. **设置Redis密码**
-4. **配置Kafka集群**
-5. **启用服务认证**
+- 服务配置位于各模块 `src/main/resources`；公共连接配置模板位于 `build/nacos`。
+- 本机模型配置保存在根目录 `.env`，部署环境可通过环境变量提供。
+- 公共日志配置将应用日志写入 `<服务名称>/out/app.log`，相对于服务工作目录解析。
+- 开发与提交规范见 [AGENTS.md](AGENTS.md)。个人计划和验收记录放在忽略目录 `documents/local`。
 
 ## 常见问题
 
-### Q1: 服务启动失败
-**A**: 检查端口占用、数据库连接、Nacos注册中心状态
+**为什么上传完成后仍显示待审？**
 
-### Q2: 数据库连接失败
-**A**: 确认PostgreSQL已启动，检查连接配置
+材料处理完成与获得可计分结论是不同状态。缺少审核规则、适用条件不确定或证据不足时，系统保留待审或证据不足结果，应结合分析详情确认原因。
 
-### Q3: 服务注册失败  
-**A**: 检查Nacos服务状态，确认网络连通性
+**为什么检索不到指标和法规？**
 
-### Q4: Elasticsearch连接失败
-**A**: 确认Elasticsearch已启动，检查端口9200
+先检查候选索引是否有数据、回填是否完成，再核对 Embedding 模型与版本、1024 维向量，以及 `retrievalTextIk` 的 IK 分词配置。`--create-only` 会跳过已有索引，不会修正旧 mapping；调整现有索引前须确认目标并完成可恢复备份。
 
-## 贡献指南
+**为什么分类服务启动失败？**
 
-1. Fork项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)  
-5. 开启Pull Request
+确认 `BERT_PYTHON_PATH` 指向正确的 Python 环境、依赖安装完整、分类权重存在，并检查 BERT 日志中的 Python 启动和模型加载结果。
 
-## 许可证
+**为什么模型配置没有生效？**
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 联系方式
-
-- 项目负责人: [Your Name]
-- 邮箱: [your.email@example.com]
-- 项目地址: [Project URL]
+检查服务工作目录是否为仓库根目录、`.env` 参数是否填写，以及 Nacos 中实际发布的配置。条件判断接口需要完整的 `chat/completions` 地址。

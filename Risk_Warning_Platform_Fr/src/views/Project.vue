@@ -366,6 +366,7 @@
 </template>
 
 <script setup lang="ts">
+import { notifyRequestError } from '@/utils/request'
 import { ref, reactive, onMounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { Plus, UploadFilled, DataAnalysis, View } from '@element-plus/icons-vue'
@@ -673,7 +674,7 @@ const searchUser = async () => {
   } catch (error) {
     searchedUser.value = null
     searchedUserId.value = null
-    ElMessage.error('查询用户失败')
+    notifyRequestError(error, '查询用户失败')
   } finally {
     searchingUser.value = false
   }
@@ -707,7 +708,7 @@ const handleAddMember = async () => {
     viewMembers(currentProject.value)
   } catch (error) {
     console.error('添加成员失败', error)
-    ElMessage.error('添加成员失败')
+    notifyRequestError(error, '添加成员失败')
   } finally {
     addingMember.value = false
   }
@@ -742,7 +743,7 @@ const viewReport = async (project: Project) => {
     }
   } catch (error) {
     console.error('获取评估记录失败', error)
-    ElMessage.error('获取评估记录失败')
+    notifyRequestError(error, '获取评估记录失败')
   } finally {
     viewingReportProjectId.value = null
   }
@@ -942,7 +943,7 @@ const confirmAllUploads = async () => {
       }
     })
   } catch (error: any) {
-    ElMessage.error(error.message || '确认上传失败')
+    notifyRequestError(error, '确认上传失败')
     console.error('确认上传失败:', error)
   } finally {
     isConfirming.value = false

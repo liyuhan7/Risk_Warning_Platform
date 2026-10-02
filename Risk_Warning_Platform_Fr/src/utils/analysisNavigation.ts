@@ -4,8 +4,6 @@ export type AnalysisView = 'analysis' | 'overview' | 'indicator' | 'risk' | 'evi
 
 type SupportedQuery = LocationQuery | LocationQueryRaw
 
-const RETRIEVAL_ONLY_MODES = new Set(['P2_RETRIEVAL', 'P2_RETRIEVAL_DEGRADED'])
-
 function firstQueryValue(value: LocationQueryValueRaw | LocationQueryValueRaw[]): string | undefined {
   const candidate = Array.isArray(value) ? value[0] : value
   return candidate === null || candidate === undefined ? undefined : String(candidate).trim() || undefined
@@ -22,13 +20,13 @@ export function withAnalysisRunId(query: SupportedQuery, analysisRunId: string):
   return nextQuery
 }
 
-export function showsLegacyAnalysisViews(analysisMode: string | null | undefined): boolean {
-  return !analysisMode || !RETRIEVAL_ONLY_MODES.has(analysisMode)
+export function showsDecisionViews(analysisMode: string | null | undefined): boolean {
+  return analysisMode === 'REASONING_RULES_V1'
 }
 
 export function normalizeAnalysisView(
   activeView: AnalysisView,
   analysisMode: string | null | undefined
 ): AnalysisView {
-  return showsLegacyAnalysisViews(analysisMode) || activeView === 'analysis' ? activeView : 'analysis'
+  return showsDecisionViews(analysisMode) || activeView === 'analysis' ? activeView : 'analysis'
 }

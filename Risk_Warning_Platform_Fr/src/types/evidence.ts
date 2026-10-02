@@ -1,6 +1,6 @@
 /**
  * Evidence 与 Structured Behavior 类型定义
- * 对应后端 risk-warning-processing 模块的只读查询契约（后端文档 documents/local/plan1/p1-08-execution.md）
+ * 对应后端 risk-warning-processing 模块的只读事实与证据查询契约。
  */
 
 /** 行为状态；UNKNOWN 表示原文存在事实但状态证据不足，不是"无状态" */

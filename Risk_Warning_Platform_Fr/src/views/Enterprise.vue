@@ -183,6 +183,7 @@
 </template>
 
 <script setup lang="ts">
+import { notifyRequestError } from '@/utils/request'
 import { ref, reactive, onMounted } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
@@ -352,7 +353,7 @@ const searchUser = async () => {
   } catch (error) {
     searchedUser.value = null
     searchedUserId.value = null
-    ElMessage.error('查询用户失败')
+    notifyRequestError(error, '查询用户失败')
   } finally {
     searchingUser.value = false
   }
@@ -386,7 +387,7 @@ const handleAddMember = async () => {
     viewMembers(currentEnterprise.value)
   } catch (error) {
     console.error('添加成员失败', error)
-    ElMessage.error('添加成员失败')
+    notifyRequestError(error, '添加成员失败')
   } finally {
     addingMember.value = false
   }

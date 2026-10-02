@@ -2,7 +2,7 @@
  * 证据回溯 API
  *
  * 只读接口位于 processing 服务：网关前缀 /api/processing（request 的 baseURL 已含 /api）。
- * 真实接口已验证（2026-09-11 T4 联调）；P1 收尾已移除本地 mock 数据与开关，页面只读真实结果。
+ * 页面只读后端持久化结果，不使用本地模拟事实或证据。
  */
 import request from '@/utils/request'
 import type { Result } from '@/types'

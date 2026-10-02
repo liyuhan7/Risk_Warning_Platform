@@ -31,7 +31,7 @@
             <el-icon><Cpu /></el-icon>
             <span>分析概览</span>
           </el-menu-item>
-          <template v-if="showLegacyViews">
+          <template v-if="showDecisionViews">
             <el-menu-item index="overview">
               <el-icon><DataAnalysis /></el-icon>
               <span>总览报告</span>
@@ -88,7 +88,7 @@
 
       <!-- 主内容区 -->
       <el-main class="main-content">
-        <!-- 分析概览视图：只消费 P2 分析链的 overview 聚合，不解释旧报告数据 -->
+        <!-- 分析概览只消费 overview 聚合结果，不解释旧报告数据。 -->
         <div v-if="activeView === 'analysis'" class="analysis-view">
           <el-alert
             v-if="analysisMissingScope"
@@ -181,6 +181,7 @@
 </template>
 
 <script setup lang="ts">
+import { notifyRequestError } from '@/utils/request'
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { DataAnalysis, TrendCharts, Document, Link, Loading, Cpu } from '@element-plus/icons-vue'
@@ -214,7 +215,7 @@ import {
 import {
   normalizeAnalysisView,
   resolveAnalysisRunId,
-  showsLegacyAnalysisViews,
+  showsDecisionViews,
   withAnalysisRunId,
   type AnalysisView
 } from '@/utils/analysisNavigation'
@@ -260,14 +261,14 @@ const projectId = computed(() => {
   return overviewData.value?.projectId ?? null
 })
 
-// ===== 分析概览（P2 分析链）：只读 overview 聚合，六态与行为级结论/候选/审计 =====
+// 分析概览只读运行状态及行为级结论、候选与审计。
 const analysisData = ref<AnalysisOverviewVO | null>(null)
 const loadingAnalysis = ref(false)
 const analysisError = ref('')
 const analysisPollLimitReached = ref(false)
 const requestedAnalysisRunId = computed(() => resolveAnalysisRunId(route.query))
 const analysisMode = computed(() => analysisData.value?.run?.analysisMode)
-const showLegacyViews = computed(() => showsLegacyAnalysisViews(analysisMode.value))
+const showDecisionViews = computed(() => showsDecisionViews(analysisMode.value))
 
 // 用户手动选过视图后不再自动切换默认视图
 let viewChosenByUser = false
@@ -546,7 +547,7 @@ const loadOverviewData = async () => {
     }
   } catch (error: any) {
     console.error('Failed to load overview data:', error)
-    ElMessage.error(error.message || '加载总览数据失败')
+    notifyRequestError(error, '加载总览数据失败')
   } finally {
     loadingOverview.value = false
   }
@@ -564,7 +565,7 @@ const loadIndicatorData = async () => {
     }
   } catch (error: any) {
     console.error('Failed to load indicator data:', error)
-    ElMessage.error(error.message || '加载指标数据失败')
+    notifyRequestError(error, '加载指标数据失败')
   } finally {
     loadingIndicator.value = false
   }
@@ -582,7 +583,7 @@ const loadRisksData = async () => {
     }
   } catch (error: any) {
     console.error('Failed to load risks data:', error)
-    ElMessage.error(error.message || '加载风险数据失败')
+    notifyRequestError(error, '加载风险数据失败')
   } finally {
     loadingRisks.value = false
   }
@@ -614,7 +615,7 @@ const loadBehaviors = async () => {
     }
   } catch (error: any) {
     console.error('Failed to load behaviors:', error)
-    ElMessage.error(error.message || '加载结构化事实失败')
+    notifyRequestError(error, '加载结构化事实失败')
   } finally {
     loadingBehaviors.value = false
   }
@@ -638,7 +639,7 @@ const loadEvidenceFor = async (behavior: StructuredBehaviorVO) => {
   } catch (error: any) {
     console.error('Failed to load evidence:', error)
     selectedEvidences.value = []
-    ElMessage.error(error.message || '加载证据原文失败')
+    notifyRequestError(error, '加载证据原文失败')
   } finally {
     loadingEvidence.value = false
   }

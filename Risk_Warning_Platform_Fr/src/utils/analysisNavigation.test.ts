@@ -2,18 +2,20 @@ import { describe, expect, it } from 'vitest'
 import {
   normalizeAnalysisView,
   resolveAnalysisRunId,
-  showsLegacyAnalysisViews,
+  showsDecisionViews,
   withAnalysisRunId
 } from './analysisNavigation'
 
 describe('分析结果导航规则', () => {
-  it.each(['P2_RETRIEVAL', 'P2_RETRIEVAL_DEGRADED'])('%s 仅显示分析入口', mode => {
-    expect(showsLegacyAnalysisViews(mode)).toBe(false)
-    expect(normalizeAnalysisView('risk', mode)).toBe('analysis')
+  it.each(['NOT_STARTED', null, undefined])('%s 仅显示分析入口', mode => {
+    expect(showsDecisionViews(mode)).toBe(false)
+    for (const view of ['analysis', 'overview', 'indicator', 'risk', 'evidence'] as const) {
+      expect(normalizeAnalysisView(view, mode)).toBe('analysis')
+    }
   })
 
-  it.each(['LEGACY', 'DECISION_PRESENT', undefined])('%s 保留历史入口', mode => {
-    expect(showsLegacyAnalysisViews(mode)).toBe(true)
+  it.each(['REASONING_RULES_V1'])('%s 显示决策与报告入口', mode => {
+    expect(showsDecisionViews(mode)).toBe(true)
     expect(normalizeAnalysisView('overview', mode)).toBe('overview')
   })
 

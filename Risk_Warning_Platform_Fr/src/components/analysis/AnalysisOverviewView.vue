@@ -103,7 +103,7 @@
                   <template v-if="conclusions.length > 0">
                     <div v-for="c in conclusions" :key="c.resultId" class="summary-item candidate indicator">
                       <div class="candidate-main">
-                        <strong>{{ c.indicatorName || c.indicatorId || '指标未提供' }} <el-tag v-if="c.mock" type="warning" size="small">模拟结论</el-tag></strong>
+                        <strong>{{ c.indicatorName || c.indicatorId || '指标未提供' }}</strong>
                         <small>合规状态：{{ label(c.complianceStatus) }} · 适用性：{{ label(c.applicable) }}</small>
                         <small v-if="c.requirement">要求：{{ c.requirement }}</small>
                       </div>
@@ -183,7 +183,7 @@ import { label } from '@/types/analysis';
 import type { AnalysisOverviewVO, BehaviorAnalysisGroupVO } from '@/types/analysis';
 
 /**
- * P2 分析链的展示区，只消费 overview 聚合结果。
+ * 分析结果展示区，只消费 overview 聚合结果。
  * 关系聚焦工作台：事实导航 + 事实详情 + 指标/法规并排 + 证据回溯；检索审计默认折叠。
  * 组件不计算分数、风险等级或候选排序，状态仅按后端返回的检索/分析状态归类。
  */

@@ -26,6 +26,7 @@ import com.riskwarning.report.service.ReportService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -48,6 +49,9 @@ public class ReportServiceImpl implements ReportService {
 
     @Autowired
     private ElasticsearchClient esClient;
+
+    @Value("${report.risk-index:t_risk}")
+    private String riskIndex = ElasticSearchConfig.RISK_INDEX;
 
     @Override
     public IndicatorDistributionVO assembleIndicatorResult(Assessment assessment) {
@@ -153,8 +157,7 @@ public class ReportServiceImpl implements ReportService {
             indicatorDistributionVO.getDimensionDistributions().put(RiskDimensionEnum.fromValue(indicatorResult.getDimension()), dimensionVO);
         }
 
-        // 修改聚合逻辑：由求和改为平均值
-        // 总体平均分已经在 AssessmentServiceImpl 处理过，这里确保分布图中的“总分”也变更为平均分
+        // 分布区间与维度展示平均分，与 Assessment 总体口径一致。
         for (ScoreRatioDistributionItemVO item : indicatorDistributionVO.getScoreDistributions()) {
             if (item.getTotalCount() > 0) {
                 item.setTotalScore(item.getTotalScore() / item.getTotalCount());
@@ -296,7 +299,7 @@ public class ReportServiceImpl implements ReportService {
             log.info("[Fetching Risks] assessmentId={}, analysisRunId={}", assessmentId, analysisRunId);
 
             SearchResponse<Risk> resp = esClient.search(s -> s
-                            .index(ElasticSearchConfig.RISK_INDEX)
+                            .index(riskIndex)
                             .size(1000)  // 假设一个项目不会超过1000个behaviors，如需要可以改成scroll
                             .query(q -> q
                                     .bool(b -> b
@@ -330,7 +333,7 @@ public class ReportServiceImpl implements ReportService {
             return risks;
         } catch (Exception e) {
             log.error("[Fetching Risks Failed] assessmentId={}, analysisRunId={}", assessmentId, analysisRunId, e);
-            return Collections.emptyList();
+            throw new IllegalStateException("风险记录查询失败", e);
         }
     }
 

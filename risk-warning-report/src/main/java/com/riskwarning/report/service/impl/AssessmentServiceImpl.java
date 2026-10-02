@@ -6,6 +6,9 @@ import com.alibaba.fastjson2.JSON;
 import com.riskwarning.common.config.ElasticSearchConfig;
 import com.riskwarning.common.po.evidence.EvidenceChunk;
 import com.riskwarning.common.enums.AssessmentStatusEnum;
+import com.riskwarning.common.enums.AnalysisExecutionMode;
+import com.riskwarning.common.po.analysis.AnalysisRun;
+import com.riskwarning.report.repository.AnalysisRunRepository;
 import com.riskwarning.common.enums.indicator.IndicatorRiskStatus;
 import com.riskwarning.common.enums.risk.RiskLevelEnum;
 import com.riskwarning.common.enums.risk.RiskStatusEnum;
@@ -19,6 +22,7 @@ import com.riskwarning.report.service.AssessmentService;
 import com.riskwarning.report.service.ReportService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -44,7 +48,12 @@ public class AssessmentServiceImpl implements AssessmentService {
     @Autowired
     private ElasticsearchClient elasticsearchClient;
 
-    private final static Double THRESHOLD_RATIO = 0.5;
+    @Autowired
+    private AnalysisRunRepository analysisRunRepository;
+
+    @Value("${report.risk-index:t_risk}")
+    private String riskIndex = ElasticSearchConfig.RISK_INDEX;
+
 
     @Override
     public void aggregateInformation(Long userId, Long projectId, Long assessmentId, String analysisRunId) {
@@ -55,37 +64,36 @@ public class AssessmentServiceImpl implements AssessmentService {
         if (assessment == null) {
             throw new RuntimeException("Assessment not found");
         }
-        // todo：查询IndicatorResult表，获取所有指标结果，计算结果小于maxScore * 0.5的产生风险，预留处置接口
+        AnalysisRun run = analysisRunRepository.findByAnalysisRunIdAndAssessmentIdAndProjectId(analysisRunId, assessmentId, projectId)
+                .orElseThrow(() -> new IllegalStateException("报告分析运行不存在"));
+        if (run.getExecutionMode() != AnalysisExecutionMode.REASONING)
+            throw new IllegalStateException("报告只接受合规分析主链的冻结结果");
         List<IndicatorResult> indicatorResults = indicatorResultRepository
                 .findByAssessmentIdAndAnalysisRunId(assessmentId, analysisRunId);
+        ReasoningReportProjection.validate(run, indicatorResults);
         List<Risk> risks = new ArrayList<>();
         double totalScore = 0.0;
         int lowRiskCount = 0, mediumRiskCount = 0, highRiskCount = 0, totalRiskCount = 0;
         for(IndicatorResult ir : indicatorResults){
             double calculatedScore = ir.getCalculatedScore().doubleValue();
-            double maxScore = ir.getMaxPossibleScore().doubleValue() == 0.0 ? calculatedScore : ir.getMaxPossibleScore().doubleValue();
             totalScore += calculatedScore;
-            boolean mockFixture = "p2_mock_fixture_v1".equals(ir.getUsedCalculationRuleType());
-            double scoreRatio = calculatedScore / maxScore;
-            boolean triggered = mockFixture ? Boolean.TRUE.equals(ir.getRiskTriggered()) : scoreRatio < THRESHOLD_RATIO;
+            boolean triggered = Boolean.TRUE.equals(ir.getRiskTriggered());
             if(triggered) {
                 totalRiskCount++;
-                RiskLevelEnum riskLevelEnum = mockFixture ? fixtureRiskLevel(ir) : RiskLevelEnum.getByScoreRatio(scoreRatio);
+                RiskLevelEnum riskLevelEnum = ir.getRiskLevel();
                 lowRiskCount += riskLevelEnum == RiskLevelEnum.LOW_RISK ? 1 : 0;
                 mediumRiskCount += riskLevelEnum == RiskLevelEnum.MEDIUM_RISK ? 1 : 0;
                 highRiskCount += riskLevelEnum == RiskLevelEnum.HIGH_RISK ? 1 : 0;
-                ir.setRiskTriggered(true);
-                ir.setRiskStatus(IndicatorRiskStatus.EVALUATED);
                 Risk risk = buildRisk(projectId, assessmentId, analysisRunId, ir, riskLevelEnum);
+                {
+                    risk.setRelatedIndicators(FrozenReportEvidence.project(ir));
+                    risk.setDescription(FrozenReportEvidence.description(ir));
+                    risk.setCreatedAt(ir.getCalculatedAt());
+                }
                 risks.add(risk);
-            } else if (mockFixture) {
-                ir.setRiskTriggered(false);
-                ir.setRiskStatus(IndicatorRiskStatus.EVALUATED);
             }
         }
 
-        // 持久化指标结果的“触发风险”状态，供指标概览/分布统计使用
-        indicatorResultRepository.saveAll(indicatorResults);
 
         try {
             if (!risks.isEmpty()) {
@@ -93,7 +101,7 @@ public class AssessmentServiceImpl implements AssessmentService {
                     for (Risk risk : risks) {
                         b.operations(op -> op
                                 .index(idx -> idx
-                                        .index(ElasticSearchConfig.RISK_INDEX)
+                                        .index(riskIndex)
                                         .id(risk.getId())
                                         .document(risk)
                                 )
@@ -115,15 +123,14 @@ public class AssessmentServiceImpl implements AssessmentService {
 
         double finalAvgScore = indicatorResults.isEmpty() ? 0.0 : totalScore / indicatorResults.size();
         assessment.setOverallScore(finalAvgScore);
-//            // TODO: 总风险等级依靠owRiskCount, mediumRiskCoun, highRiskCount来设置
         assessment.setOverallRiskLevel(RiskLevelEnum.getByRiskCount(lowRiskCount, mediumRiskCount, highRiskCount));
 
         assessment.setStatus(AssessmentStatusEnum.ASSESSED);
+        assessment.setAssessmentDate(LocalDateTime.now());
         assessment.setDetails(JSON.toJSONString(new AssessmentGeneralDetails(
                 reportService.assembleGeneral(assessment, risks),
                 reportService.assembleIndicatorResult(assessment, analysisRunId)
         )));
-        assessment.setAssessmentDate(LocalDateTime.now());
         assessmentRepository.save(assessment);
     }
 
@@ -155,19 +162,7 @@ public class AssessmentServiceImpl implements AssessmentService {
                 .build();
     }
 
-    /** P2 固定规则已在 processing 决策，Report 只读取结果，禁止按统一阈值重算。 */
-    static RiskLevelEnum fixtureRiskLevel(IndicatorResult indicatorResult) {
-        if (indicatorResult.getCalculationDetails() == null
-                || indicatorResult.getCalculationDetails().getTraces() == null) {
-            throw new IllegalStateException("P2 指标结果缺少规则追踪");
-        }
-        return indicatorResult.getCalculationDetails().getTraces().stream()
-                .filter(trace -> trace.getRuleEvaluation() != null
-                        && Boolean.TRUE.equals(trace.getRuleEvaluation().getRiskTriggered()))
-                .map(trace -> trace.getRuleEvaluation().getRiskLevel()).filter(Objects::nonNull)
-                .findFirst().orElseThrow(() -> new IllegalStateException("P2 风险缺少固定 riskLevel"));
-    }
-
+    /** Retrieval 固定规则已在 processing 决策，Report 只读取结果，禁止按统一阈值重算。 */
     static String stableRiskId(String analysisRunId, Long assessmentId, String indicatorEsId, String name) {
         return EvidenceChunk.sha256(analysisRunId + "|" + assessmentId + "|" + indicatorEsId + "|" + name)
                 .substring(0, 32);

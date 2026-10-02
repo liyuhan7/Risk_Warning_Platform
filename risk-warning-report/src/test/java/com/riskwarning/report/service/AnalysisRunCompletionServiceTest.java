@@ -37,7 +37,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
- * LEGACY 报告完成链测试：严格顺序 aggregate → cleanup → succeed → 通知入箱、
+ * 报告完成测试：聚合、运行成功与通知入箱、
  * 幂等重放、终态保护、作用域校验与 Outbox 异常传播。
  */
 class AnalysisRunCompletionServiceTest {
@@ -47,13 +47,11 @@ class AnalysisRunCompletionServiceTest {
     private final AnalysisRunRepository analysisRunRepository = mock(AnalysisRunRepository.class);
     private final AssessmentService assessmentService = mock(AssessmentService.class);
     private final AssessmentRepository assessmentRepository = mock(AssessmentRepository.class);
-    private final AnalysisRunResultCleanupService cleanupService =
-            mock(AnalysisRunResultCleanupService.class);
     private final KafkaOutbox outbox = mock(KafkaOutbox.class);
     private final AssessmentFlowLogger flowLogger = mock(AssessmentFlowLogger.class);
     private final AnalysisRunCompletionService service = new AnalysisRunCompletionService(
             analysisRunRepository, assessmentService, assessmentRepository,
-            cleanupService, outbox, flowLogger);
+            outbox, flowLogger);
     private AnalysisRun run;
     private AssessmentCompletedEventMessage message;
     private Assessment assessment;
@@ -61,7 +59,9 @@ class AnalysisRunCompletionServiceTest {
     @BeforeEach
     void setup() {
         run = AnalysisRun.start(SCOPE, LocalDateTime.of(2026, 9, 5, 10, 0));
-        when(analysisRunRepository.findByAnalysisRunIdAndAssessmentIdAndProjectId(
+        run.freezeBehaviors(java.util.Arrays.asList("b"));
+        run.prepareReport(new com.fasterxml.jackson.databind.ObjectMapper().createObjectNode().put("completionKind", "FULL").put("decisionCount", 1));
+        when(analysisRunRepository.lockScope(
                 "run-1", 20L, 10L)).thenReturn(Optional.of(run));
         message = new AssessmentCompletedEventMessage(
                 "msg-1", "ts", "trace", 5L, 10L, 20L, "run-1");
@@ -71,12 +71,11 @@ class AnalysisRunCompletionServiceTest {
     }
 
     @Test
-    void aggregatesThenCleanupsThenSucceedsThenEnqueuesNotification() throws Exception {
+    void aggregatesThenSucceedsThenEnqueuesNotification() throws Exception {
         service.aggregateAndComplete(message, SCOPE);
 
-        InOrder order = inOrder(assessmentService, cleanupService, analysisRunRepository, outbox);
+        InOrder order = inOrder(assessmentService, analysisRunRepository, outbox);
         order.verify(assessmentService).aggregateInformation(5L, 10L, 20L, "run-1");
-        order.verify(cleanupService).cleanupAfterSuccess(20L, "run-1");
         order.verify(analysisRunRepository).saveAndFlush(run);
         order.verify(outbox).enqueue(any(NotificationMessage.class));
         assertEquals(AnalysisRunStatus.SUCCEEDED, run.getStatus());
@@ -90,6 +89,27 @@ class AnalysisRunCompletionServiceTest {
                 flowCaptor.getAllValues().get(1).getStage());
         assertEquals(AssessmentFlowStatus.SUCCEEDED,
                 flowCaptor.getAllValues().get(1).getStatus());
+    }
+
+    @Test
+    void reasoningSuccessPreservesHistoricalResults() {
+        run = AnalysisRun.start(SCOPE, LocalDateTime.now(), com.riskwarning.common.enums.AnalysisExecutionMode.REASONING);
+        run.freezeBehaviors(java.util.Arrays.asList("b"));
+        run.prepareReport(new com.fasterxml.jackson.databind.ObjectMapper().createObjectNode().put("completionKind", "FULL").put("decisionCount", 1));
+        when(analysisRunRepository.lockScope("run-1", 20L, 10L)).thenReturn(Optional.of(run));
+        service.aggregateAndComplete(message, SCOPE);
+        assertEquals(AnalysisRunStatus.SUCCEEDED, run.getStatus());
+        verify(outbox).enqueue(any(NotificationMessage.class));
+    }
+
+    @Test
+    void unpreparedReasoningRunCannotPublishReport() {
+        run = AnalysisRun.start(SCOPE, LocalDateTime.now(), com.riskwarning.common.enums.AnalysisExecutionMode.REASONING);
+        run.freezeBehaviors(java.util.Arrays.asList("b"));
+        when(analysisRunRepository.lockScope("run-1", 20L, 10L)).thenReturn(Optional.of(run));
+        assertThrows(IllegalStateException.class, () -> service.aggregateAndComplete(message, SCOPE));
+        assertEquals(AnalysisRunStatus.RUNNING, run.getStatus());
+        verifyNoInteractions(assessmentService, outbox);
     }
 
     @Test
@@ -134,20 +154,10 @@ class AnalysisRunCompletionServiceTest {
 
         assertEquals(AnalysisRunStatus.RUNNING, run.getStatus());
         verify(analysisRunRepository, never()).saveAndFlush(any());
-        verifyNoInteractions(cleanupService, outbox);
+        verifyNoInteractions(outbox);
     }
 
-    @Test
-    void cleanupFailureKeepsRunRunningWithoutNotification() throws Exception {
-        doThrow(new IllegalStateException("清理失败")).when(cleanupService)
-                .cleanupAfterSuccess(20L, "run-1");
 
-        assertThrows(IllegalStateException.class, () -> service.aggregateAndComplete(message, SCOPE));
-
-        assertEquals(AnalysisRunStatus.RUNNING, run.getStatus());
-        verify(analysisRunRepository, never()).saveAndFlush(any());
-        verify(outbox, never()).enqueue(any());
-    }
 
     @Test
     void outboxFailurePropagatesForDurableRetry() {
@@ -177,19 +187,19 @@ class AnalysisRunCompletionServiceTest {
 
         service.aggregateAndComplete(message, SCOPE);
 
-        verifyNoInteractions(assessmentService, cleanupService, outbox);
+        verifyNoInteractions(assessmentService, outbox);
         verify(analysisRunRepository, never()).saveAndFlush(any());
     }
 
     @Test
     void unknownOrTerminalRunIsRejected() {
-        when(analysisRunRepository.findByAnalysisRunIdAndAssessmentIdAndProjectId(
+        when(analysisRunRepository.lockScope(
                 "run-1", 20L, 10L)).thenReturn(Optional.empty());
         assertThrows(BusinessException.class, () -> service.aggregateAndComplete(message, SCOPE));
 
         AnalysisRun failed = AnalysisRun.start(SCOPE, LocalDateTime.of(2026, 9, 5, 10, 0));
         failed.fail(LocalDateTime.of(2026, 9, 5, 10, 1));
-        when(analysisRunRepository.findByAnalysisRunIdAndAssessmentIdAndProjectId(
+        when(analysisRunRepository.lockScope(
                 "run-1", 20L, 10L)).thenReturn(Optional.of(failed));
         assertThrows(BusinessException.class, () -> service.aggregateAndComplete(message, SCOPE));
         verifyNoInteractions(assessmentService);
@@ -201,7 +211,7 @@ class AnalysisRunCompletionServiceTest {
                 "msg-1", "ts", "trace", 5L, 11L, 20L, "run-1");
 
         assertThrows(BusinessException.class, () -> service.aggregateAndComplete(foreign, SCOPE));
-        verifyNoInteractions(assessmentService, cleanupService, outbox);
+        verifyNoInteractions(assessmentService, outbox);
     }
 
     @Test
@@ -209,6 +219,6 @@ class AnalysisRunCompletionServiceTest {
         message.setUserId(null);
 
         assertThrows(BusinessException.class, () -> service.aggregateAndComplete(message, SCOPE));
-        verifyNoInteractions(assessmentService, cleanupService, outbox);
+        verifyNoInteractions(assessmentService, outbox);
     }
 }

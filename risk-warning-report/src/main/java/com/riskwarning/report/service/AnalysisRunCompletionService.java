@@ -3,6 +3,7 @@ package com.riskwarning.report.service;
 import com.alibaba.fastjson2.JSON;
 import com.riskwarning.common.dto.analysis.AnalysisScope;
 import com.riskwarning.common.enums.AnalysisRunStatus;
+import com.riskwarning.common.enums.AnalysisExecutionMode;
 import com.riskwarning.common.exception.BusinessException;
 import com.riskwarning.common.message.AssessmentCompletedEventMessage;
 import com.riskwarning.common.message.NotificationMessage;
@@ -27,10 +28,8 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * LEGACY 报告完成链：汇总、旧结果清理、运行成功与完成通知入箱共用同一
- * 数据库事务。严格顺序 aggregate → cleanup → run.succeed → 通知入箱，
- * cleanup 失败时运行不得提前进入 SUCCEEDED；任何一步失败整体回滚，
- * 由 Durable Work 重试，本服务不负责终止运行。
+ * 报告投影完成后提交运行成功与通知入箱，并保留运行证据。
+ * 任何一步失败由外层事务回滚并重试。
  */
 @Service
 @Slf4j
@@ -39,26 +38,23 @@ public class AnalysisRunCompletionService {
     private final AnalysisRunRepository analysisRunRepository;
     private final AssessmentService assessmentService;
     private final AssessmentRepository assessmentRepository;
-    private final AnalysisRunResultCleanupService cleanupService;
     private final KafkaOutbox outbox;
     private final AssessmentFlowLogger flowLogger;
 
     public AnalysisRunCompletionService(AnalysisRunRepository analysisRunRepository,
                                         AssessmentService assessmentService,
                                         AssessmentRepository assessmentRepository,
-                                        AnalysisRunResultCleanupService cleanupService,
                                         KafkaOutbox outbox,
                                         AssessmentFlowLogger flowLogger) {
         this.analysisRunRepository = analysisRunRepository;
         this.assessmentService = assessmentService;
         this.assessmentRepository = assessmentRepository;
-        this.cleanupService = cleanupService;
         this.outbox = outbox;
         this.flowLogger = flowLogger;
     }
 
     /**
-     * 校验事件与运行作用域一致后，在同一事务内完成聚合、清理、
+     * 校验事件与运行作用域一致后，在同一事务内完成聚合、
      * 运行成功标记与完成通知入箱；任何一步失败整体回滚并向上抛出。
      */
     @Transactional
@@ -66,7 +62,7 @@ public class AnalysisRunCompletionService {
         requireConsistent(message, scope);
         AnalysisRun run;
         try {
-            run = analysisRunRepository.findByAnalysisRunIdAndAssessmentIdAndProjectId(
+            run = analysisRunRepository.lockScope(
                             scope.getAnalysisRunId(), scope.getAssessmentId(), scope.getProjectId())
                     .orElseThrow(() -> new BusinessException("找不到匹配的分析运行"));
             if (run.getStatus() == AnalysisRunStatus.SUCCEEDED) {
@@ -77,15 +73,18 @@ public class AnalysisRunCompletionService {
             if (run.getStatus() != AnalysisRunStatus.RUNNING) {
                 throw new BusinessException("已结束的分析运行不能生成报告");
             }
+            if (run.getExecutionMode() != AnalysisExecutionMode.REASONING)
+                throw new IllegalStateException("只允许合规分析主链生成报告");
+            {
+                com.fasterxml.jackson.databind.JsonNode summary = run.getAnalysisSummary();
+                if (summary == null || run.getExpectedBehaviorIds() == null
+                        || !("FULL".equals(summary.path("completionKind").asText()) || "PARTIAL".equals(summary.path("completionKind").asText()))
+                        || summary.path("decisionCount").asInt(0) <= 0)
+                    throw new IllegalStateException("合规报告尚未准备有效指标决定");
+            }
             assessmentService.aggregateInformation(message.getUserId(), scope.getProjectId(),
                     scope.getAssessmentId(), scope.getAnalysisRunId());
             flowLogger.info(aggregateEvent(message, scope));
-            try {
-                cleanupService.cleanupAfterSuccess(scope.getAssessmentId(), scope.getAnalysisRunId());
-            } catch (Exception exception) {
-                // 清理失败时运行保持 RUNNING，任务交还 Durable Work 重试
-                throw new IllegalStateException("旧结果清理失败，运行保持 RUNNING 待重试", exception);
-            }
             run.succeed(LocalDateTime.now());
             analysisRunRepository.saveAndFlush(run);
             outbox.enqueue(buildNotification(message, scope));

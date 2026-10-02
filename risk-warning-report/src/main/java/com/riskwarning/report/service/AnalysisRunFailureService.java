@@ -23,7 +23,8 @@ public class AnalysisRunFailureService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void markFailed(AnalysisScope scope, LocalDateTime finishedAt) {
-        AnalysisRun run = analysisRunRepository.findByAnalysisRunIdAndAssessmentIdAndProjectId(
+        // 与报告完成共用行锁；迟到的耗尽回调不得覆盖已提交的成功终态。
+        AnalysisRun run = analysisRunRepository.lockScope(
                         scope.getAnalysisRunId(), scope.getAssessmentId(), scope.getProjectId())
                 .orElseThrow(() -> new BusinessException("找不到待终止的分析运行"));
         if (run.getStatus() == AnalysisRunStatus.RUNNING) {

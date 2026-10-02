@@ -4,10 +4,10 @@ import com.riskwarning.common.po.behavior.Behavior;
 import org.springframework.stereotype.Component;
 
 /**
- * 行为检索查询文本构建器（P2-02 冻结模板 query-v1）。
+ * 行为检索查询文本构建器（冻结模板 query-v1）。
  *
  * <p>query-v1 = description + action + object，三段去空白后以单个空格连接。
- * dimension 不进入查询文本：行为维度来自后置分类器（P2-06 结论其不可靠），
+ * dimension 不进入查询文本：行为维度来自分类器，不能作为检索过滤依据，
  * 检索相关性以文本语义为准，与标注集查询文本口径一致。
  *
  * <p>输出为确定性函数：同输入必同输出；连续空白折叠为单空格。

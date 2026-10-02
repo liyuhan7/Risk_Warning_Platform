@@ -46,6 +46,6 @@ public class BehaviorAnalysisContextVO {
     private String blockedReason;
     private List<RetrievalCandidateVO> indicatorCandidates;
     private List<RetrievalCandidateVO> regulationCandidates;
-    /** 历史结论载体，仅在旧运行产生指标结果时携带；真实 P2 检索链为 null。 */
+    /** 历史结论载体，仅在旧运行产生指标结果时携带；真实 Retrieval 检索链为 null。 */
     private Object calculationDetails;
 }

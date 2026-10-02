@@ -19,8 +19,9 @@ import com.riskwarning.common.po.indicator.Indicator;
 import com.riskwarning.common.utils.RedisUtil;
 import com.riskwarning.processing.repository.AssessmentRepository;
 import com.riskwarning.processing.repository.IndicatorResultRepository;
-import com.riskwarning.processing.service.BehaviorProcessingService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -39,8 +40,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
+/**
+ * 部署环境联通检查；运行前配置完整应用依赖，并将数据库连接指向隔离测试 schema。
+ */
+@EnabledIfSystemProperty(named = "processing.environment.integration", matches = "true")
 @SpringBootTest(classes = ProcessingApplication.class)
 public class ConnectivityTest {
+
+    @BeforeEach
+    void requireIsolatedDatabase() throws Exception {
+        try (Connection connection = dataSource.getConnection()) {
+            org.junit.jupiter.api.Assertions.assertTrue(
+                    connection.getSchema() != null && connection.getSchema().matches("processing_it_[a-f0-9]{32}"),
+                    "联通检查必须使用 processing_it_<UUID> 隔离 schema");
+        }
+    }
 
     @Autowired
     private DataSource dataSource;
@@ -64,8 +78,6 @@ public class ConnectivityTest {
     @Autowired
     private TransactionTemplate transactionTemplate;
 
-    @Autowired
-    private BehaviorProcessingService behaviorProcessingService;
 
 //    @Test
 //    @Transactional

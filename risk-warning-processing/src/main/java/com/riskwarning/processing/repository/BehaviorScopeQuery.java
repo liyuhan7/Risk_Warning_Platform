@@ -5,7 +5,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 /**
  * Behavior 查询的唯一作用域条件。
  *
- * "项目 + 评估 + 运行三作用域精确匹配"是冻结语义（p1-03），写入聚合与只读查询两侧
+ * "项目 + 评估 + 运行三作用域精确匹配"是冻结语义（），写入聚合与只读查询两侧
  * 都必须经过这里构建，禁止任何调用方退化为项目级查询；从一处构建避免两处实现漂移。
  */
 public final class BehaviorScopeQuery {

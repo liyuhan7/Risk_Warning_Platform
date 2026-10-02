@@ -57,14 +57,14 @@ public class AnalysisContextService {
         AnalysisRunSelector.Selection selection = runSelector.select(assessmentId, projectId, analysisRunId);
         if (selection.getRun() == null) {
             return AnalysisContextVO.builder().contextVersion(CONTEXT_VERSION).assessmentId(assessmentId)
-                    .projectId(projectId).runStatus("NOT_STARTED").analysisMode(AnalysisModeResolver.NO_ARTIFACTS)
+                    .projectId(projectId).runStatus("NOT_STARTED").analysisMode("NOT_STARTED")
                     .generatedAt(time(LocalDateTime.now())).blockedReasons(new TreeMap<>())
                     .items(new ArrayList<>()).build();
         }
         AnalysisRun run = selection.getRun();
         List<RetrievalAudit> auditRows = audits.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId());
         List<AnalysisResult> resultRows = results.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId());
-        Map<String, AnalysisTrace> traces = legacyTraces(projectId, assessmentId, run.getAnalysisRunId());
+        Map<String, AnalysisTrace> traces = calculationTraces(projectId, assessmentId, run.getAnalysisRunId());
         Map<String, Behavior> descriptions = descriptions(projectId, assessmentId, run.getAnalysisRunId());
         Map<String, RetrievalAudit> auditsByBehavior = new TreeMap<>();
         for (RetrievalAudit audit : auditRows) { auditsByBehavior.put(audit.getBehaviorId(), audit); }
@@ -82,13 +82,13 @@ public class AnalysisContextService {
         }
         return AnalysisContextVO.builder().contextVersion(CONTEXT_VERSION).assessmentId(assessmentId)
                 .projectId(projectId).analysisRunId(run.getAnalysisRunId()).runStatus(run.getStatus().name())
-                .analysisMode(AnalysisModeResolver.resolve(resultRows, auditRows)).generatedAt(time(LocalDateTime.now()))
+                .analysisMode("REASONING_RULES_V1").generatedAt(time(LocalDateTime.now()))
                 .behaviorCount(items.size()).readyForAnalysisCount(ready).blockedCount(items.size() - ready)
                 .blockedReasons(blockedReasons).items(items).build();
     }
 
-    /** 旧链的指标结果按行为保存检索轨迹；真实 P2 检索链没有指标结果。 */
-    private Map<String, AnalysisTrace> legacyTraces(Long projectId, Long assessmentId, String analysisRunId) {
+    /** 指标计算结果按行为提供被冻结的检索与计分轨迹。 */
+    private Map<String, AnalysisTrace> calculationTraces(Long projectId, Long assessmentId, String analysisRunId) {
         Map<String, AnalysisTrace> traces = new HashMap<>();
         for (IndicatorResult result : indicatorResults.findByAssessmentIdAndAnalysisRunId(assessmentId, analysisRunId)) {
             if (result.getCalculationDetails() == null || result.getCalculationDetails().getTraces() == null) { continue; }
@@ -167,12 +167,12 @@ public class AnalysisContextService {
         AnalysisAuditStatus analysis = audit.getAnalysisStatus();
         if (analysis == AnalysisAuditStatus.INSUFFICIENT_EVIDENCE || evidenceIds.isEmpty()) { return "INSUFFICIENT_EVIDENCE"; }
         if (analysis == AnalysisAuditStatus.RECALL_GAP) { return "RECALL_GAP"; }
-        if (analysis == AnalysisAuditStatus.NOT_DEMO_INPUT) { return "NOT_P2_RUN"; }
+        if (analysis == AnalysisAuditStatus.NOT_DEMO_INPUT) { return "NOT_RETRIEVAL_RUN"; }
         if (analysis == AnalysisAuditStatus.NOT_ATTEMPTED) { return "NOT_ATTEMPTED"; }
         if (!snapshotAvailable || candidates.stream().noneMatch(RetrievalCandidateVO::isSnapshotAvailable)) {
             return "SNAPSHOT_UNAVAILABLE";
         }
-        if (analysis != AnalysisAuditStatus.WAITING_P3) { return "NOT_WAITING_FOR_ANALYSIS"; }
+        if (analysis != AnalysisAuditStatus.WAITING_ANALYSIS) { return "NOT_WAITING_FOR_ANALYSIS"; }
         return null;
     }
 

@@ -26,6 +26,7 @@ public class AnalysisOverviewService {
     private final AnalysisResultRepository results;
     private final RetrievalAuditRepository audits;
     private final BehaviorDocumentRepository behaviors;
+    private final RuleEvaluationAuditRepository ruleAudits;
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /**
@@ -60,7 +61,7 @@ public class AnalysisOverviewService {
                 .fallbackToUsableRun(selection.isFallbackToUsableRun()).build());
         List<RetrievalAudit> auditRows = audits.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId());
         List<AnalysisResult> resultRows = results.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId());
-        vo.getRun().setAnalysisMode(AnalysisModeResolver.resolve(resultRows, auditRows));
+        vo.getRun().setAnalysisMode("REASONING_RULES_V1");
         Map<String, Behavior> descriptions = new HashMap<>();
         // ES 不可用只影响行为描述，PostgreSQL 的审计与结论仍可回放。
         try {
@@ -69,6 +70,8 @@ public class AnalysisOverviewService {
             log.warn("分析概览行为描述不可用: assessmentId={}, run={}", assessmentId, run.getAnalysisRunId(), e);
         }
         Map<String, BehaviorAnalysisGroupVO> groups = new TreeMap<>();
+        if (run.getExpectedBehaviorIds() != null) for (String id : run.getExpectedBehaviorIds())
+            groups.put(id, group(id, descriptions.get(id)));
         descriptions.forEach((id, behavior) -> groups.put(id, group(id, behavior)));
         for (RetrievalAudit audit : auditRows) {
             BehaviorAnalysisGroupVO group = groups.computeIfAbsent(audit.getBehaviorId(), id -> group(id, descriptions.get(id)));
@@ -86,7 +89,7 @@ public class AnalysisOverviewService {
             org.springframework.beans.BeanUtils.copyProperties(result, c);
             c.setResultId(result.getId()); c.setApplicable(value(result.getApplicable()));
             c.setComplianceStatus(value(result.getComplianceStatus())); c.setGapType(value(result.getGapType()));
-            c.setAnalyzedAt(time(result.getAnalyzedAt())); c.setMock("mock-fixture-v1".equals(result.getModelVersion()));
+            c.setAnalyzedAt(time(result.getAnalyzedAt())); c.setMock(false);
             c.setEvidenceIds(safe(result.getEvidenceIds())); c.setRegulationIds(safe(result.getRegulationIds()));
             c.setIndicatorName(names.get("INDICATOR:"+result.getIndicatorId()));
             c.setRegulationNames(safe(result.getRegulationIds()).stream().map(id -> names.get("REGULATION:"+id)).collect(Collectors.toList()));
@@ -103,13 +106,54 @@ public class AnalysisOverviewService {
             if ("NO_CANDIDATES".equals(retrieval)) summary.setNoCandidateCount(summary.getNoCandidateCount()+1);
             if ("FAILED".equals(retrieval)) summary.setRetrievalFailedCount(summary.getRetrievalFailedCount()+1);
             if ("SNAPSHOT_UNAVAILABLE".equals(retrieval)) summary.setSnapshotUnavailableCount(summary.getSnapshotUnavailableCount()+1);
-            if ("WAITING_P3".equals(analysis)) summary.setWaitingForAnalysisCount(summary.getWaitingForAnalysisCount()+1);
+            if ("WAITING_ANALYSIS".equals(analysis)) summary.setWaitingForAnalysisCount(summary.getWaitingForAnalysisCount()+1);
             if ("NOT_ATTEMPTED".equals(analysis)) summary.setNotAttemptedCount(summary.getNotAttemptedCount()+1);
             if ("NOT_DEMO_INPUT".equals(analysis)) summary.setNotDemoInputCount(summary.getNotDemoInputCount()+1);
             if ("RECALL_GAP".equals(analysis)) summary.setRecallGapCount(summary.getRecallGapCount()+1);
             if ("INSUFFICIENT_EVIDENCE".equals(analysis)) summary.setInsufficientEvidenceCount(summary.getInsufficientEvidenceCount()+1);
         }
         String status = run.getStatus().name();
+        if (run.getExecutionMode() == com.riskwarning.common.enums.AnalysisExecutionMode.REASONING) {
+            vo.getRun().setAnalysisMode("REASONING_RULES_V1");
+            summary.setBehaviorCount(run.getExpectedBehaviorIds() == null ? 0 : run.getExpectedBehaviorIds().size());
+            summary.setDecisionCount(0);
+            Set<String> reviewed = new HashSet<>();
+            for (RetrievalAudit row : auditRows) if (row.getAnalysisStatus() == com.riskwarning.common.enums.analysis.AnalysisAuditStatus.NEEDS_REVIEW)
+                reviewed.add(row.getBehaviorId());
+            Set<String> seen = new HashSet<>();
+            for (RuleEvaluationAudit row : ruleAudits.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId())) {
+                if (!projectId.equals(row.getProjectId()) || !assessmentId.equals(row.getAssessmentId())
+                        || !run.getAnalysisRunId().equals(row.getAnalysisRunId()) || !seen.add(row.getIndicatorId())
+                        || row.getCalculationDetails() == null || row.getCalculationDetails().getRuleCalculation() == null)
+                    throw new IllegalStateException("概览规则审计作用域或详情不一致");
+                com.riskwarning.processing.rule.RuleEvaluationContracts.validate(row.getCalculationDetails().getRuleCalculation().getFinalDecision());
+                com.riskwarning.common.dto.analysis.RuleEvaluationResult decision = row.getCalculationDetails().getRuleCalculation().getFinalDecision();
+                if (!row.getIndicatorId().equals(decision.getIndicatorId()) || row.getStatus() != decision.getStatus()
+                        || !Objects.equals(row.getInputHash(), decision.getInputHash()))
+                    throw new IllegalStateException("概览规则审计与最终决定不一致");
+                if (row.getStatus() == com.riskwarning.common.enums.analysis.RuleEvaluationStatus.DECIDED
+                        || row.getStatus() == com.riskwarning.common.enums.analysis.RuleEvaluationStatus.DECIDED_WITH_CONFLICT)
+                    summary.setDecisionCount(summary.getDecisionCount() + 1);
+                if (row.getStatus() == com.riskwarning.common.enums.analysis.RuleEvaluationStatus.DECIDED_WITH_CONFLICT)
+                    summary.setConflictCount(summary.getConflictCount() + 1);
+                if (row.getStatus() == com.riskwarning.common.enums.analysis.RuleEvaluationStatus.UNSUPPORTED_RULE)
+                    summary.setUnsupportedRuleCount(summary.getUnsupportedRuleCount() + 1);
+                if (row.getStatus() == com.riskwarning.common.enums.analysis.RuleEvaluationStatus.NEEDS_REVIEW)
+                    resultRows.stream().filter(result -> row.getIndicatorId().equals(result.getIndicatorId())).forEach(result -> reviewed.add(result.getBehaviorId()));
+            }
+            summary.setAnalyzedCount((int) auditRows.stream().filter(row -> row.getAnalysisStatus()
+                    == com.riskwarning.common.enums.analysis.AnalysisAuditStatus.ANALYZED).count());
+            summary.setNoApplicableCandidateCount((int) auditRows.stream().filter(row -> row.getAnalysisStatus()
+                    == com.riskwarning.common.enums.analysis.AnalysisAuditStatus.NO_APPLICABLE_CANDIDATE).count());
+            summary.setNeedsReviewCount(reviewed.size());
+            if (run.getAnalysisSummary() != null) {
+                AnalysisSummaryVO prepared = new com.fasterxml.jackson.databind.ObjectMapper().convertValue(run.getAnalysisSummary(), AnalysisSummaryVO.class);
+                if (prepared.getBehaviorCount() != summary.getBehaviorCount() || prepared.getDecisionCount() != summary.getDecisionCount())
+                    throw new IllegalStateException("报告准备摘要与冻结行为或规则审计不一致");
+                vo.setSummary(prepared);
+                if (run.getStatus() == com.riskwarning.common.enums.AnalysisRunStatus.RUNNING) status = "REPORT_PENDING";
+            }
+        }
         if ("SUCCEEDED".equals(status)) status = "COMPLETED_WITH_DECISION";
         if ("COMPLETED_WITHOUT_DECISION".equals(status) && !auditRows.isEmpty()
                 && auditRows.stream().allMatch(a -> a.getRetrievalStatus()

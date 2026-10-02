@@ -30,6 +30,8 @@ public class RetrievalCandidateVO {
     private String dimension;
     private String type;
     private Double maxScore;
+    /** 供规则引擎回放的冻结来源，不进入模型提示词。 */
+    private com.fasterxml.jackson.databind.JsonNode sourceRule;
     /** 候选类型、ID 和名称齐全；不要求指标必须有正文。 */
     private boolean snapshotAvailable;
     /** 正文独立于候选元数据判断，空白内容不可作为原文依据。 */

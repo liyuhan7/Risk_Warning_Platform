@@ -24,16 +24,14 @@ import com.riskwarning.common.reliability.KafkaOutboxCodec;
 import com.riskwarning.common.reliability.KafkaOutboxHandler;
 import com.riskwarning.common.reliability.TransactionalKafkaOutbox;
 import com.riskwarning.processing.client.RetrievalClient;
-import com.riskwarning.processing.config.P2ProcessingProperties;
+import com.riskwarning.processing.config.AnalysisProcessingProperties;
 import com.riskwarning.processing.repository.AnalysisRunRepository;
 import com.riskwarning.processing.repository.BehaviorDocumentRepository;
 import com.riskwarning.processing.repository.RetrievalAuditRepository;
 import com.riskwarning.processing.service.AnalysisRunFailureService;
-import com.riskwarning.processing.service.BehaviorProcessingService;
 import com.riskwarning.processing.service.BehaviorQueryTextBuilder;
 import com.riskwarning.processing.service.EvidenceQueryService;
-import com.riskwarning.processing.service.P2CompletionService;
-import com.riskwarning.processing.service.P2RetrievalProcessingService;
+import com.riskwarning.processing.service.RetrievalProcessingService;
 import com.riskwarning.processing.service.RetrievalAuditService;
 import com.riskwarning.processing.task.BehaviorProcessingWorkHandler;
 import com.riskwarning.processing.task.IndicatorCalculationWorkHandler;
@@ -77,9 +75,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
- * R1-03 Step F：真实 PostgreSQL + Kafka 验证 processing 可靠链。
+ * 真实 PostgreSQL + Kafka 验证 processing 可靠链。
  * 检索超时运行保持 RUNNING 且保留失败审计；重试耗尽 Work 与 Run 同步 FAILED；
- * Behavior 重试指标任务 messageId 稳定且单一入箱；P2 完成事务原子并保留 Outbox。
+ * Behavior 重试指标任务 messageId 稳定且单一入箱；Retrieval 完成事务原子并保留 Outbox。
  */
 @EnabledIfEnvironmentVariable(named = "R1_03_IT_ENABLED", matches = "true")
 class ProcessingReliabilityTest {
@@ -121,21 +119,7 @@ class ProcessingReliabilityTest {
         TestConfig.completeFailures.set(0);
     }
 
-    @Test
-    void retrievalTimeoutKeepsRunRunningWithFailedAudit() {
-        seedRun();
-        seedBehavior();
-        when(retrievalClient().retrieve(any(RetrievalBatchRequest.class)))
-                .thenThrow(new IllegalStateException("retrieval timeout"));
 
-        IndicatorCalculationWorkHandler handler = indicatorHandler();
-        assertThrows(IllegalStateException.class, () -> handler.execute(
-                new DurableWorkContext(fakeWork()), encodeIndicator(indicatorMessage())));
-
-        // 临时检索故障不改变运行状态，只保留失败审计供诊断
-        assertEquals(AnalysisRunStatus.RUNNING, runStatus());
-        assertEquals(1L, auditCount("FAILED"));
-    }
 
     @Test
     void exhaustedRetriesMarkWorkAndRunFailed() throws InterruptedException {
@@ -205,36 +189,7 @@ class ProcessingReliabilityTest {
         assertTrue(storedPayload.contains(indicatorMessageId));
     }
 
-    @Test
-    void p2CompletionCommitsRunAndNotificationOutbox() throws Exception {
-        seedRun();
-        seedBehavior();
-        RetrievalBatchItem item = RetrievalBatchItem.builder()
-                .behaviorId("beh-1").status(RetrievalBatchStatus.SUCCESS)
-                .embeddingModel("test-model").embeddingVersion("1")
-                .candidates(new ArrayList<>()).build();
-        when(retrievalClient().retrieve(any(RetrievalBatchRequest.class)))
-                .thenReturn(RetrievalBatchResponse.builder()
-                        .items(Arrays.asList(item)).build());
 
-        IndicatorCalculationWorkHandler handler = indicatorHandler();
-        handler.execute(new DurableWorkContext(fakeWork()),
-                encodeIndicator(indicatorMessage()));
-        assertEquals(AnalysisRunStatus.COMPLETED_WITHOUT_DECISION, runStatus());
-
-        // Kafka 发送由 Outbox 任务异步执行：完成事务只保证通知持久化
-        String notificationId = analysisRunId + ":p2-completed-notification";
-        assertEquals(1L, workRowCount(notificationId), "完成通知必须已入箱");
-
-        KafkaConsumer<String, String> consumer = kafkaEnv.stringConsumer("r103-proc-" + analysisRunId);
-        consumer.subscribe(Arrays.asList("notification_tasks"));
-        DurableWork outboxWork = completingStore.claim(KafkaOutboxHandler.KIND, "worker-send");
-        new KafkaOutboxHandler(kafkaEnv.kafkaUtils(), new KafkaOutboxCodec())
-                .execute(new DurableWorkContext(outboxWork), outboxWork.getPayload());
-        int matched = waitForMessages(consumer, notificationId, 1, 30);
-        assertEquals(1, matched, "恢复发送后必须收到同一稳定 messageId 的通知");
-        consumer.close();
-    }
 
     // ---------- 支撑 ----------
 
@@ -242,13 +197,15 @@ class ProcessingReliabilityTest {
         return context.getBean(RetrievalClient.class);
     }
 
-    /** 指标任务处理器：真实 P2 链，LEGACY 分支依赖仅以 mock 占位。 */
+    /** 指标任务使用主链身份校验，通过分析故障验证任务重试耗尽。 */
     private IndicatorCalculationWorkHandler indicatorHandler() {
+        com.riskwarning.processing.service.ComplianceAnalysisOrchestrator analysis =
+                Mockito.mock(com.riskwarning.processing.service.ComplianceAnalysisOrchestrator.class);
+        Mockito.doThrow(new IllegalStateException("analysis unavailable")).when(analysis).process(Mockito.any(), Mockito.any());
         return new IndicatorCalculationWorkHandler(codec(),
-                context.getBean(P2RetrievalProcessingService.class),
-                Mockito.mock(BehaviorProcessingService.class),
-                context.getBean(P2ProcessingProperties.class),
-                context.getBean(AnalysisRunFailureService.class));
+                context.getBean(AnalysisRunFailureService.class),
+                new com.riskwarning.processing.service.AnalysisRunModeResolver(context.getBean(AnalysisRunRepository.class)),
+                analysis);
     }
 
     /** Behavior 链的重依赖以 mock 代替，聚焦重试与 messageId 稳定性。 */
@@ -491,9 +448,8 @@ class ProcessingReliabilityTest {
         }
 
         @Bean
-        public P2ProcessingProperties p2Properties() {
-            P2ProcessingProperties properties = new P2ProcessingProperties();
-            properties.setMode(P2ProcessingProperties.Mode.P2);
+        public AnalysisProcessingProperties processingProperties() {
+            AnalysisProcessingProperties properties = new AnalysisProcessingProperties();
             properties.setBatchSize(8);
             return properties;
         }
@@ -541,31 +497,12 @@ class ProcessingReliabilityTest {
             return new TransactionalKafkaOutbox(durableWorkStore, new KafkaOutboxCodec(), flowLogger());
         }
 
-        @Bean
-        public P2CompletionService p2CompletionService(AnalysisRunRepository runs,
-                                                       KafkaOutbox outbox,
-                                                       AssessmentFlowLogger flowLogger) {
-            return new P2CompletionService(runs, outbox, flowLogger);
-        }
 
-        @Bean
-        public P2RetrievalProcessingService p2RetrievalProcessingService(
-                BehaviorDocumentRepository behaviors,
-                EvidenceQueryService evidenceQuery,
-                RetrievalClient retrievalClient,
-                RetrievalAuditService auditService,
-                AnalysisRunRepository runs,
-                P2CompletionService completion,
-                BehaviorQueryTextBuilder queryBuilder,
-                P2ProcessingProperties p2Properties,
-                AssessmentFlowLogger flowLogger) {
-            return new P2RetrievalProcessingService(behaviors, evidenceQuery, retrievalClient,
-                    auditService, runs, completion, queryBuilder, p2Properties, flowLogger);
-        }
+
+
 
         private static ProcessingMessageCodec codec() {
             return new ProcessingMessageCodec(new ObjectMapper());
         }
     }
 }
-

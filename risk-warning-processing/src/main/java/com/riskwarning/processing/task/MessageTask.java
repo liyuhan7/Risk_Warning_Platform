@@ -10,13 +10,13 @@ import com.riskwarning.common.reliability.KafkaOutbox;
 import com.riskwarning.common.utils.StringUtils;
 import com.riskwarning.processing.entity.dto.ProcessedDocument;
 import com.riskwarning.processing.service.AnalysisRunFailureService;
-import com.riskwarning.processing.service.BehaviorProcessingService;
 import com.riskwarning.processing.service.DocumentProcessingService;
 import com.riskwarning.processing.service.EvidenceExtractionService;
 import com.riskwarning.processing.service.FactExtractionPipeline;
 import com.riskwarning.processing.service.SourceDocumentScopeValidator;
-import com.riskwarning.processing.service.P2RetrievalProcessingService;
-import com.riskwarning.processing.config.P2ProcessingProperties;
+import com.riskwarning.processing.service.AnalysisRunModeResolver;
+import com.riskwarning.processing.service.ComplianceAnalysisOrchestrator;
+import com.riskwarning.common.enums.AnalysisExecutionMode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -45,9 +45,6 @@ public class MessageTask {
     private DocumentProcessingService documentProcessingService;
 
     @Autowired
-    private BehaviorProcessingService behaviorProcessingService;
-
-    @Autowired
     private SourceDocumentScopeValidator sourceDocumentScopeValidator;
 
     @Autowired
@@ -71,10 +68,10 @@ public class MessageTask {
     private KafkaOutbox kafkaOutbox;
 
     @Autowired
-    private P2RetrievalProcessingService p2RetrievalProcessingService;
+    private AnalysisRunModeResolver runModes;
 
     @Autowired
-    private P2ProcessingProperties p2Properties = new P2ProcessingProperties();
+    private ComplianceAnalysisOrchestrator analysis;
 
 
     @KafkaListener(topics = "behavior_processing_tasks", groupId = "test-consumer",
@@ -204,13 +201,8 @@ public class MessageTask {
         behaviorThreadPoolExecutor.execute(() -> {
             try {
                 log.info("▶ 开始行为评估和指标计算...");
-                if (p2Properties.getMode() == P2ProcessingProperties.Mode.P2) {
-                    p2RetrievalProcessingService.process(message, analysisScope);
-                } else {
-                    behaviorProcessingService.processProjectBehaviors(
-                            message.getUserId(), message.getProjectId(), message.getAssessmentId(),
-                            analysisScope.getAnalysisRunId(), message.getMessageId());
-                }
+                AnalysisExecutionMode mode = runModes.resolve(analysisScope);
+                analysis.process(message, analysisScope);
             } catch (Exception e) {
                 log.error("✗ 指标计算任务失败: projectId={}, assessmentId={}, error={}",
                         message.getProjectId(), message.getAssessmentId(), e.getMessage(), e);

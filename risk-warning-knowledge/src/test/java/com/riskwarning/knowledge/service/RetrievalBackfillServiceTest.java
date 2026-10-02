@@ -43,6 +43,7 @@ class RetrievalBackfillServiceTest {
         Map<String, Object> source = indicatorSource();
         String text = "指标\n描述\n安全 环保";
         source.put("retrievalTextHash", RetrievalBackfillService.sha256(text));
+        source.put("retrievalTextIk", text);
         source.put("embeddingModel", MODEL);
         source.put("embeddingVersion", VERSION);
         source.put("retrievalVector", Collections.singletonList(1.0f));
@@ -107,15 +108,31 @@ class RetrievalBackfillServiceTest {
     }
 
     @Test
-    void updateContainsExactlyFiveRequiredFields() {
+    void updateContainsSemanticAndLexicalFields() {
         List<Float> vector = new ArrayList<>(Collections.nCopies(1024, 0.0f));
         RetrievalBackfillService.Plan plan = new RetrievalBackfillService.Plan(
                 "idx", "id", "text", "hash", MODEL, VERSION);
         Map<String, Object> fields = RetrievalBackfillService.updateFields(plan, vector);
-        assertEquals(new LinkedHashSet<>(Arrays.asList("retrievalText", "retrievalVector",
+        assertEquals(new LinkedHashSet<>(Arrays.asList("retrievalText", "retrievalTextIk", "retrievalVector",
                 "retrievalTextHash", "embeddingModel", "embeddingVersion")), fields.keySet());
         assertSame(vector, fields.get("retrievalVector"));
+        assertEquals(fields.get("retrievalText"), fields.get("retrievalTextIk"));
         assertEquals(MODEL, fields.get("embeddingModel"));
+    }
+
+    @Test
+    void matchingVectorMetadataWithoutCurrentLexicalTextDoesNotSkip() {
+        String text = "指标\n描述\n安全 环保";
+        Map<String, Object> source = indicatorSource();
+        source.put("retrievalTextHash", RetrievalBackfillService.sha256(text));
+        source.put("embeddingModel", MODEL);
+        source.put("embeddingVersion", VERSION);
+        source.put("retrievalVector", Collections.singletonList(1.0f));
+        assertFalse(RetrievalBackfillService.shouldSkip(source, RetrievalBackfillService.sha256(text), MODEL, VERSION));
+        source.put("retrievalTextIk", "过时的关键词文本");
+        assertFalse(RetrievalBackfillService.shouldSkip(source, RetrievalBackfillService.sha256(text), MODEL, VERSION));
+        source.put("retrievalTextIk", text);
+        assertTrue(RetrievalBackfillService.shouldSkip(source, RetrievalBackfillService.sha256(text), MODEL, VERSION));
     }
 
     @Test

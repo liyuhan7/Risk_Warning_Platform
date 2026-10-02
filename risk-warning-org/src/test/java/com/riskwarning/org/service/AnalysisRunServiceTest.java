@@ -42,22 +42,26 @@ class AnalysisRunServiceTest {
 
         assertEquals(scope, run.toScope());
         assertEquals(AnalysisRunStatus.RUNNING, run.getStatus());
+        assertEquals(com.riskwarning.common.enums.AnalysisExecutionMode.REASONING, run.getExecutionMode());
         verify(runRepository).existsByAssessmentIdAndStatus(20L, AnalysisRunStatus.RUNNING);
     }
 
+
+
     @Test
     void rejectsMissingWrongProjectOrExistingRun() {
-        assertThrows(BusinessException.class, () -> service.start(null, now));
-        assertThrows(BusinessException.class, () -> service.start(scope, null));
+        assertEquals(400, assertThrows(BusinessException.class, () -> service.start(null, now)).getCode());
+        assertEquals(400, assertThrows(BusinessException.class, () -> service.start(scope, null)).getCode());
+        assertEquals(404, assertThrows(BusinessException.class, () -> service.start(scope, now)).getCode());
         when(assessmentRepository.findById(20L))
                 .thenReturn(Assessment.builder().id(20L).projectId(99L).build());
-        assertThrows(BusinessException.class, () -> service.start(scope, now));
+        assertEquals(403, assertThrows(BusinessException.class, () -> service.start(scope, now)).getCode());
 
         when(assessmentRepository.findById(20L))
                 .thenReturn(Assessment.builder().id(20L).projectId(10L).build());
         when(runRepository.existsByAssessmentIdAndStatus(20L, AnalysisRunStatus.RUNNING))
                 .thenReturn(true);
-        assertThrows(BusinessException.class, () -> service.start(scope, now));
+        assertEquals(409, assertThrows(BusinessException.class, () -> service.start(scope, now)).getCode());
         verify(runRepository, never()).saveAndFlush(any());
     }
 

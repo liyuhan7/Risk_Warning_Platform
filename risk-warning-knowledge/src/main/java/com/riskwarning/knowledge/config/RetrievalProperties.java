@@ -4,7 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-/** 新检索配置，与旧 BERT/Milvus 配置独立。 */
+/** 指标与法规候选检索配置。 */
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "retrieval")

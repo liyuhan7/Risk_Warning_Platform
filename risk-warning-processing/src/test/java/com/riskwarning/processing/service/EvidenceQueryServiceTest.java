@@ -69,7 +69,7 @@ class EvidenceQueryServiceTest {
                 PROJECT_ID, ASSESSMENT_ID)).thenReturn(Collections.singletonList(
                         chunk(DOCUMENT_ID, PROJECT_ID, 999L, 1, 0, "越权证据")));
 
-        assertThrows(IllegalStateException.class,
+        assertThrows(SecurityException.class,
                 () -> new EvidenceQueryService(repository).listByScope(PROJECT_ID, ASSESSMENT_ID, null));
     }
 
@@ -121,7 +121,7 @@ class EvidenceQueryServiceTest {
                 .thenReturn(Collections.singletonList(
                         chunk(DOCUMENT_ID, PROJECT_ID, 999L, 1, 0, "越权引用")));
 
-        assertThrows(IllegalStateException.class, () -> new EvidenceQueryService(repository)
+        assertThrows(SecurityException.class, () -> new EvidenceQueryService(repository)
                 .listByIds(Collections.singletonList("ev-outside"), PROJECT_ID, ASSESSMENT_ID));
     }
 

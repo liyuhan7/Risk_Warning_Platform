@@ -3,13 +3,14 @@ package com.riskwarning.processing.task;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.riskwarning.common.reliability.DurableWorkStore;
 import com.riskwarning.common.reliability.KafkaOutbox;
-import com.riskwarning.processing.config.P2ProcessingProperties;
+import com.riskwarning.processing.config.AnalysisProcessingProperties;
 import com.riskwarning.processing.service.AnalysisRunFailureService;
-import com.riskwarning.processing.service.BehaviorProcessingService;
+import com.riskwarning.processing.service.AnalysisRunModeResolver;
+import com.riskwarning.processing.service.ComplianceAnalysisOrchestrator;
 import com.riskwarning.processing.service.DocumentProcessingService;
 import com.riskwarning.processing.service.EvidenceExtractionService;
 import com.riskwarning.processing.service.FactExtractionPipeline;
-import com.riskwarning.processing.service.P2RetrievalProcessingService;
+import com.riskwarning.processing.service.RetrievalProcessingService;
 import com.riskwarning.processing.service.SourceDocumentScopeValidator;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -39,8 +40,6 @@ class DurableProcessingListenerConditionTest {
                     () -> mock(com.riskwarning.processing.util.FileScanner.class))
             .withBean(com.riskwarning.processing.util.ContentExtractor.class,
                     () -> mock(com.riskwarning.processing.util.ContentExtractor.class))
-            .withBean(BehaviorProcessingService.class,
-                    () -> mock(BehaviorProcessingService.class))
             .withBean(co.elastic.clients.elasticsearch.ElasticsearchClient.class,
                     () -> mock(co.elastic.clients.elasticsearch.ElasticsearchClient.class))
             .withBean(com.riskwarning.processing.repository.IndicatorResultRepository.class,
@@ -67,14 +66,17 @@ class DurableProcessingListenerConditionTest {
             .withBean("BehaviorProcessTaskThreadPool", ThreadPoolTaskExecutor.class,
                     ThreadPoolTaskExecutor::new)
             .withBean(KafkaOutbox.class, () -> mock(KafkaOutbox.class))
-            .withBean(P2RetrievalProcessingService.class,
-                    () -> mock(P2RetrievalProcessingService.class))
-            .withBean(P2ProcessingProperties.class, P2ProcessingProperties::new)
+            .withBean(RetrievalProcessingService.class,
+                    () -> mock(RetrievalProcessingService.class))
+            .withBean(AnalysisProcessingProperties.class, AnalysisProcessingProperties::new)
+            .withBean(AnalysisRunModeResolver.class, () -> mock(AnalysisRunModeResolver.class))
+            .withBean(ComplianceAnalysisOrchestrator.class, () -> mock(ComplianceAnalysisOrchestrator.class))
             .withUserConfiguration(DurableProcessingMessageTask.class, MessageTask.class);
 
     @Test
     void reliabilityEnabledReplacesCompatListenerWithInboxListener() {
         runner.withPropertyValues("assessment.reliability.enabled=true").run(context -> {
+            assertThat(context).hasNotFailed();
             assertThat(context).hasSingleBean(DurableProcessingMessageTask.class);
             assertThat(context).doesNotHaveBean(MessageTask.class);
         });
@@ -83,6 +85,7 @@ class DurableProcessingListenerConditionTest {
     @Test
     void defaultConfigurationKeepsCompatListenerOnly() {
         runner.run(context -> {
+            assertThat(context).hasNotFailed();
             assertThat(context).hasSingleBean(MessageTask.class);
             assertThat(context).doesNotHaveBean(DurableProcessingMessageTask.class);
         });
@@ -91,6 +94,7 @@ class DurableProcessingListenerConditionTest {
     @Test
     void explicitFalseConfigurationKeepsCompatListenerOnly() {
         runner.withPropertyValues("assessment.reliability.enabled=false").run(context -> {
+            assertThat(context).hasNotFailed();
             assertThat(context).hasSingleBean(MessageTask.class);
             assertThat(context).doesNotHaveBean(DurableProcessingMessageTask.class);
         });

@@ -29,11 +29,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
- * 真实 DeepSeek 模型上的 P1-05 抽取测评：契约通过率、字段保真、两轮稳定性。
+ * 真实模型抽取测评：契约通过率、字段保真、两轮稳定性。
  *
  * 需要环境变量 LLM_ENABLED=true 与 LLM_BASE_URL/LLM_MODEL/LLM_API_KEY，缺失时整类跳过；
- * 稳定性阈值可用 P1_STABILITY_MIN（0~1，缺省 0.5）收紧为断言，缺省仅输出指标供决策。
- * 调用成本：约 8 次小请求。运行示例见 run-processing.ps1 的 .env 加载方式。
+ * 稳定性阈值可用 FACT_EXTRACTION_STABILITY_MIN（0~1，缺省 0.5）收紧为断言，缺省仅输出指标供决策。
+ * 调用成本：约 8 次小请求。通过环境变量显式启用。
  */
 class RealModelExtractionEvalTest {
 
@@ -72,7 +72,7 @@ class RealModelExtractionEvalTest {
                 new FactExtractionResponseValidator(new ObjectMapper()),
                 new StructuredBehaviorAssembler());
 
-        String stabilityEnv = System.getenv("P1_STABILITY_MIN");
+        String stabilityEnv = System.getenv("FACT_EXTRACTION_STABILITY_MIN");
         if (hasText(stabilityEnv)) {
             stabilityAsserted = true;
             stabilityMin = Double.parseDouble(stabilityEnv.trim());

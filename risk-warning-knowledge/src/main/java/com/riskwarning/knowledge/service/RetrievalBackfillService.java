@@ -23,14 +23,14 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
- * 独立的检索字段回填服务，不复用或改变旧向量化链。
- * 每个 update 的 doc 同时携带五个检索字段，避免文档处于半更新状态。
+ * 检索文本与 Embedding 字段回填服务。
+ * 每个 update 同时写入语义文本、关键词文本、向量和版本信息。
  */
 @Service
 @ConditionalOnExpression("${retrieval.enabled:false} and ${embedding.enabled:false}")
 public class RetrievalBackfillService {
     static final String[] SOURCE_FIELDS = {"name", "description", "tags", "fullText",
-            "retrievalTextHash", "embeddingModel", "embeddingVersion", "retrievalVector"};
+            "retrievalTextHash", "embeddingModel", "embeddingVersion", "retrievalVector", "retrievalTextIk"};
     private static final int SCROLL_SIZE = 200;
     private static final String SCROLL_KEEP_ALIVE = "2m";
 
@@ -233,15 +233,18 @@ public class RetrievalBackfillService {
 
     static boolean shouldSkip(Map source, String hash, String model, String version) {
         Object vector = source.get("retrievalVector");
+        String lexicalText = string(source.get("retrievalTextIk"));
         return Objects.equals(hash, string(source.get("retrievalTextHash")))
                 && Objects.equals(model, string(source.get("embeddingModel")))
                 && Objects.equals(version, string(source.get("embeddingVersion")))
-                && vector instanceof Collection && !((Collection) vector).isEmpty();
+                && vector instanceof Collection && !((Collection) vector).isEmpty()
+                && StringUtils.hasText(lexicalText) && Objects.equals(hash, sha256(lexicalText));
     }
 
     static Map<String, Object> updateFields(Plan plan, List<Float> vector) {
         Map<String, Object> fields = new LinkedHashMap<>();
         fields.put("retrievalText", plan.text);
+        fields.put("retrievalTextIk", plan.text);
         fields.put("retrievalVector", vector);
         fields.put("retrievalTextHash", plan.hash);
         fields.put("embeddingModel", plan.model);

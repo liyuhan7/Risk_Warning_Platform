@@ -20,6 +20,10 @@ public class AnalysisConclusionVO {
     private String gapType;
     private Double gapValue;
     private String gapUnit;
+    private String schemaVersion;
+    private Boolean conditionMet;
+    private Double observedValue;
+    private String observedUnit;
     private Double confidence;
     private String reasoning;
     private String modelVersion;

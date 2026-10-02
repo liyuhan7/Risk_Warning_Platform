@@ -22,7 +22,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 /**
- * R1-03 真实 Kafka 隔离环境。
+ * 真实 Kafka 隔离环境。
  * 每个测试使用随机 topic/group；故障注入场景通过测试专用 producer
  * 超时配置模拟 broker 不可用，不修改生产发送语义。
  */

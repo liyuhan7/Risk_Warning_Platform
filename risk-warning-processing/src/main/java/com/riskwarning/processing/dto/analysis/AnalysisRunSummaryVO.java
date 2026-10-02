@@ -15,13 +15,8 @@ public class AnalysisRunSummaryVO {
     private String finishedAt;
     private String errorCode;
     private String errorMessage;
-    /** 最新运行不可用时，是否从历史中选择了最近可用运行。 */
+    /** 最新运行不可用时，是否选择了最近可用运行。 */
     private boolean fallbackToUsableRun;
-    /**
-     * 运行级分析来源标识，由该运行的结论与审计推导，不作为可写字段。
-     * LEGACY_MOCK_DEMO：存在演示结论；DECISION_PRESENT：存在非演示结论；
-     * P2_RETRIEVAL：真实检索候选等待后续分析；P2_RETRIEVAL_DEGRADED：检索未产出可分析候选；
-     * NO_ARTIFACTS：本次运行没有结论也没有审计。
-     */
+    /** 当前分析模式标识；未开始时为 NOT_STARTED。 */
     private String analysisMode;
 }

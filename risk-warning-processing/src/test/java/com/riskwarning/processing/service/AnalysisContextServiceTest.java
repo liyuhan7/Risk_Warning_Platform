@@ -67,7 +67,7 @@ class AnalysisContextServiceTest {
                 .thenReturn(Optional.empty());
         AnalysisContextVO context = service.context(86L, 7L, null);
         assertEquals("NOT_STARTED", context.getRunStatus());
-        assertEquals(AnalysisModeResolver.NO_ARTIFACTS, context.getAnalysisMode());
+        assertEquals("NOT_STARTED", context.getAnalysisMode());
         assertEquals(0, context.getBehaviorCount());
         assertTrue(context.getItems().isEmpty());
     }
@@ -96,14 +96,14 @@ class AnalysisContextServiceTest {
     }
 
     @Test void successfulRetrievalWaitsForAnalysisWithBothCandidateTypes() {
-        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_P3,
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_ANALYSIS,
                 Arrays.asList(candidate(RetrievalCandidateType.INDICATOR, "indicator-1", "采购审批指标", 1),
                         candidate(RetrievalCandidateType.REGULATION, "regulation-1", "采购管理办法", 1)));
 
         AnalysisContextVO context = service.context(86L, 7L, "run-1");
         assertEquals(AnalysisContextService.CONTEXT_VERSION, context.getContextVersion());
         assertEquals("run-1", context.getAnalysisRunId());
-        assertEquals(AnalysisModeResolver.P2_RETRIEVAL, context.getAnalysisMode());
+        assertEquals("REASONING_RULES_V1", context.getAnalysisMode());
         assertEquals(1, context.getBehaviorCount());
         assertEquals(1, context.getReadyForAnalysisCount());
         assertEquals(0, context.getBlockedCount());
@@ -130,7 +130,7 @@ class AnalysisContextServiceTest {
         assertBlocked("NO_CANDIDATES", RetrievalAuditStatus.NO_CANDIDATES, AnalysisAuditStatus.NOT_ATTEMPTED);
         assertBlocked("SNAPSHOT_UNAVAILABLE", RetrievalAuditStatus.SNAPSHOT_UNAVAILABLE, AnalysisAuditStatus.NOT_ATTEMPTED);
         assertBlocked("INSUFFICIENT_EVIDENCE", RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.INSUFFICIENT_EVIDENCE);
-        assertBlocked("NOT_P2_RUN", RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.NOT_DEMO_INPUT);
+        assertBlocked("NOT_RETRIEVAL_RUN", RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.NOT_DEMO_INPUT);
         assertBlocked("NOT_ATTEMPTED", RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.NOT_ATTEMPTED);
     }
 
@@ -140,7 +140,7 @@ class AnalysisContextServiceTest {
         assertEquals(1, withoutAudit.getBlockedReasons().get("NO_RETRIEVAL_AUDIT"));
 
         behavior.setEvidenceIds(Collections.emptyList());
-        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_P3,
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_ANALYSIS,
                 Collections.singletonList(candidate(RetrievalCandidateType.INDICATOR, "indicator-1", "采购审批指标", 1)));
         AnalysisContextVO withoutEvidence = service.context(86L, 7L, "run-1");
         assertEquals("INSUFFICIENT_EVIDENCE", withoutEvidence.getItems().get(0).getBlockedReason());
@@ -150,14 +150,14 @@ class AnalysisContextServiceTest {
 
     @Test void nonRecoverableCandidateSnapshotBlocksAnalysis() {
         RetrievalCandidateSnapshot snapshot = candidate(RetrievalCandidateType.INDICATOR, "indicator-1", null, 1);
-        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_P3, Collections.singletonList(snapshot));
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_ANALYSIS, Collections.singletonList(snapshot));
         BehaviorAnalysisContextVO item = service.context(86L, 7L, "run-1").getItems().get(0);
         assertEquals("SNAPSHOT_UNAVAILABLE", item.getBlockedReason());
         assertFalse(item.isReadyForAnalysis());
     }
 
     @Test void existingDecisionBlocksReprocessing() {
-        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_P3,
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_ANALYSIS,
                 Collections.singletonList(candidate(RetrievalCandidateType.INDICATOR, "indicator-1", "采购审批指标", 1)));
         when(results.findByAssessmentIdAndAnalysisRunId(86L, "run-1")).thenReturn(Collections.singletonList(
                 AnalysisResult.builder().id("result").behaviorId("b").indicatorId("indicator-1")
@@ -165,13 +165,13 @@ class AnalysisContextServiceTest {
 
         AnalysisContextVO context = service.context(86L, 7L, "run-1");
         assertEquals("DECISION_PRESENT", context.getItems().get(0).getBlockedReason());
-        assertEquals(AnalysisModeResolver.DECISION_PRESENT, context.getAnalysisMode());
+        assertEquals("REASONING_RULES_V1", context.getAnalysisMode());
         assertEquals(0, context.getReadyForAnalysisCount());
     }
 
-    @Test void legacyRunKeepsCalculationDetailsReadableForTheSameBehavior() {
-        AnalysisTrace trace = AnalysisTrace.builder().behaviorId("b").queryText("旧链查询")
-                .candidates(Collections.singletonList(candidate(RetrievalCandidateType.INDICATOR, "indicator-1", "旧指标", 1)))
+    @Test void keepsCalculationDetailsReadableForTheSameBehavior() {
+        AnalysisTrace trace = AnalysisTrace.builder().behaviorId("b").queryText("指标查询")
+                .candidates(Collections.singletonList(candidate(RetrievalCandidateType.INDICATOR, "indicator-1", "测试指标", 1)))
                 .build();
         when(indicatorResults.findByAssessmentIdAndAnalysisRunId(86L, "run-1")).thenReturn(Collections.singletonList(
                 IndicatorResult.builder().assessmentId(86L).projectId(7L).analysisRunId("run-1")
@@ -186,7 +186,7 @@ class AnalysisContextServiceTest {
     }
 
     @Test void contextKeyNamesAreFrozen() throws Exception {
-        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_P3,
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_ANALYSIS,
                 Collections.singletonList(candidate(RetrievalCandidateType.INDICATOR, "indicator-1", "采购审批指标", 1)));
         ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
         JsonNode root = mapper.readTree(mapper.writeValueAsString(service.context(86L, 7L, "run-1")));
@@ -205,13 +205,13 @@ class AnalysisContextServiceTest {
                 new TreeSet<>(fieldNames(root.get("items").get(0))));
     }
 
-    @Test void controllerMapsScopeAndFailureCodes() {
+    @Test void controllerPreservesScopeAndFailureTypes() {
         AnalysisContextController controller = new AnalysisContextController(service);
-        assertEquals(400, controller.context(86L, null, "run-1").getCode());
-        assertEquals(403, controller.context(86L, 8L, "run-1").getCode());
-        assertEquals(404, controller.context(86L, 7L, "other-run").getCode());
+        assertThrows(IllegalArgumentException.class, () -> controller.context(86L, null, "run-1"));
+        assertThrows(SecurityException.class, () -> controller.context(86L, 8L, "run-1"));
+        assertThrows(java.util.NoSuchElementException.class, () -> controller.context(86L, 7L, "other-run"));
         when(audits.findByAssessmentIdAndAnalysisRunId(86L, "run-1")).thenThrow(new IllegalStateException("DB down"));
-        assertEquals(500, controller.context(86L, 7L, "run-1").getCode());
+        assertThrows(IllegalStateException.class, () -> controller.context(86L, 7L, "run-1"));
     }
 
     private void assertBlocked(String reason, RetrievalAuditStatus retrieval, AnalysisAuditStatus analysis) {

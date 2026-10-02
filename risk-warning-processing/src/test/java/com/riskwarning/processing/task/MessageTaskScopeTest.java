@@ -8,13 +8,13 @@ import com.riskwarning.common.message.IndicatorCalculationTaskMessage;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 import com.riskwarning.processing.service.AnalysisRunFailureService;
-import com.riskwarning.processing.service.BehaviorProcessingService;
+import com.riskwarning.processing.service.ComplianceAnalysisOrchestrator;
 import com.riskwarning.processing.service.DocumentProcessingService;
 import com.riskwarning.processing.service.EvidenceExtractionService;
 import com.riskwarning.processing.service.FactExtractionPipeline;
 import com.riskwarning.processing.service.SourceDocumentScopeValidator;
-import com.riskwarning.processing.service.P2RetrievalProcessingService;
-import com.riskwarning.processing.config.P2ProcessingProperties;
+import com.riskwarning.processing.service.RetrievalProcessingService;
+import com.riskwarning.processing.config.AnalysisProcessingProperties;
 import com.riskwarning.processing.entity.dto.ProcessedDocument;
 import com.riskwarning.common.reliability.KafkaOutbox;
 import org.junit.jupiter.api.io.TempDir;
@@ -44,6 +44,16 @@ class MessageTaskScopeTest {
 
     @TempDir
     Path tempDir;
+
+    private MessageTask task() {
+        MessageTask task = new MessageTask();
+        com.riskwarning.processing.service.AnalysisRunModeResolver resolver =
+                mock(com.riskwarning.processing.service.AnalysisRunModeResolver.class);
+        org.mockito.Mockito.when(resolver.resolve(any())).thenReturn(com.riskwarning.common.enums.AnalysisExecutionMode.REASONING);
+        ReflectionTestUtils.setField(task, "runModes", resolver);
+        ReflectionTestUtils.setField(task, "analysis", mock(com.riskwarning.processing.service.ComplianceAnalysisOrchestrator.class));
+        return task;
+    }
 
     @Test
     void acceptsCompleteScope() {
@@ -100,62 +110,22 @@ class MessageTaskScopeTest {
                         Collections.singletonList(new SourceDocumentRef(null, "source.pdf"))));
     }
 
-    @Test
-    void routesEachModeToItsOwnProcessingChain() {
-        BehaviorProcessingService behaviorProcessingService = mock(BehaviorProcessingService.class);
-        P2RetrievalProcessingService retrievalProcessingService = mock(P2RetrievalProcessingService.class);
-        AnalysisRunFailureService failureService = mock(AnalysisRunFailureService.class);
-        KafkaOutbox kafkaOutbox = mock(KafkaOutbox.class);
-        P2ProcessingProperties properties = new P2ProcessingProperties();
-        org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor executor =
-                new org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(1);
-        executor.setMaxPoolSize(1);
-        executor.initialize();
-        try {
-            MessageTask task = new MessageTask();
-            ReflectionTestUtils.setField(task, "behaviorProcessingService", behaviorProcessingService);
-            ReflectionTestUtils.setField(task, "p2RetrievalProcessingService", retrievalProcessingService);
-            ReflectionTestUtils.setField(task, "analysisRunFailureService", failureService);
-            ReflectionTestUtils.setField(task, "behaviorThreadPoolExecutor", executor);
-            ReflectionTestUtils.setField(task, "kafkaOutbox", kafkaOutbox);
-            ReflectionTestUtils.setField(task, "p2Properties", properties);
-            IndicatorCalculationTaskMessage message = new IndicatorCalculationTaskMessage(
-                    "message", "timestamp", "trace", 1L, 10L, 20L, "run-1");
 
-            task.onMessage(message);
-
-            verify(behaviorProcessingService, timeout(1000))
-                    .processProjectBehaviors(1L, 10L, 20L, "run-1", "message");
-            verifyNoInteractions(retrievalProcessingService);
-
-            properties.setMode(P2ProcessingProperties.Mode.P2);
-            task.onMessage(message);
-
-            verify(retrievalProcessingService, timeout(1000))
-                    .process(any(IndicatorCalculationTaskMessage.class), eq(new AnalysisScope(10L, 20L, "run-1")));
-            verify(behaviorProcessingService, times(1))
-                    .processProjectBehaviors(any(), any(), any(), any(), any());
-            verifyNoInteractions(kafkaOutbox);
-        } finally {
-            executor.shutdown();
-        }
-    }
 
     @Test
     void marksIndicatorRunFailedWithoutRethrowingFromConsumerTask() {
-        BehaviorProcessingService behaviorProcessingService = mock(BehaviorProcessingService.class);
+        ComplianceAnalysisOrchestrator analysis = mock(ComplianceAnalysisOrchestrator.class);
         AnalysisRunFailureService failureService = mock(AnalysisRunFailureService.class);
-        doThrow(new RuntimeException("指标计算异常")).when(behaviorProcessingService)
-                .processProjectBehaviors(1L, 10L, 20L, "run-1", "message");
+        doThrow(new RuntimeException("指标计算异常")).when(analysis)
+                .process(any(IndicatorCalculationTaskMessage.class), eq(new AnalysisScope(10L, 20L, "run-1")));
         org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor executor =
                 new org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor();
         executor.setCorePoolSize(1);
         executor.setMaxPoolSize(1);
         executor.initialize();
         try {
-            MessageTask task = new MessageTask();
-            ReflectionTestUtils.setField(task, "behaviorProcessingService", behaviorProcessingService);
+            MessageTask task = task();
+            ReflectionTestUtils.setField(task, "analysis", analysis);
             ReflectionTestUtils.setField(task, "analysisRunFailureService", failureService);
             ReflectionTestUtils.setField(task, "behaviorThreadPoolExecutor", executor);
 
@@ -193,7 +163,7 @@ class MessageTaskScopeTest {
         when(evidenceService.extractAndPersist(eq(scope), any())).thenReturn(Collections.emptyList());
         when(pipeline.process(scope, Collections.singletonList(document))).thenReturn(Collections.emptyList());
 
-        MessageTask task = new MessageTask();
+        MessageTask task = task();
         ReflectionTestUtils.setField(task, "documentProcessingService", documentService);
         ReflectionTestUtils.setField(task, "sourceDocumentScopeValidator", scopeValidator);
         ReflectionTestUtils.setField(task, "evidenceExtractionService", evidenceService);
@@ -252,7 +222,7 @@ class MessageTaskScopeTest {
         when(pipeline.process(scope, Collections.singletonList(document)))
                 .thenThrow(new IllegalStateException("事实抽取失败"));
 
-        MessageTask task = new MessageTask();
+        MessageTask task = task();
         ReflectionTestUtils.setField(task, "documentProcessingService", documentService);
         ReflectionTestUtils.setField(task, "sourceDocumentScopeValidator", scopeValidator);
         ReflectionTestUtils.setField(task, "evidenceExtractionService", evidenceService);

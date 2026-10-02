@@ -26,7 +26,7 @@ public interface IndicatorResultRepository extends JpaRepository<IndicatorResult
             Long assessmentId, String analysisRunId, String indicatorEsId);
 
     /**
-     * 按评估与运行读取指标结果，供后续分析上下文回放旧链检索轨迹。
+     * 按评估与运行读取指标结果，供分析上下文回放冻结的检索与计算轨迹。
      */
     List<IndicatorResult> findByAssessmentIdAndAnalysisRunId(Long assessmentId, String analysisRunId);
 

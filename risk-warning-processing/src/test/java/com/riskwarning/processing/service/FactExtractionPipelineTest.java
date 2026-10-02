@@ -56,7 +56,7 @@ class FactExtractionPipelineTest {
 
         assertEquals(Arrays.asList(first, second), result);
         verify(writer).enrichAndWrite(Arrays.asList(first, second));
-        // 每个文档抽取前必须先清理该 run 下该文档的旧产物（p1-06 D5）
+        // 每个文档抽取前必须先清理该 run 下该文档的旧产物（ D5）
         verify(repository).deleteByAnalysisRunIdAndSourceDocumentId("run-1", 101L);
         verify(repository).deleteByAnalysisRunIdAndSourceDocumentId("run-1", 102L);
     }

@@ -23,9 +23,10 @@ class AnalysisOverviewServiceTest {
     private final AnalysisResultRepository results = mock(AnalysisResultRepository.class);
     private final RetrievalAuditRepository audits = mock(RetrievalAuditRepository.class);
     private final BehaviorDocumentRepository behaviors = mock(BehaviorDocumentRepository.class);
+    private final RuleEvaluationAuditRepository ruleAudits = mock(RuleEvaluationAuditRepository.class);
     private final AnalysisRunSelector runSelector = new AnalysisRunSelector(runs);
     private final AnalysisOverviewService service = new AnalysisOverviewService(
-            assessments, projects, runSelector, results, audits, behaviors);
+            assessments, projects, runSelector, results, audits, behaviors, ruleAudits);
     private final LocalDateTime start = LocalDateTime.of(2026, 9, 18, 10, 0);
     private AnalysisRun run;
 
@@ -47,15 +48,59 @@ class AnalysisOverviewServiceTest {
         verifyNoInteractions(results, audits, behaviors);
     }
     @Test void running() { assertEquals("RUNNING", service.overview(86L, 7L).getDisplayStatus()); }
+    private void reasoningRun() {
+        run = AnalysisRun.start(new AnalysisScope(7L, 86L, "latest"), start, com.riskwarning.common.enums.AnalysisExecutionMode.REASONING);
+        run.freezeBehaviors(Collections.singletonList("b"));
+        when(runs.findFirstByAssessmentIdAndProjectIdOrderByStartedAtDescAnalysisRunIdDesc(86L, 7L)).thenReturn(Optional.of(run));
+    }
+    @Test void reasoningSemanticResultDoesNotCountAsIndicatorDecision() {
+        reasoningRun();
+        when(results.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.singletonList(
+                AnalysisResult.builder().id("result").schemaVersion("1.1").behaviorId("b").indicatorId("i")
+                        .applicable(Applicability.APPLICABLE).complianceStatus(ComplianceStatus.COMPLIANT).build()));
+        when(behaviors.findByScope(7L, 86L, "latest")).thenThrow(new RuntimeException("unavailable"));
+        AnalysisOverviewVO vo = service.overview(86L, 7L);
+        assertEquals(1, vo.getSummary().getBehaviorCount()); assertEquals(1, vo.getSummary().getConclusionCount());
+        assertEquals(0, vo.getSummary().getDecisionCount()); assertNull(vo.getSummary().getCompletionKind());
+        assertEquals(1, vo.getBehaviorGroups().size()); assertEquals("REASONING_RULES_V1", vo.getRun().getAnalysisMode());
+    }
+    @Test void preparedSummaryMustMatchPersistedDecisionCount() {
+        reasoningRun();
+        com.fasterxml.jackson.databind.node.ObjectNode summary = new com.fasterxml.jackson.databind.ObjectMapper().createObjectNode();
+        summary.put("behaviorCount", 1); summary.put("decisionCount", 1); summary.put("completionKind", "FULL");
+        run.prepareReport(summary);
+        assertThrows(IllegalStateException.class, () -> service.overview(86L, 7L));
+    }
+    @Test void noneSummarySurvivesMissingEsAndDoesNotBecomeNoRisk() {
+        reasoningRun();
+        AnalysisSummaryVO summary = new AnalysisSummaryVO(); summary.setBehaviorCount(1); summary.setCompletionKind(CompletionKind.NONE);
+        run.prepareReport(new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(summary)); run.completeWithoutDecision(start.plusMinutes(1));
+        AnalysisOverviewVO vo = service.overview(86L, 7L);
+        assertEquals(CompletionKind.NONE, vo.getSummary().getCompletionKind());
+        assertEquals(0, vo.getSummary().getDecisionCount()); assertEquals("COMPLETED_WITHOUT_DECISION", vo.getDisplayStatus());
+    }
+    @Test void bridgeFieldsAreExposedWithoutInventingReasoningCoverage() {
+        when(results.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.singletonList(
+                AnalysisResult.builder().id("result").schemaVersion("1.1").behaviorId("b").indicatorId("i")
+                        .applicable(Applicability.APPLICABLE).complianceStatus(ComplianceStatus.COMPLIANT)
+                        .observedValue(0.0).observedUnit("day").modelVersion("model-v1").build()));
+        AnalysisOverviewVO vo = service.overview(86L, 7L);
+        AnalysisConclusionVO c = vo.getBehaviorGroups().get(0).getConclusions().get(0);
+        assertEquals("1.1", c.getSchemaVersion());
+        assertEquals(0.0, c.getObservedValue());
+        assertEquals("day", c.getObservedUnit());
+        assertNull(c.getConditionMet());
+        assertNull(vo.getSummary().getCompletionKind());
+    }
     @Test void failedDoesNotBecomeNoCandidates() {
         run.fail(start.plusSeconds(1)); audit(RetrievalAuditStatus.NO_CANDIDATES, AnalysisAuditStatus.NOT_ATTEMPTED, Collections.emptyList());
         assertEquals("FAILED", service.overview(86L, 7L).getDisplayStatus());
     }
-    @Test void succeededCountsDecision() {
+    @Test void semanticConclusionAloneDoesNotCreateIndicatorDecision() {
         run.succeed(start.plusSeconds(1)); conclusion(ComplianceStatus.NON_COMPLIANT);
         AnalysisOverviewVO vo = service.overview(86L, 7L);
-        assertEquals("COMPLETED_WITH_DECISION", vo.getDisplayStatus()); assertEquals(1, vo.getSummary().getDecisionCount());
-        assertTrue(vo.getBehaviorGroups().get(0).getConclusions().get(0).isMock());
+        assertEquals("COMPLETED_WITH_DECISION", vo.getDisplayStatus()); assertEquals(0, vo.getSummary().getDecisionCount());
+        assertFalse(vo.getBehaviorGroups().get(0).getConclusions().get(0).isMock());
     }
     @Test void insufficientEvidenceRetainedWithoutDecision() {
         run.completeWithoutDecision(start.plusSeconds(1)); conclusion(ComplianceStatus.INSUFFICIENT_EVIDENCE);
@@ -95,7 +140,7 @@ class AnalysisOverviewServiceTest {
     }
     @Test void candidatePreservesRetrievalIdentityAndVersions() {
         Map<String, String> filters = Collections.singletonMap("enabled", "false");
-        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_P3, Collections.singletonList(
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_ANALYSIS, Collections.singletonList(
                 RetrievalCandidateSnapshot.builder().name("指标")
                         .result(RetrievalResult.builder().candidateType(RetrievalCandidateType.INDICATOR)
                                 .candidateId("indicator-1").behaviorId("b").assessmentId(86L)
@@ -195,7 +240,7 @@ class AnalysisOverviewServiceTest {
         when(runs.findByAnalysisRunIdAndAssessmentIdAndProjectId("good-run", 86L, 7L)).thenReturn(Optional.of(older));
         when(audits.findByAssessmentIdAndAnalysisRunId(86L, "good-run")).thenReturn(Collections.singletonList(
                 RetrievalAudit.builder().behaviorId("b").retrievalStatus(RetrievalAuditStatus.SUCCESS)
-                        .analysisStatus(AnalysisAuditStatus.WAITING_P3)
+                        .analysisStatus(AnalysisAuditStatus.WAITING_ANALYSIS)
                         .embeddingModel("BAAI/bge-m3").embeddingVersion("v1")
                         .candidates(Collections.singletonList(RetrievalCandidateSnapshot.builder().name("采购指标")
                                 .result(RetrievalResult.builder().candidateType(RetrievalCandidateType.INDICATOR)
@@ -242,22 +287,22 @@ class AnalysisOverviewServiceTest {
         assertEquals("FAILED", vo.getDisplayStatus());
         assertFalse(vo.getRun().isFallbackToUsableRun());
     }
-    @Test void runSummaryDistinguishesRealRetrievalFromMockConclusions() {
+    @Test void runSummaryAlwaysUsesComplianceAnalysisMode() {
         run.succeed(start.plusSeconds(1));
-        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_P3, Collections.emptyList());
-        assertEquals("P2_RETRIEVAL", service.overview(86L, 7L).getRun().getAnalysisMode());
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.WAITING_ANALYSIS, Collections.emptyList());
+        assertEquals("REASONING_RULES_V1", service.overview(86L, 7L).getRun().getAnalysisMode());
 
         conclusion(ComplianceStatus.NON_COMPLIANT);
-        assertEquals("LEGACY_MOCK_DEMO", service.overview(86L, 7L).getRun().getAnalysisMode());
+        assertEquals("REASONING_RULES_V1", service.overview(86L, 7L).getRun().getAnalysisMode());
     }
     @Test void controllerErrors() {
         AnalysisOverviewController controller = new AnalysisOverviewController(service);
-        assertEquals(400, controller.overview(86L, null).getCode());
-        assertEquals(403, controller.overview(86L, 8L).getCode());
+        assertThrows(IllegalArgumentException.class, () -> controller.overview(86L, null));
+        assertThrows(SecurityException.class, () -> controller.overview(86L, 8L));
         when(assessments.findById(99L)).thenReturn(Optional.empty());
-        assertEquals(404, controller.overview(99L, 7L).getCode());
+        assertThrows(java.util.NoSuchElementException.class, () -> controller.overview(99L, 7L));
         when(audits.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenThrow(new IllegalStateException("DB unavailable"));
-        assertEquals(500, controller.overview(86L, 7L).getCode());
+        assertThrows(IllegalStateException.class, () -> controller.overview(86L, 7L));
     }
     private void audit(RetrievalAuditStatus retrieval, AnalysisAuditStatus analysis, List<RetrievalCandidateSnapshot> candidates) {
         when(audits.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.singletonList(
@@ -266,6 +311,6 @@ class AnalysisOverviewServiceTest {
     private void conclusion(ComplianceStatus status) {
         when(results.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.singletonList(
                 AnalysisResult.builder().id("result").behaviorId("b").indicatorId("i50").applicable(Applicability.APPLICABLE)
-                        .complianceStatus(status).modelVersion("mock-fixture-v1").build()));
+                        .complianceStatus(status).modelVersion("model-v1").build()));
     }
 }

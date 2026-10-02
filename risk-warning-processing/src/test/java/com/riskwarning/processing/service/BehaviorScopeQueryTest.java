@@ -13,7 +13,7 @@ class BehaviorScopeQueryTest {
 
     @Test
     void buildsExactProjectAssessmentAndRunTerms() {
-        Query query = BehaviorProcessingService.buildBehaviorScopeQuery(10L, 20L, "run-1");
+        Query query = com.riskwarning.processing.repository.BehaviorScopeQuery.build(10L, 20L, "run-1");
 
         assertTrue(query.isBool());
         List<Query> terms = query.bool().must();
@@ -29,6 +29,6 @@ class BehaviorScopeQueryTest {
     @Test
     void rejectsIncompleteScopeInsteadOfFallingBackToProjectQuery() {
         assertThrows(IllegalArgumentException.class,
-                () -> BehaviorProcessingService.buildBehaviorScopeQuery(10L, 20L, " "));
+                () -> com.riskwarning.processing.repository.BehaviorScopeQuery.build(10L, 20L, " "));
     }
 }

@@ -39,7 +39,7 @@ public class FactExtractionPipeline {
 
     /**
      * 所有文件抽取成功后一次写入，抽取失败时不会写入部分 Behavior。
-     * 每个文档抽取前先清理该 run 下该文档已落库的旧产物（p1-06 D5），
+     * 每个文档抽取前先清理该 run 下该文档已落库的旧产物（ D5），
      * 保证同 analysisRunId 重跑（消息重投、崩溃恢复）不会因模型输出漂移残留重复文档。
      */
     public List<Behavior> process(AnalysisScope scope, List<SourceDocumentRef> documents) {

@@ -91,7 +91,7 @@ class AnalysisRunPersistenceTest {
         }
     }
 
-    /** 验证 P1-08 新增的"最近成功运行"解析在真实 SQL 下的排序与状态过滤。 */
+    /** 验证  新增的"最近成功运行"解析在真实 SQL 下的排序与状态过滤。 */
     @Test
     void resolvesMostRecentSuccessfulRunIgnoringFailedOnes() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();

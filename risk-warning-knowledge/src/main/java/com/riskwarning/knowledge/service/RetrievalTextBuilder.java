@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 知识库检索文本构建器（P2-02 冻结模板）。
+ * 知识库检索文本构建器。
  *
- * <p>模板版本（P2-02-01 模板对照实验冻结）：
+ * <p>冻结模板版本：
  * <ul>
  *   <li>ind-v1：指标 = name + "\n" + description + "\n" + tags（空白段跳过，tags 空格连接）</li>
  *   <li>reg-v1：法规 = name + "\n" + fullText（完整原文，不截断）</li>
@@ -19,7 +19,7 @@ import java.util.List;
  * <p>complianceDomain / regionCodes 是过滤维度，不进入检索文本；
  * RANGE/BINARY 等计算规则不影响文本生成。输出为确定性函数：同输入必同输出。
  *
- * <p>超长法规明确拒绝并记录，不静默截断唯一原文（计划 12 风险表）。
+ * <p>超长法规明确拒绝并记录，不静默截断唯一原文。
  */
 @Component
 public class RetrievalTextBuilder {

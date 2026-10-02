@@ -69,7 +69,7 @@ class EvidenceChunkRepositoryPersistenceTest {
         }
     }
 
-    /** 验证 P1-08 新增派生查询的真实 SQL 解析；方法名拼错会在仓库创建时暴露。 */
+    /** 验证  新增派生查询的真实 SQL 解析；方法名拼错会在仓库创建时暴露。 */
     @Test
     void queriesEvidenceByAssessmentScopeAndIdBatch() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();

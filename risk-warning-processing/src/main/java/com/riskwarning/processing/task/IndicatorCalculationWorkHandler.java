@@ -5,18 +5,18 @@ import com.riskwarning.common.message.IndicatorCalculationTaskMessage;
 import com.riskwarning.common.observability.AssessmentFlowContext;
 import com.riskwarning.common.reliability.DurableWorkContext;
 import com.riskwarning.common.reliability.DurableWorkHandler;
-import com.riskwarning.processing.config.P2ProcessingProperties;
 import com.riskwarning.processing.service.AnalysisRunFailureService;
-import com.riskwarning.processing.service.BehaviorProcessingService;
-import com.riskwarning.processing.service.P2RetrievalProcessingService;
+import com.riskwarning.processing.service.AnalysisRunModeResolver;
+import com.riskwarning.processing.service.ComplianceAnalysisOrchestrator;
+import com.riskwarning.common.enums.AnalysisExecutionMode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 指标计算持久任务：按运行模式分发到 P2 检索链或 LEGACY 行为评估链。
+ * 指标计算持久任务：仅进入合规分析主链。
  * 检索超时、外部服务不可用等临时异常直接外抛，由 Durable Work 重试，
  * AnalysisRun 在临时故障期间保持 RUNNING；重试耗尽后才标记为 FAILED。
- * LEGACY 链传入原始 indicator messageId，保证完成事件 ID 稳定可去重。
+ * 消息身份保持稳定，运行作用域全程不变。
  */
 @Component
 @Slf4j
@@ -25,21 +25,18 @@ public class IndicatorCalculationWorkHandler implements DurableWorkHandler {
     public static final String KIND = "INDICATOR_CALCULATION";
 
     private final ProcessingMessageCodec codec;
-    private final P2RetrievalProcessingService p2RetrievalProcessingService;
-    private final BehaviorProcessingService behaviorProcessingService;
-    private final P2ProcessingProperties p2Properties;
     private final AnalysisRunFailureService analysisRunFailureService;
+    private final AnalysisRunModeResolver runModes;
+    private final ComplianceAnalysisOrchestrator analysis;
 
     public IndicatorCalculationWorkHandler(ProcessingMessageCodec codec,
-                                           P2RetrievalProcessingService p2RetrievalProcessingService,
-                                           BehaviorProcessingService behaviorProcessingService,
-                                           P2ProcessingProperties p2Properties,
-                                           AnalysisRunFailureService analysisRunFailureService) {
+                                           AnalysisRunFailureService analysisRunFailureService,
+                                           AnalysisRunModeResolver runModes,
+                                           ComplianceAnalysisOrchestrator analysis) {
         this.codec = codec;
-        this.p2RetrievalProcessingService = p2RetrievalProcessingService;
-        this.behaviorProcessingService = behaviorProcessingService;
-        this.p2Properties = p2Properties;
         this.analysisRunFailureService = analysisRunFailureService;
+        this.runModes = runModes;
+        this.analysis = analysis;
     }
 
     @Override
@@ -51,20 +48,15 @@ public class IndicatorCalculationWorkHandler implements DurableWorkHandler {
     public void execute(DurableWorkContext context, String payload) {
         IndicatorCalculationTaskMessage message = codec.decodeIndicator(payload);
         AnalysisScope analysisScope = MessageTask.requireScope(message);
+        AnalysisExecutionMode mode = runModes.resolve(analysisScope);
         log.info("[Durable 指标计算] workId={}, messageId={}, projectId={}, mode={}",
                 context.getWorkId(), message.getMessageId(),
-                message.getProjectId(), p2Properties.getMode());
-        if (p2Properties.getMode() == P2ProcessingProperties.Mode.P2) {
-            p2RetrievalProcessingService.process(message, analysisScope);
-        } else {
-            behaviorProcessingService.processProjectBehaviors(
-                    message.getUserId(), message.getProjectId(), message.getAssessmentId(),
-                    analysisScope.getAnalysisRunId(), message.getMessageId());
-        }
+                message.getProjectId(), mode);
+        analysis.process(message, analysisScope);
     }
 
     /**
-     * 重试耗尽后按载荷中的原始作用域终止分析运行；P2 与 LEGACY 共用同一规则，
+     * 重试耗尽后按载荷中的原始作用域终止分析运行；仅终止当前主链的运行，
      * analysisRunId 全程不变。载荷损坏或标记动作失败只记录日志，
      * 不改变 Durable Work 已 FAILED 的事实。
      */
@@ -86,7 +78,7 @@ public class IndicatorCalculationWorkHandler implements DurableWorkHandler {
         }
         log.error("[Durable 指标计算重试耗尽] workId={}, analysisRunId={}, projectId={}, mode={}",
                 context.getWorkId(), scope.getAnalysisRunId(), scope.getProjectId(),
-                p2Properties.getMode(), failure);
+                AnalysisExecutionMode.REASONING, failure);
     }
 
     /** 从载荷恢复链路身份；解析失败由 Worker 降级到任务固有身份。 */

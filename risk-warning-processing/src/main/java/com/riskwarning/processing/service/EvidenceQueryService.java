@@ -100,7 +100,7 @@ public class EvidenceQueryService {
         List<EvidenceChunk> verified = new ArrayList<>(chunks.size());
         for (EvidenceChunk chunk : chunks) {
             if (!projectId.equals(chunk.getProjectId()) || !assessmentId.equals(chunk.getAssessmentId())) {
-                throw new IllegalStateException("证据归属与查询作用域不一致: " + chunk.getId());
+                throw new SecurityException("证据归属与查询作用域不一致: " + chunk.getId());
             }
             chunk.verifyIntegrity();
             verified.add(chunk);

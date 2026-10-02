@@ -10,6 +10,13 @@ import java.util.List;
 @AllArgsConstructor
 public class AnalysisSummaryVO {
     private int behaviorCount;
+    /** Reasoning 覆盖摘要由权威记录派生，Retrieval 不解释此字段。 */
+    private com.riskwarning.common.enums.analysis.CompletionKind completionKind;
+    private int analyzedCount;
+    private int noApplicableCandidateCount;
+    private int needsReviewCount;
+    private int unsupportedRuleCount;
+    private int conflictCount;
     private int conclusionCount;
     private int decisionCount;
     private int retrievalSuccessCount;

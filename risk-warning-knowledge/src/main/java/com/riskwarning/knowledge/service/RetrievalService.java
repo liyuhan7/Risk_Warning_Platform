@@ -184,7 +184,8 @@ public class RetrievalService {
                     .contentHash(!indicator && content != null ? EvidenceChunk.sha256(content) : null)
                     .indicatorLevel(level instanceof Number ? ((Number) level).intValue() : null)
                     .dimension(string(source.get("dimension"))).type(string(source.get("type")))
-                    .maxScore(max instanceof Number ? ((Number) max).doubleValue() : null).build());
+                    .maxScore(max instanceof Number ? ((Number) max).doubleValue() : null)
+                    .sourceRule(indicator ? IndicatorRuleSourceSnapshot.capture(result.getCandidateId(), source) : null).build());
         }
         return output;
     }

@@ -22,6 +22,7 @@ class FactExtractionResponseValidatorTest {
     void matchesAllFrozenP104Samples() throws Exception {
         FactExtractionResponseValidator validator = new FactExtractionResponseValidator(objectMapper);
         JsonNode samples = objectMapper.readTree(fixture("fact-extraction-samples.json").toFile());
+        assertTrue(samples.isArray() && samples.size() > 0, "冻结样例必须为非空数组");
 
         for (JsonNode sample : samples) {
             Set<String> allowed = new HashSet<>();
@@ -56,9 +57,9 @@ class FactExtractionResponseValidatorTest {
     }
 
     private Path fixture(String... parts) {
-        Path root = Paths.get("..", "test", "fixtures", "p1");
+        Path root = Paths.get("..", "test", "fixtures", "fact-extraction");
         if (!Files.exists(root)) {
-            root = Paths.get("test", "fixtures", "p1");
+            root = Paths.get("test", "fixtures", "fact-extraction");
         }
         for (String part : parts) {
             root = root.resolve(part);

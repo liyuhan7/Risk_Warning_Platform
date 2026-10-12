@@ -2,7 +2,7 @@
   "caseId": "CASE-002",
   "caseType": "COMPLIANT",
   "companyName": "正源智能装备有限公司",
-  "generationBasis": "documents/data/indicator.json（金标准得分与风险触发由脚本从指标规则机械推导）",
+  "generationBasis": "documents/data/old/indicator.json（金标准得分与风险触发由脚本从指标规则机械推导）",
   "projectId": 4,
   "assessmentId": 33,
   "sourceDocuments": [

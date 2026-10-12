@@ -2,7 +2,7 @@
   "caseId": "CASE-003",
   "caseType": "INSUFFICIENT_EVIDENCE",
   "companyName": "云枢信息科技有限公司",
-  "generationBasis": "documents/data/indicator.json（金标准得分与风险触发由脚本从指标规则机械推导）",
+  "generationBasis": "documents/data/old/indicator.json（金标准得分与风险触发由脚本从指标规则机械推导）",
   "projectId": 5,
   "assessmentId": 34,
   "sourceDocuments": [

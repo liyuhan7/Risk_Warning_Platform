@@ -2,7 +2,7 @@
 """P0 固定测试案例生成脚本（指标驱动版）。
 
 金标准原则：
-- 测试材料严格依据 documents/data/indicator.json 中真实存在的可执行三级指标构造；
+- 历史虚拟验收材料依据 documents/data/old/indicator.json 构造，不用于当前生产评估；
 - 每个事实段落对应一个指标的 BINARY 判定条件，句子只负责让条件真假唯一可判；
 - expected.json 中的预期得分 / 风险触发由脚本从指标规则机械推导，不依赖人工常识判断；
 - CASE-001 与 CASE-002 使用同一批指标做镜像对照（同一规则、相反事实、相反结论），
@@ -19,7 +19,7 @@ from docx import Document
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", "..", ".."))
-INDICATOR_FILE = os.path.join(REPO_ROOT, "documents", "data", "indicator.json")
+INDICATOR_FILE = os.path.join(REPO_ROOT, "documents", "data", "old", "indicator.json")
 
 # 已人工审批冻结的运行时标识。重跑本脚本不得改变这些值，
 # 否则回归比对将失去与历史 Baseline 的可对照性。
@@ -207,7 +207,7 @@ def build_expected(case_id, spec, resolved, regulations):
         "caseId": case_id,
         "caseType": spec["caseType"],
         "companyName": spec["companyName"],
-        "generationBasis": "documents/data/indicator.json（金标准得分与风险触发由脚本从指标规则机械推导）",
+        "generationBasis": "documents/data/old/indicator.json（历史虚拟验收，得分与触发由旧指标规则推导）",
         "projectId": FROZEN_PROJECT_IDS.get(case_id),
         "assessmentId": FROZEN_ASSESSMENT_IDS.get(case_id),
         "sourceDocuments": [{
@@ -233,7 +233,7 @@ def check_sentence(text):
 
 def main():
     items = load_indicators()
-    reg_data = json.load(open(os.path.join(REPO_ROOT, "documents", "data", "regulation.json"), encoding="utf-8"))
+    reg_data = json.load(open(os.path.join(REPO_ROOT, "documents", "data", "old", "regulation.json"), encoding="utf-8"))
     regulations = reg_data if isinstance(reg_data, list) else reg_data.get("items", [])
     summary = []
     for case_id, spec in CASES.items():

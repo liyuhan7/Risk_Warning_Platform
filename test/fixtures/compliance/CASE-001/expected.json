@@ -2,7 +2,7 @@
   "caseId": "CASE-001",
   "caseType": "NON_COMPLIANT",
   "companyName": "宏图电子制造有限公司",
-  "generationBasis": "documents/data/indicator.json（金标准得分与风险触发由脚本从指标规则机械推导）",
+  "generationBasis": "documents/data/old/indicator.json（金标准得分与风险触发由脚本从指标规则机械推导）",
   "projectId": 3,
   "assessmentId": 32,
   "sourceDocuments": [

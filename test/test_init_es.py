@@ -28,6 +28,10 @@ def mapping_fixture(analyzer="ik_max_word"):
 
 
 class FreshInitializationTest(unittest.TestCase):
+    def test_knowledge_seed_sources_are_current_business_libraries(self):
+        self.assertEqual("documents/data/indicator.json", init_es.INDEX_SEED_FILES["t_indicator"])
+        self.assertEqual("documents/data/regulation.json", init_es.INDEX_SEED_FILES["t_regulation"])
+
     def test_existing_index_is_never_overwritten_or_seeded(self):
         with patch.object(init_es, "http", return_value=(200, "")) as http, patch.object(init_es, "bulk_import") as seed:
             init_es.initialize_missing_indices({"t_indicator": {}})

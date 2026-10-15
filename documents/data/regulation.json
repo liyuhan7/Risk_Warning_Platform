@@ -39,13 +39,13 @@
   },
   {
     "id": "-AUtUZ0B3BXzX1tXFV8S",
-    "name": "证券法-内幕交易罚款",
+    "name": "证券法-内幕交易非法持券处理、所得没收与倍数罚款",
     "type": "定量",
     "dimension": "企业关联方风险",
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "内幕交易行为人",
-    "fullText": "内幕交易行为人，没收违法所得，并处以违法所得一倍以上十倍以下的罚款。",
+    "fullText": "内幕交易行为人，责令依法处理非法持有的证券，没收违法所得，并处以违法所得一倍以上十倍以下的罚款。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-25T19:32:28.000000",
     "complianceDomain": [
@@ -97,12 +97,12 @@
   },
   {
     "id": "-AUtUZ0B3BXzX1tXFVwQ",
-    "name": "劳动合同法-劳务派遣协议",
+    "name": "劳动合同法-劳务派遣协议约定事项",
     "type": "定性",
     "dimension": "劳务合规风险",
     "region": "中国",
     "direction": "必要",
-    "applicableSubject": "用工单位",
+    "applicableSubject": "劳务派遣单位",
     "fullText": "劳务派遣单位应当与用工单位订立劳务派遣协议。劳务派遣协议应当约定派遣岗位和人员数量、派遣期限、劳动报酬和社会保险费的数额与支付方式以及违反协议的责任。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T22:51:51.000000",
@@ -286,7 +286,7 @@
   },
   {
     "id": "-QUtUZ0B3BXzX1tXFVwQ",
-    "name": "反垄断法-滥用市场支配地位",
+    "name": "反垄断法-市场支配地位经营者的价格滥用行为",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -305,7 +305,7 @@
   },
   {
     "id": "-QUtUZ0B3BXzX1tXFWAS",
-    "name": "典当管理办法-注册资本",
+    "name": "典当管理办法-一般典当与房地产抵押典当资本分支",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -324,7 +324,7 @@
   },
   {
     "id": "-QUtUZ0B3BXzX1tXFWES",
-    "name": "商业银行授信工作尽职指引",
+    "name": "商业银行授信工作尽职指引-授信制度与客户调查审批",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -399,7 +399,7 @@
   },
   {
     "id": "-gUtUZ0B3BXzX1tXFV8S",
-    "name": "网络交易监督管理办法-搭售",
+    "name": "网络交易监督管理办法-搭售显著提醒",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -515,7 +515,7 @@
   },
   {
     "id": "-gUtUZ0B3BXzX1tXFWIT",
-    "name": "对外贸易法-国营贸易",
+    "name": "对外贸易法-国营贸易授权经营资格",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -591,7 +591,7 @@
   },
   {
     "id": "-wUtUZ0B3BXzX1tXFV8S",
-    "name": "商业银行大额风险暴露管理办法-集团客户",
+    "name": "商业银行大额风险暴露管理办法-非同业单一集团客户授信上限",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -610,7 +610,7 @@
   },
   {
     "id": "-wUtUZ0B3BXzX1tXFVoM",
-    "name": "纳税信用管理办法-A级纳税人",
+    "name": "纳税信用管理办法-纳税信用评价周期与A级分值",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -688,7 +688,7 @@
   },
   {
     "id": "-wUtUZ0B3BXzX1tXFWES",
-    "name": "建设工程质量管理条例-保修期",
+    "name": "建设工程质量管理条例-防水防渗漏工程保修期限",
     "type": "定量",
     "dimension": "供应链风险",
     "region": "中国",
@@ -706,12 +706,12 @@
   },
   {
     "id": "-wUtUZ0B3BXzX1tXFWIT",
-    "name": "工伤保险条例-一次性补助",
+    "name": "工伤保险条例-工亡近亲属待遇领取",
     "type": "定性",
     "dimension": "劳务合规风险",
     "region": "中国",
     "direction": "必要",
-    "applicableSubject": "社保基金",
+    "applicableSubject": "因工死亡职工近亲属",
     "fullText": "职工因工死亡，其近亲属按照规定从工伤保险基金领取丧葬补助金、供养亲属抚恤金和一次性工亡补助金。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T17:29:00.000000",
@@ -730,7 +730,7 @@
     "region": "全球",
     "direction": "必要",
     "applicableSubject": "跨国企业",
-    "fullText": "跨国公司内部交易定价应遵循独立交易原则（Arm's Length Principle）。\n适用主体或业务条件：跨国企业。",
+    "fullText": "跨国公司内部交易定价应遵循独立交易原则（Arm's Length Principle）。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T18:30:00.000000",
     "complianceDomain": [
@@ -1189,7 +1189,7 @@
   },
   {
     "id": "0QUtUZ0B3BXzX1tXFVsN",
-    "name": "环境保护法-排污收费",
+    "name": "环境保护法-达标基础上进一步减排的政策鼓励",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -1537,25 +1537,6 @@
     ]
   },
   {
-    "id": "0gUtUZ0B3BXzX1tXFV8S",
-    "name": "劳动合同法-试用期工资",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "用人单位",
-    "fullText": "劳动者在试用期的工资不得低于本单位相同岗位最低档工资或者劳动合同约定工资的80%。",
-    "quantitativeIndicator": 0.8,
-    "createdAt": "2025-11-25T18:53:50.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "0gUtUZ0B3BXzX1tXFVsN",
     "name": "消费者权益保护法-远程七日无理由退货及适用例外",
     "type": "定量",
@@ -1563,33 +1544,13 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "经营者",
-    "fullText": "适用条件：中国生活消费中经营者通过网络、电视、电话、邮购等方式销售商品，按消费者权益保护法第二十五条办理无理由退货。消费者收到商品之日起七日内可以退货无须说明理由；消费者定作、鲜活易腐、在线下载或消费者拆封的音像制品及计算机软件等数字商品、交付报纸期刊不适用。其他依商品性质不宜退货的须消费者购买时确认，经营者不得擅自扩大范围；依实施条例第十九条显著标注提示确认，不得默认同意，未经确认不得拒绝。退回商品应完好；合理查验打开包装或调试且不影响原有品质功能外观的应予退货。质量瑕疵责任另按第二十四条等处理，不能以不适用无理由退货免除。七日保留收到商品的日历期间起点，不换为签订单或一百六十八小时。",
+    "fullText": "适用条件：中国生活消费中经营者通过网络、电视、电话、邮购等方式销售商品，按消费者权益保护法第二十五条办理无理由退货。消费者收到商品之日起七日内可以退货无须说明理由；消费者定作、鲜活易腐、在线下载或消费者拆封的音像制品及计算机软件等数字商品、交付报纸期刊不适用。其他依商品性质不宜退货的须消费者购买时确认，经营者不得擅自扩大范围；依实施条例第十九条显著标注提示确认，不得默认同意，未经确认不得拒绝。退回商品应完好；合理查验打开包装或调试且不影响原有品质功能外观的应予退货。质量瑕疵责任另按第二十四条等处理，不能以不适用无理由退货免除。七日期间自消费者收到商品之日起按日历期间计算。",
     "quantitativeIndicator": 7.0,
     "createdAt": "2025-11-24T11:18:18.000000",
     "complianceDomain": [
       "电子商务",
       "零售业",
       "互联网"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "0gUtUZ0B3BXzX1tXFVwQ",
-    "name": "民用爆炸物品安全管理条例-购买许可",
-    "type": "定性",
-    "dimension": "供应链风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "民用爆炸物品使用单位",
-    "fullText": "申请购买民用爆炸物品的，应当向所在地县级人民政府公安机关提出购买申请，并提交有关材料。公安机关应当自受理申请之日起5日内审查完毕，对符合条件的，核发《民用爆炸物品购买许可证》。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T22:13:13.000000",
-    "complianceDomain": [
-      "采矿业",
-      "建筑工程",
-      "化工制造"
     ],
     "regionCodes": [
       "CN"
@@ -1659,7 +1620,7 @@
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "招标人",
-    "fullText": "招标人不得以不合理的条件限制、排斥潜在投标人或者投标人。\n适用主体或业务条件：政府采购。",
+    "fullText": "招标人不得以不合理的条件限制、排斥潜在投标人或者投标人。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T15:05:00.000000",
     "complianceDomain": [
@@ -1824,13 +1785,13 @@
   },
   {
     "id": "0wUtUZ0B3BXzX1tXFWMT",
-    "name": "上市公司章程指引-对外担保",
+    "name": "上市公司章程指引-对外担保审议权限",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "上市公司",
-    "fullText": "公司对外担保必须经董事会或股东大会审议。\n适用主体或业务条件：上市公司。",
+    "fullText": "公司对外担保必须经董事会或股东大会审议。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T15:10:00.000000",
     "complianceDomain": [
@@ -2143,25 +2104,6 @@
     ]
   },
   {
-    "id": "1QUtUZ0B3BXzX1tXFV0R",
-    "name": "禁止使用童工规定-工伤赔偿",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "用人单位",
-    "fullText": "童工患病或者受伤的，用人单位应当负责送到医疗机构治疗，并负担治疗期间的全部医疗和生活费用。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-25T09:27:27.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "1QUtUZ0B3BXzX1tXFV4R",
     "name": "商业银行并表管理指引-资本管理",
     "type": "定性",
@@ -2221,18 +2163,19 @@
   },
   {
     "id": "1QUtUZ0B3BXzX1tXFVwQ",
-    "name": "城镇燃气管理条例-安全检查",
+    "name": "城镇燃气管理条例-用户燃气设施定期检查与用气指导",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "燃气经营者",
-    "fullText": "燃气经营者应当定期对用户的燃气设施进行安全检查，指导用户安全用气。",
+    "fullText": "燃气经营者应当对燃气用户的燃气设施进行定期安全检查，并提供安全用气指导。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T22:16:16.000000",
     "complianceDomain": [
       "公共事业",
-      "能源"
+      "能源",
+      "石油天然气"
     ],
     "regionCodes": [
       "CN"
@@ -2554,18 +2497,17 @@
   },
   {
     "id": "1gUtUZ0B3BXzX1tXFV4R",
-    "name": "就业服务与就业管理规定-体检",
+    "name": "就业服务与就业管理规定-招聘乙肝血清学体检限制及法定岗位例外",
     "type": "定性",
     "dimension": "劳务合规风险",
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "用人单位",
-    "fullText": "用人单位招用人员，不得强行将乙肝病毒血清学指标作为体检标准。",
+    "fullText": "用人单位招用人员，除国家法律、行政法规和国务院卫生行政部门规定禁止乙肝病原携带者从事的工作外，不得强行将乙肝病毒血清学指标作为体检标准。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-25T14:40:40.000000",
     "complianceDomain": [
-      "医疗服务",
-      "服务业"
+      "综合类"
     ],
     "regionCodes": [
       "CN"
@@ -2573,7 +2515,7 @@
   },
   {
     "id": "1gUtUZ0B3BXzX1tXFV8S",
-    "name": "互联网药品信息服务管理办法-信息审核",
+    "name": "互联网药品信息服务管理办法-证书标注与禁发信息",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -2801,25 +2743,6 @@
     ]
   },
   {
-    "id": "1wUtUZ0B3BXzX1tXFWAS",
-    "name": "禁止使用童工规定-罚款标准执行",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "用人单位",
-    "fullText": "用人单位使用童工的，由劳动保障行政部门按照每使用一名童工每月处5000元罚款的标准给予处罚。",
-    "quantitativeIndicator": 5000.0,
-    "createdAt": "2025-11-26T00:58:07.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "1wUtUZ0B3BXzX1tXFWES",
     "name": "联合国全球契约十项原则",
     "type": "定性",
@@ -2827,7 +2750,7 @@
     "region": "国际",
     "direction": "可选",
     "applicableSubject": "企业",
-    "fullText": "企业应支持并尊重国际公认的人权，确保不因自身行为而成为侵犯人权的共犯。\n适用主体或业务条件：跨国企业。",
+    "fullText": "企业应支持并尊重国际公认的人权，确保不因自身行为而成为侵犯人权的共犯。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T11:37:00.000000",
     "complianceDomain": [
@@ -2854,25 +2777,6 @@
     ],
     "regionCodes": [
       "CN"
-    ]
-  },
-  {
-    "id": "1wUtUZ0B3BXzX1tXFWMT",
-    "name": "防止强迫维吾尔人劳动法(UFLPA)",
-    "type": "定性",
-    "dimension": "企业国际合作风险",
-    "region": "美国",
-    "direction": "禁止",
-    "applicableSubject": "进口商",
-    "fullText": "推定所有来自中国新疆地区的商品均由强迫劳动生产，除非提供明确证据反驳。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-01T15:30:00.000000",
-    "complianceDomain": [
-      "纺织制造",
-      "光伏"
-    ],
-    "regionCodes": [
-      "US"
     ]
   },
   {
@@ -3274,7 +3178,7 @@
   },
   {
     "id": "2AUtUZ0B3BXzX1tXFWIT",
-    "name": "上市公司信息披露管理办法-定期报告",
+    "name": "上市公司信息披露管理办法-年度报告编制披露期限",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -3292,7 +3196,7 @@
   },
   {
     "id": "2AUtUZ0B3BXzX1tXFWMT",
-    "name": "ISO 22000-食品安全管理体系",
+    "name": "ISO 22000-前提方案与HACCP危害控制",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "全球",
@@ -3331,7 +3235,7 @@
   },
   {
     "id": "2QUtUZ0B3BXzX1tXFV4R",
-    "name": "危险化学品安全管理条例-销售备案",
+    "name": "危险化学品安全管理条例-剧毒化学品购买备案",
     "type": "定量",
     "dimension": "供应链风险",
     "region": "中国",
@@ -3388,26 +3292,6 @@
     ]
   },
   {
-    "id": "2QUtUZ0B3BXzX1tXFVwQ",
-    "name": "烟花爆竹安全管理条例-道路运输",
-    "type": "定性",
-    "dimension": "供应链风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "托运人",
-    "fullText": "经由道路运输烟花爆竹的，应当经公安部门许可。托运人应当向运达地县级人民政府公安部门提出申请，提交相关材料，取得《烟花爆竹道路运输许可证》。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T22:20:20.000000",
-    "complianceDomain": [
-      "物流仓储",
-      "化工制造",
-      "交通运输"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "2QUtUZ0B3BXzX1tXFWAS",
     "name": "证券法-虚假陈述责任承担",
     "type": "定性",
@@ -3446,25 +3330,6 @@
     ]
   },
   {
-    "id": "2QUtUZ0B3BXzX1tXFWIT",
-    "name": "美国涉疆法案-可反驳推定",
-    "type": "定性",
-    "dimension": "企业国际合作风险",
-    "region": "美国",
-    "direction": "禁止",
-    "applicableSubject": "出口商",
-    "fullText": "除非CBP（美国海关和边境保护局）确定进口商完全遵守了相关指引并提供了令人信服的证据，否则推定所有在新疆开采、生产或制造的产品均由强迫劳动制造。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T16:55:00.000000",
-    "complianceDomain": [
-      "纺织制造",
-      "光伏"
-    ],
-    "regionCodes": [
-      "US"
-    ]
-  },
-  {
     "id": "2QUtUZ0B3BXzX1tXFWMT",
     "name": "内幕交易认定指南",
     "type": "定性",
@@ -3472,7 +3337,7 @@
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "内幕信息知情人",
-    "fullText": "禁止利用内幕信息买卖证券，或者泄露该信息，或者建议他人买卖该证券。\n适用主体或业务条件：上市公司。",
+    "fullText": "禁止利用内幕信息买卖证券，或者泄露该信息，或者建议他人买卖该证券。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T15:40:00.000000",
     "complianceDomain": [
@@ -4509,18 +4374,21 @@
   },
   {
     "id": "3AUtUZ0B3BXzX1tXFWES",
-    "name": "网络交易监督管理办法-自动续费",
+    "name": "网络交易监督管理办法-服务接受前及自动续费日前提醒与自主选择",
     "type": "定量",
     "dimension": "产品合规风险",
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "网络交易经营者",
-    "fullText": "网络交易经营者采取自动续费等方式提供服务的，应当在自动续费日期前5日，以显著方式提请消费者注意。",
+    "fullText": "网络交易经营者采取自动展期、自动续费等方式提供服务的，应当在消费者接受服务前和自动展期、自动续费等日期前5日，以显著方式提请消费者注意，由消费者自主选择。",
     "quantitativeIndicator": 5.0,
     "createdAt": "2025-11-24T12:03:00.000000",
     "complianceDomain": [
       "互联网",
-      "电信运营"
+      "电信运营",
+      "电子商务",
+      "服务业",
+      "零售业"
     ],
     "regionCodes": [
       "CN"
@@ -4661,7 +4529,7 @@
   },
   {
     "id": "3QUtUZ0B3BXzX1tXFWES",
-    "name": "商业银行理财业务监督管理办法-杠杆率",
+    "name": "商业银行理财业务监督管理办法-开放式公募理财杠杆上限",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -4882,13 +4750,13 @@
   },
   {
     "id": "3gUtUZ0B3BXzX1tXFVwQ",
-    "name": "农药管理条例-经营许可",
+    "name": "农药管理条例-农药经营许可取得与申请",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "农药经营者",
-    "fullText": "国家实行农药经营许可制度。经营农药的，应当向县级以上地方人民政府农业主管部门申请农药经营许可证。",
+    "fullText": "国家实行农药经营许可制度。经营农药应当取得农药经营许可证，并向县级以上地方人民政府农业主管部门申请办理。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T22:25:25.000000",
     "complianceDomain": [
@@ -5054,7 +4922,7 @@
   },
   {
     "id": "3wUtUZ0B3BXzX1tXFWES",
-    "name": "上市公司章程指引-对外担保",
+    "name": "上市公司章程指引-累计担保净资产比例触发股东大会审议",
     "type": "定量",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -5098,7 +4966,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "上市公司",
-    "fullText": "持有上市公司5%以上股份的法人或者其他组织，为上市公司的关联法人。\n适用主体或业务条件：上市公司。",
+    "fullText": "持有上市公司5%以上股份的法人或者其他组织，为上市公司的关联法人。",
     "quantitativeIndicator": 0.05,
     "createdAt": "2025-10-01T16:10:00.000000",
     "complianceDomain": [
@@ -5943,25 +5811,6 @@
     ]
   },
   {
-    "id": "4gUtUZ0B3BXzX1tXFWIT",
-    "name": "城镇燃气管理条例-安全检查",
-    "type": "定性",
-    "dimension": "供应链风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "燃气经营者",
-    "fullText": "燃气经营者应当对燃气用户的燃气设施进行定期安全检查，并提供安全用气指导。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T17:04:00.000000",
-    "complianceDomain": [
-      "公共事业",
-      "石油天然气"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "4gUtUZ0B3BXzX1tXFWMT",
     "name": "发票管理办法-虚开",
     "type": "定性",
@@ -6001,7 +5850,7 @@
   },
   {
     "id": "4wUtUZ0B3BXzX1tXFV4R",
-    "name": "对外贸易法-知识产权保护",
+    "name": "对外贸易法-对外贸易知识产权协定保护",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -6034,44 +5883,6 @@
       "建筑工程",
       "物流仓储",
       "市政公用"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "4wUtUZ0B3BXzX1tXFVwQ",
-    "name": "劳动合同法-劳动定额与加班安排",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "用人单位",
-    "fullText": "适用条件：中国境内适用劳动合同法的用人单位安排劳动者加班时。应严格执行劳动定额标准，不得强迫或者变相强迫劳动者加班；安排加班应按照国家有关规定支付加班费。工资支付书面记录及其保存要求另按工资支付暂行规定等适用依据核对，不能据本条推定所有考勤或加班事实记录统一保存两年。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T22:30:30.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "4wUtUZ0B3BXzX1tXFWAS",
-    "name": "禁止使用童工规定-录用登记及身份核查材料保管",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "用人单位",
-    "fullText": "适用条件：中国境内用人单位招用人员进行身份核查和录用登记时。应核查被招用人员身份证，并妥善保管录用登记、核查材料。第四条没有规定所有情形均须另行保存身份证复印件；具体材料形式、个人信息处理范围和保存期限应依实际核查需要及适用规定确定。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-26T01:10:19.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
     ],
     "regionCodes": [
       "CN"
@@ -6115,7 +5926,7 @@
   },
   {
     "id": "4wUtUZ0B3BXzX1tXFWMT",
-    "name": "外商投资安全审查办法",
+    "name": "外商投资安全审查办法-国防及重要行业投资安全审查",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -6448,12 +6259,12 @@
   },
   {
     "id": "5AUtUZ0B3BXzX1tXFWES",
-    "name": "互联网广告管理办法-弹出广告",
+    "name": "互联网广告管理办法-弹出广告关闭标志与一键关闭",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
     "direction": "必要",
-    "applicableSubject": "广告主/发布者",
+    "applicableSubject": "广告发布者",
     "fullText": "以弹出等形式发布互联网广告，应当显著标明关闭标志，确保一键关闭。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T12:11:00.000000",
@@ -6491,7 +6302,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "采购人",
-    "fullText": "政府采购应当采购本国货物、工程和服务，除非国内无法获取或无法以合理商业条件获取。\n适用主体或业务条件：政府采购。",
+    "fullText": "政府采购应当采购本国货物、工程和服务，除非国内无法获取或无法以合理商业条件获取。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T16:35:00.000000",
     "complianceDomain": [
@@ -6542,18 +6353,17 @@
   },
   {
     "id": "5QUtUZ0B3BXzX1tXFV8S",
-    "name": "出口管制法-临时管制",
+    "name": "出口管制法-清单外临时管制批准公告与期限",
     "type": "定量",
     "dimension": "企业国际合作风险",
     "region": "中国",
     "direction": "可选",
     "applicableSubject": "国家出口管制管理部门",
-    "fullText": "国家出口管制管理部门可以对出口管制清单以外的货物、技术和服务实施临时管制。临时管制的实施期限不超过2年。",
+    "fullText": "经国务院批准，国家出口管制管理部门可以对出口管制清单以外的货物、技术和服务实施临时管制，并予以公告。临时管制的实施期限不超过2年。",
     "quantitativeIndicator": 2.0,
     "createdAt": "2025-11-25T19:13:09.000000",
     "complianceDomain": [
-      "进出口贸易",
-      "电子制造"
+      "综合类"
     ],
     "regionCodes": [
       "CN"
@@ -6643,7 +6453,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "中央企业",
-    "fullText": "企业应强化对所属单位的管控，建立健全覆盖各级子企业的内部控制体系。\n适用主体或业务条件：国有企业。",
+    "fullText": "企业应强化对所属单位的管控，建立健全覆盖各级子企业的内部控制体系。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T16:40:00.000000",
     "complianceDomain": [
@@ -6926,7 +6736,7 @@
   },
   {
     "id": "5gUtUZ0B3BXzX1tXFWES",
-    "name": "保险法-偿付能力",
+    "name": "保险法-核心偿付能力充足率下限",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -7020,7 +6830,7 @@
   },
   {
     "id": "5wUtUZ0B3BXzX1tXFV8S",
-    "name": "特种设备安全法-事故责任",
+    "name": "特种设备安全法-事故责任单位行政罚款",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -7634,13 +7444,13 @@
   },
   {
     "id": "6AUtUZ0B3BXzX1tXFWMT",
-    "name": "上市公司证券发行管理办法-盈利能力",
+    "name": "上市公司证券发行管理办法-公开发行持续盈利与财务条件",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "上市公司",
-    "fullText": "上市公司公开发行证券，应当具有持续盈利能力，财务状况良好。\n适用主体或业务条件：上市公司。",
+    "fullText": "上市公司公开发行证券，应当具有持续盈利能力，财务状况良好。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T16:55:00.000000",
     "complianceDomain": [
@@ -7671,7 +7481,7 @@
   },
   {
     "id": "6QUtUZ0B3BXzX1tXFV8S",
-    "name": "商业银行理财业务监督管理办法-信息披露",
+    "name": "商业银行理财业务监督管理办法-统计报表报送",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -7722,25 +7532,6 @@
     "complianceDomain": [
       "银行业",
       "金融业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "6QUtUZ0B3BXzX1tXFWAS",
-    "name": "禁止使用童工规定-送回费用",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "用人单位",
-    "fullText": "用人单位使用童工的，应当将童工送回原居住地交其父母或者其他监护人，所需交通和食宿费用全部由用人单位承担。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-26T01:16:25.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
     ],
     "regionCodes": [
       "CN"
@@ -7923,7 +7714,7 @@
     ],
     "direction": "必要",
     "applicableSubject": "电子商务经营者及承担相应协助职责的平台经营者",
-    "fullText": "适用条件：中国境内电子商务法第二条范围内的争议，金融类产品服务及网络内容类排除活动另按适用规则。电子商务经营者在争议处理中应提供原始合同和交易记录；丢失伪造篡改销毁隐匿或拒绝提供，致使法院仲裁机构或有关机关无法查明事实时，承担相应责任。平台应积极协助平台内争议消费者维护权益，可按自愿公平公正原则设在线解决机制并公示规则。实际证据提供、事实查明影响与角色分开核对，不自行扩出全国统一案卷字段、保存年限或每案必经在线调解的义务。",
+    "fullText": "适用条件：中国境内电子商务法第二条范围内的争议，金融类产品服务及网络内容类排除活动另按适用规则。电子商务经营者在争议处理中应提供原始合同和交易记录；丢失伪造篡改销毁隐匿或拒绝提供，致使法院仲裁机构或有关机关无法查明事实时，承担相应责任。平台应积极协助平台内争议消费者维护权益，可按自愿公平公正原则设在线解决机制并公示规则。实际证据提供、事实查明影响与角色分开核对，案卷字段及保存期限按适用要求核对，在线争议解决依自愿原则。",
     "quantitativeIndicator": null,
     "createdAt": "2026-10-11T00:00:00",
     "complianceDomain": [
@@ -8399,7 +8190,7 @@
     ],
     "direction": "禁止",
     "applicableSubject": "经营者",
-    "fullText": "适用条件：2025年10月15日起适用中国反不正当竞争法的有奖销售。不得因奖项种类、兑奖条件、奖金金额或奖品等信息不明确影响兑奖；活动开始后不得无正当理由变更上述信息；不得谎称有奖或故意使内定人员中奖等欺骗销售。抽奖式最高奖金额不得超过五万元，仅针对抽奖式最高奖，不是所有赠品、总奖池或销售额的统一上限。核对活动规则与实际兑奖、变更时点和理由，五万元等于上限不因本款自动违法；奖品折价、其他促销规定及实际版本另核，不能用统一检查次数替代。",
+    "fullText": "适用条件：2025年10月15日起适用中国反不正当竞争法的有奖销售。不得因奖项种类、兑奖条件、奖金金额或奖品等信息不明确影响兑奖；活动开始后不得无正当理由变更上述信息；不得谎称有奖或故意使内定人员中奖等欺骗销售。抽奖式最高奖金额不得超过五万元，仅针对抽奖式最高奖，不是所有赠品、总奖池或销售额的统一上限。核对活动规则与实际兑奖、变更时点和理由，五万元等于上限不因本款自动违法；奖品折价、其他促销规定及实际版本另核，按实际活动内容及适用要求核对。",
     "quantitativeIndicator": null,
     "createdAt": "2026-10-11T00:00:00",
     "complianceDomain": [
@@ -8627,25 +8418,6 @@
     ]
   },
   {
-    "id": "7AUtUZ0B3BXzX1tXFV0R",
-    "name": "关于企业实行不定时工作制和综合计算工时工作制的审批办法-其他工时适用与批准",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "用人单位",
-    "fullText": "适用条件：中国境内企业因生产特点不能实行标准工时、拟依法采用不定时或综合计算工时工作制时。须按劳动法第三十九条及审批办法核对岗位条件并取得相应劳动行政批准；综合计算须采用已确认的周、月、季或年等周期，其平均日、周工作时间应与法定标准工作时间基本相同。中央和地方审批依对应权限及规定办理；实施须保障健康、充分听取职工意见并妥善安排休息，不能把一般企业加班审批单当成特殊工时行政批准。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-25T10:14:14.000000",
-    "complianceDomain": [
-      "互联网",
-      "交通运输"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "7AUtUZ0B3BXzX1tXFV4R",
     "name": "数据安全法-数据安全负责人",
     "type": "定性",
@@ -8666,18 +8438,19 @@
   },
   {
     "id": "7AUtUZ0B3BXzX1tXFV8S",
-    "name": "证券法-内幕交易",
+    "name": "证券法-内幕信息公开前交易泄露及建议交易禁止",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
     "direction": "禁止",
-    "applicableSubject": "内幕信息知情人",
-    "fullText": "禁止证券交易内幕信息的知情人和非法获取内幕信息的人利用内幕信息从事证券交易活动。",
+    "applicableSubject": "内幕信息知情人和非法获取内幕信息的人",
+    "fullText": "证券交易内幕信息的知情人和非法获取内幕信息的人，在内幕信息公开前，不得买卖该证券，或者泄露该信息，或者建议他人买卖该证券。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-25T19:20:16.000000",
     "complianceDomain": [
       "证券业",
-      "金融业"
+      "金融业",
+      "基金业"
     ],
     "regionCodes": [
       "CN"
@@ -8704,7 +8477,7 @@
   },
   {
     "id": "7AUtUZ0B3BXzX1tXFVwQ",
-    "name": "互联网广告管理办法-竞价排名",
+    "name": "互联网广告管理办法-竞价排名商品服务广告标识",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -9366,7 +9139,8 @@
     "createdAt": "2025-11-24T09:00:00.000000",
     "complianceDomain": [
       "电子制造",
-      "纺织制造"
+      "纺织制造",
+      "汽车制造"
     ],
     "regionCodes": [
       "CN"
@@ -9413,26 +9187,6 @@
     ]
   },
   {
-    "id": "7wUtUZ0B3BXzX1tXFWES",
-    "name": "美国维吾尔强迫劳动预防法(UFLPA)",
-    "type": "定性",
-    "dimension": "供应链风险",
-    "region": "美国",
-    "direction": "禁止",
-    "applicableSubject": "出口商",
-    "fullText": "假定所有来自中国新疆地区的货物均由强迫劳动生产，禁止进口，除非进口商能提供反驳证据。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T12:22:00.000000",
-    "complianceDomain": [
-      "纺织制造",
-      "光伏",
-      "农业"
-    ],
-    "regionCodes": [
-      "US"
-    ]
-  },
-  {
     "id": "7wUtUZ0B3BXzX1tXFWIT",
     "name": "劳动合同法-服务期违约金",
     "type": "定性",
@@ -9458,7 +9212,7 @@
     "region": "全球",
     "direction": "必要",
     "applicableSubject": "跨国企业",
-    "fullText": "企业应及时缴纳税款，并遵守所在国家的税收法律法规。\n适用主体或业务条件：跨国企业。",
+    "fullText": "企业应及时缴纳税款，并遵守所在国家的税收法律法规。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T17:30:00.000000",
     "complianceDomain": [
@@ -10032,7 +9786,7 @@
   },
   {
     "id": "8QUtUZ0B3BXzX1tXFVsQ",
-    "name": "票据法-追索权",
+    "name": "票据法-对前手追索权期间",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -10894,7 +10648,7 @@
   },
   {
     "id": "9AUtUZ0B3BXzX1tXFV8S",
-    "name": "网络安全法-关键信息基础设施",
+    "name": "网络安全法-境内信息数据存储与出境评估",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -11006,24 +10760,6 @@
     ],
     "regionCodes": [
       "ASEAN"
-    ]
-  },
-  {
-    "id": "9AUtUZ0B3BXzX1tXFWIT",
-    "name": "出口管制法-临时管制",
-    "type": "定量",
-    "dimension": "企业国际合作风险",
-    "region": "中国",
-    "direction": "可选",
-    "applicableSubject": "国家出口管制管理部门",
-    "fullText": "国家出口管制管理部门可以对管制清单以外的货物、技术和服务实施临时管制，临时管制的期限不超过2年。",
-    "quantitativeIndicator": 2.0,
-    "createdAt": "2025-11-24T17:22:00.000000",
-    "complianceDomain": [
-      "综合类"
-    ],
-    "regionCodes": [
-      "CN"
     ]
   },
   {
@@ -11145,13 +10881,13 @@
   },
   {
     "id": "9QUtUZ0B3BXzX1tXFVwQ",
-    "name": "政府采购法-采购代理机构",
+    "name": "政府采购法-委托采购代理机构",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
     "direction": "可选",
-    "applicableSubject": "采购代理机构",
-    "fullText": "采购人可以委托经国务院有关部门或者省级人民政府有关部门认定资格的采购代理机构，在委托的范围内办理政府采购事宜。",
+    "applicableSubject": "采购人",
+    "fullText": "采购人可以委托集中采购机构以外的采购代理机构，在委托的范围内办理政府采购事宜。依法委托时，采购人与采购代理机构应签订委托代理协议，明确委托事项及双方权利义务。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T22:48:48.000000",
     "complianceDomain": [
@@ -11200,26 +10936,8 @@
     ]
   },
   {
-    "id": "9QUtUZ0B3BXzX1tXFWIT",
-    "name": "就业服务与就业管理规定-体检",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "用人单位",
-    "fullText": "用人单位招用人员，除国家法律、行政法规和国务院卫生行政部门规定禁止乙肝病原携带者从事的工作外，不得强行将乙肝病毒血清学指标作为体检标准。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T17:23:00.000000",
-    "complianceDomain": [
-      "综合类"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "9QUtUZ0B3BXzX1tXFWMT",
-    "name": "反倾销条例-倾销幅度",
+    "name": "反倾销条例-反倾销税征收条件",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -11473,26 +11191,6 @@
     ]
   },
   {
-    "id": "9gUtUZ0B3BXzX1tXFVsQ",
-    "name": "网络交易监督管理办法-自动续费",
-    "type": "定量",
-    "dimension": "产品合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "网络交易经营者",
-    "fullText": "网络交易经营者采取自动展期、自动续费等方式提供服务的，应当在消费者接受服务前和自动展期、自动续费等日期前5日，以显著方式提请消费者注意，由消费者自主选择。",
-    "quantitativeIndicator": 5.0,
-    "createdAt": "2025-11-24T11:54:54.000000",
-    "complianceDomain": [
-      "互联网",
-      "电子商务",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "9gUtUZ0B3BXzX1tXFVwQ",
     "name": "关于加强私募投资基金监管的若干规定-名称规范",
     "type": "定性",
@@ -11628,7 +11326,7 @@
   },
   {
     "id": "9wUtUZ0B3BXzX1tXFVoM",
-    "name": "上市公司信息披露管理办法-定期报告",
+    "name": "上市公司信息披露管理办法-年度中期报告披露与年度财务报告审计",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -11647,18 +11345,19 @@
   },
   {
     "id": "9wUtUZ0B3BXzX1tXFVsQ",
-    "name": "征信业管理条例-异议处理",
+    "name": "征信业管理条例-异议信息核查处理及书面答复期限",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
     "direction": "必要",
-    "applicableSubject": "征信机构",
+    "applicableSubject": "征信机构或者信息提供者",
     "fullText": "征信机构或者信息提供者收到异议，应当按照国务院征信业监督管理部门的规定对相关信息进行核查和处理，并自收到异议之日起20日内书面答复异议人。",
     "quantitativeIndicator": 20.0,
     "createdAt": "2025-11-24T11:55:55.000000",
     "complianceDomain": [
       "征信业",
-      "金融业"
+      "金融业",
+      "银行业"
     ],
     "regionCodes": [
       "CN"
@@ -11666,7 +11365,7 @@
   },
   {
     "id": "9wUtUZ0B3BXzX1tXFVwQ",
-    "name": "医疗器械监督管理条例-分类管理",
+    "name": "医疗器械监督管理条例-三类医疗器械风险及管理要求",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -11741,7 +11440,7 @@
   },
   {
     "id": "9wUtUZ0B3BXzX1tXFWMT",
-    "name": "企业会计准则第36号-关联方披露",
+    "name": "企业会计准则第36号-母子公司名称附注披露",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -11835,25 +11534,6 @@
     ]
   },
   {
-    "id": "AAUtUZ0B3BXzX1tXFVwQ",
-    "name": "商业银行流动性风险管理办法-流动性覆盖率",
-    "type": "定量",
-    "dimension": "企业信用风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "商业银行",
-    "fullText": "商业银行的流动性覆盖率应当不低于100%。",
-    "quantitativeIndicator": 1.0,
-    "createdAt": "2025-11-24T18:01:01.000000",
-    "complianceDomain": [
-      "银行业",
-      "金融业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "AAUtUZ0B3BXzX1tXFWAS",
     "name": "网络安全法-网络安全等级保护",
     "type": "定性",
@@ -11908,24 +11588,6 @@
     ],
     "regionCodes": [
       "CN"
-    ]
-  },
-  {
-    "id": "AAUtUZ0B3BXzX1tXFWMT",
-    "name": "美国海关C-TPAT反恐认证",
-    "type": "定性",
-    "dimension": "企业国际合作风险",
-    "region": "美国",
-    "direction": "可选",
-    "applicableSubject": "出口企业",
-    "fullText": "参与C-TPAT认证的企业需强化供应链安全管理，防止恐怖主义渗透，可享受通关便利。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T17:34:00.000000",
-    "complianceDomain": [
-      "物流仓储"
-    ],
-    "regionCodes": [
-      "US"
     ]
   },
   {
@@ -12118,7 +11780,7 @@
   },
   {
     "id": "AgUtUZ0B3BXzX1tXFV0R",
-    "name": "上市公司章程指引-利润分配",
+    "name": "上市公司章程指引-利润分配政策连续性与利益平衡",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -12272,7 +11934,7 @@
   },
   {
     "id": "AgUtUZ0B3BXzX1tXFWQT",
-    "name": "快递暂行条例-实名收寄",
+    "name": "快递暂行条例-寄件人身份查验登记",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -12408,7 +12070,7 @@
   },
   {
     "id": "AwUtUZ0B3BXzX1tXFWIS",
-    "name": "证券法-投资者保护",
+    "name": "证券法-投资者适当性与风险揭示",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -12801,7 +12463,7 @@
   },
   {
     "id": "BgUtUZ0B3BXzX1tXFVsM",
-    "name": "美国海外反腐败法(FCPA)-账簿记录",
+    "name": "美国海外反腐败法(FCPA)-账簿准确性及账外支付限制",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "美国",
@@ -12944,26 +12606,6 @@
     "complianceDomain": [
       "证券业",
       "金融业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "BwUtUZ0B3BXzX1tXFV8R",
-    "name": "网络交易监督管理办法-自动续费",
-    "type": "定量",
-    "dimension": "产品合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "网络交易经营者",
-    "fullText": "网络交易经营者采取自动展期、自动续费等方式提供服务的，应当在消费者接受服务前和自动展期、自动续费等日期前5日，以显著方式提请消费者注意。",
-    "quantitativeIndicator": 5.0,
-    "createdAt": "2025-11-25T13:19:19.000000",
-    "complianceDomain": [
-      "电子商务",
-      "互联网",
-      "零售业"
     ],
     "regionCodes": [
       "CN"
@@ -13163,7 +12805,7 @@
   },
   {
     "id": "CAUtUZ0B3BXzX1tXFVwQ",
-    "name": "劳动合同法-试用期解除",
+    "name": "劳动合同法-用人单位试用期解除条件与理由说明",
     "type": "定性",
     "dimension": "劳务合规风险",
     "region": "中国",
@@ -13486,25 +13128,6 @@
     ]
   },
   {
-    "id": "CgUtUZ0B3BXzX1tXFVsM",
-    "name": "劳务派遣暂行规定-用工比例",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "用工单位",
-    "fullText": "用工单位使用的被派遣劳动者数量不得超过其用工总量的 10%。",
-    "quantitativeIndicator": 0.1,
-    "createdAt": "2025-11-24T10:26:05.666555",
-    "complianceDomain": [
-      "建筑工程",
-      "制造业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "CgUtUZ0B3BXzX1tXFVwQ",
     "name": "证券法-短线交易",
     "type": "定量",
@@ -13575,24 +13198,6 @@
     "complianceDomain": [
       "互联网",
       "文化传媒"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "CgUtUZ0B3BXzX1tXFWQT",
-    "name": "工资支付暂行规定-记录保存",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "用人单位",
-    "fullText": "用人单位必须书面记录支付劳动者工资的数额、时间、领取签字等，并保存两年以上备查。",
-    "quantitativeIndicator": 2.0,
-    "createdAt": "2025-10-01T19:45:00.000000",
-    "complianceDomain": [
-      "综合类"
     ],
     "regionCodes": [
       "CN"
@@ -13770,7 +13375,7 @@
   },
   {
     "id": "DAUtUZ0B3BXzX1tXFV0R",
-    "name": "劳动合同法-集体合同",
+    "name": "劳动合同法-集体合同可约定事项",
     "type": "定性",
     "dimension": "劳务合规风险",
     "region": "中国",
@@ -13827,7 +13432,7 @@
   },
   {
     "id": "DAUtUZ0B3BXzX1tXFVsM",
-    "name": "反洗钱法-大额交易报告",
+    "name": "反洗钱法-现金大额交易报告币种门槛",
     "type": "定量",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -14002,13 +13607,14 @@
     "dimension": "企业关联方风险",
     "region": "中国",
     "direction": "必要",
-    "applicableSubject": "股东",
+    "applicableSubject": "有限责任公司股东",
     "fullText": "股东应当按期足额缴纳公司章程中规定的各自所认缴的出资额。股东以货币出资的，应当将货币出资足额存入有限责任公司在银行开设的账户。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T10:35:40.000000",
     "complianceDomain": [
       "制造业",
-      "服务业"
+      "服务业",
+      "投资服务"
     ],
     "regionCodes": [
       "CN"
@@ -14151,7 +13757,7 @@
   },
   {
     "id": "DgUtUZ0B3BXzX1tXFVsM",
-    "name": "药品管理法-GMP认证",
+    "name": "药品管理法-GMP符合性要求",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -14383,7 +13989,7 @@
   },
   {
     "id": "DwUtUZ0B3BXzX1tXFWIS",
-    "name": "上市公司收购管理办法-一致行动人",
+    "name": "上市公司收购管理办法-一致行动人持股合并计算",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -14401,7 +14007,7 @@
   },
   {
     "id": "DwUtUZ0B3BXzX1tXFWMT",
-    "name": "关于规范上市公司与关联方资金往来及上市公司对外担保若干问题的通知",
+    "name": "关于规范上市公司与关联方资金往来及上市公司对外担保若干问题的通知-关联方对外担保限制",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -14496,25 +14102,6 @@
     ]
   },
   {
-    "id": "EAUtUZ0B3BXzX1tXFVsM",
-    "name": "劳动合同法-试用期工资",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "用人单位",
-    "fullText": "劳动者在试用期的工资不得低于本单位相同岗位最低档工资或者劳动合同约定工资的 80%，并不得低于用人单位所在地的最低工资标准。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T10:44:35.555444",
-    "complianceDomain": [
-      "互联网",
-      "餐饮服务"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "EAUtUZ0B3BXzX1tXFVwQ",
     "name": "女职工劳动保护特别规定-孕产哺乳待遇与孕期工时保护",
     "type": "定性",
@@ -14572,33 +14159,14 @@
     ]
   },
   {
-    "id": "EAUtUZ0B3BXzX1tXFWMT",
-    "name": "互联网文化管理暂行规定",
-    "type": "定性",
-    "dimension": "产品合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "互联网文化单位",
-    "fullText": "经营性互联网文化单位提供互联网文化产品，不得含有诱导未成年人违法犯罪和渲染暴力、色情、赌博、恐怖活动的内容。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T17:50:00.000000",
-    "complianceDomain": [
-      "互联网",
-      "文化传媒"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "EAUtUZ0B3BXzX1tXFWQT",
     "name": "工会法-工会经费",
     "type": "定量",
     "dimension": "劳务合规风险",
     "region": "中国",
     "direction": "必要",
-    "applicableSubject": "企业",
-    "fullText": "建立工会的企业、事业单位、社会组织，应当按每月全部职工工资总额的2%向工会拨缴经费。",
+    "applicableSubject": "建立工会组织的用人单位",
+    "fullText": "建立工会组织的用人单位，应当按每月全部职工工资总额的2%向工会拨缴经费。",
     "quantitativeIndicator": 0.02,
     "createdAt": "2025-10-01T20:15:00.000000",
     "complianceDomain": [
@@ -14673,7 +14241,7 @@
     "dimension": "企业国际合作风险",
     "region": "中国",
     "direction": "必要",
-    "applicableSubject": "外商投资企业",
+    "applicableSubject": "国家",
     "fullText": "国家对外商投资实行准入前国民待遇加负面清单管理制度。负面清单之外的领域，按照内外资一致的原则实施管理。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T10:47:50.333222",
@@ -14858,7 +14426,7 @@
   },
   {
     "id": "EgUtUZ0B3BXzX1tXFVwQ",
-    "name": "保险法-偿付能力",
+    "name": "保险法-业务规模风险对应的最低偿付能力",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -14964,25 +14532,6 @@
     "complianceDomain": [
       "建筑工程",
       "采矿业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "EwUtUZ0B3BXzX1tXFV4R",
-    "name": "证券法-内幕交易罚款",
-    "type": "定性",
-    "dimension": "企业关联方风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "内幕交易行为人",
-    "fullText": "内幕交易行为人，责令依法处理非法持有的证券，没收违法所得，并处以违法所得一倍以上十倍以下的罚款。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-25T10:53:53.000000",
-    "complianceDomain": [
-      "证券业",
-      "金融业"
     ],
     "regionCodes": [
       "CN"
@@ -15155,25 +14704,6 @@
       "化工制造",
       "采矿业",
       "建筑工程"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "FAUtUZ0B3BXzX1tXFV8R",
-    "name": "禁止使用童工规定-吊销执照",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "行政主管部门",
-    "fullText": "单位或者个人为不满16周岁的未成年人介绍就业的，由劳动保障行政部门按照每介绍一人处5000元罚款的标准给予处罚；职业中介机构为不满16周岁的未成年人介绍就业的，并由劳动保障行政部门吊销其职业介绍许可证。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-25T15:41:11.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
     ],
     "regionCodes": [
       "CN"
@@ -15521,7 +15051,7 @@
   },
   {
     "id": "FgUtUZ0B3BXzX1tXFVsM",
-    "name": "加州消费者隐私法(CCPA)-选择退出权",
+    "name": "加州消费者隐私法(CCPA)-网页个人信息出售退出链接",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "美国",
@@ -15561,7 +15091,7 @@
   },
   {
     "id": "FgUtUZ0B3BXzX1tXFWAS",
-    "name": "证券法-短线交易收益",
+    "name": "证券法-董事会未收回短线交易收益时股东请求",
     "type": "定量",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -15600,7 +15130,7 @@
   },
   {
     "id": "FgUtUZ0B3BXzX1tXFWIS",
-    "name": "网络交易监督管理办法-直播带货",
+    "name": "网络交易监督管理办法-直播运营者与营销人员身份核验",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -15637,26 +15167,6 @@
     ]
   },
   {
-    "id": "FgUtUZ0B3BXzX1tXFWQT",
-    "name": "网络安全审查办法-上市审查",
-    "type": "定量",
-    "dimension": "企业国际合作风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "网络平台运营者",
-    "fullText": "掌握超过100万用户个人信息的网络平台运营者赴国外上市，必须向网络安全审查办公室申报网络安全审查。",
-    "quantitativeIndicator": 1000000.0,
-    "createdAt": "2025-10-02T09:05:00.000000",
-    "complianceDomain": [
-      "互联网",
-      "数据服务",
-      "电信运营"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "FwUtUZ0B3BXzX1tXFV0R",
     "name": "保险公司偿付能力管理规定-偿付能力充足率",
     "type": "定量",
@@ -15670,25 +15180,6 @@
     "complianceDomain": [
       "保险业",
       "金融业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "FwUtUZ0B3BXzX1tXFV4R",
-    "name": "禁止使用童工规定-责任追究",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "单位/个人",
-    "fullText": "单位或者个人为不满16周岁的未成年人介绍就业的，由劳动保障行政部门按照每介绍一人处5000元罚款的标准给予处罚。",
-    "quantitativeIndicator": 5000.0,
-    "createdAt": "2025-11-25T10:57:57.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
     ],
     "regionCodes": [
       "CN"
@@ -15709,25 +15200,6 @@
       "机械制造",
       "建筑工程",
       "物流仓储"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "FwUtUZ0B3BXzX1tXFVsM",
-    "name": "住房公积金管理条例-缴存比例与地区上限",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "用人单位",
-    "fullText": "适用条件：住房公积金管理条例规定的单位及其在职职工确定缴存比例时。条例第十八条规定职工和单位各自的缴存比例均不得低于职工上一年度月平均工资的5%，具体比例依规定程序确定。建金〔2018〕45号通知第三部分规定各地缴存比例上限依程序确定且不高于12%，单位在5%至本地上限区间内确定比例；不能把12%直接当作所有地区的实际缴存上限。个人与单位比例分别核对，不相加后套用同一上限。困难单位依条例第二十条经法定程序批准降低比例或缓缴的，按批准范围与期间另行处理。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T11:05:30.000000",
-    "complianceDomain": [
-      "房地产",
-      "金融业"
     ],
     "regionCodes": [
       "CN"
@@ -15812,7 +15284,7 @@
   },
   {
     "id": "FwUtUZ0B3BXzX1tXFWQT",
-    "name": "食品安全国家标准-食品添加剂使用标准(GB 2760)",
+    "name": "食品安全国家标准-食品腐败与质量缺陷掩盖禁止",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -15946,7 +15418,7 @@
   },
   {
     "id": "GAUtUZ0B3BXzX1tXFWIS",
-    "name": "民用航空安全检查规则",
+    "name": "民用航空安全检查规则-航空货物安检与危险品品名申报",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -15984,7 +15456,7 @@
   },
   {
     "id": "GAUtUZ0B3BXzX1tXFWQT",
-    "name": "商业银行授信工作尽职指引",
+    "name": "商业银行授信工作尽职指引-授信风险垂直管理与全过程调查",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -16160,7 +15632,7 @@
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "高级管理人员",
-    "fullText": "高级管理人员应当忠实履行职务，维护公司和全体股东的最大利益，不得在控股股东、实际控制人及其控制的其他企业中担任除董事、监事以外的其他行政职务。\n适用主体或业务条件：上市公司。",
+    "fullText": "高级管理人员应当忠实履行职务，维护公司和全体股东的最大利益，不得在控股股东、实际控制人及其控制的其他企业中担任除董事、监事以外的其他行政职务。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T09:20:00.000000",
     "complianceDomain": [
@@ -16443,7 +15915,7 @@
   },
   {
     "id": "GwUtUZ0B3BXzX1tXFWAS",
-    "name": "外汇管理条例-国际收支统计",
+    "name": "外汇管理条例-申报范围内机构个人国际收支申报",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -16518,7 +15990,7 @@
   },
   {
     "id": "GwUtUZ0B3BXzX1tXFWQT",
-    "name": "关于进一步加强塑料污染治理的意见",
+    "name": "关于进一步加强塑料污染治理的意见-超薄塑料购物袋与农用地膜厚度限制",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -16654,7 +16126,7 @@
   },
   {
     "id": "HAUtUZ0B3BXzX1tXFWIS",
-    "name": "公司法-监事会职权",
+    "name": "公司法-董事高管履职监督与罢免建议",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -16747,7 +16219,7 @@
   },
   {
     "id": "HQUtUZ0B3BXzX1tXFVsM",
-    "name": "女职工劳动保护特别规定-产假",
+    "name": "女职工劳动保护特别规定-基本产假与难产多胞胎增加分支",
     "type": "定量",
     "dimension": "劳务合规风险",
     "region": "中国",
@@ -16919,7 +16391,7 @@
   },
   {
     "id": "HgUtUZ0B3BXzX1tXFVsM",
-    "name": "网络交易监督管理办法-直播带货",
+    "name": "网络交易监督管理办法-网络交易直播视频保存期限",
     "type": "定量",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -16951,7 +16423,8 @@
     "complianceDomain": [
       "银行业",
       "保险业",
-      "证券业"
+      "证券业",
+      "金融业"
     ],
     "regionCodes": [
       "CN"
@@ -17016,7 +16489,7 @@
   },
   {
     "id": "HgUtUZ0B3BXzX1tXFWQT",
-    "name": "海关企业信用管理办法-失信企业",
+    "name": "海关企业信用管理办法-失信企业认定情形与监管",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -17243,27 +16716,8 @@
     ]
   },
   {
-    "id": "IAUtUZ0B3BXzX1tXFV8R",
-    "name": "禁止使用童工规定-行政处分",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "国家工作人员",
-    "fullText": "国家工作人员在禁止使用童工的监督检查工作中发现使用童工情况不予制止、纠正、查处的，或者发现使用童工情况不报告的，依法给予行政处分。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-25T15:53:23.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "IAUtUZ0B3BXzX1tXFVsM",
-    "name": "上市公司证券发行管理办法-盈利能力",
+    "name": "上市公司证券发行管理办法-公开发行加权净资产收益率条件",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -17327,7 +16781,7 @@
     "dimension": "劳务合规风险",
     "region": "中国",
     "direction": "必要",
-    "applicableSubject": "用人单位/社保基金",
+    "applicableSubject": "工伤职工",
     "fullText": "治疗工伤所需费用符合工伤保险诊疗项目目录、工伤保险药品目录、工伤保险住院服务标准的，从工伤保险基金支付。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T13:11:00.000000",
@@ -17474,7 +16928,7 @@
   },
   {
     "id": "IQUtUZ0B3BXzX1tXFWES",
-    "name": "网络游戏管理暂行办法-未成年人保护",
+    "name": "网络游戏管理暂行办法-未成年人游戏内容与时间保护",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -17524,25 +16978,6 @@
     "createdAt": "2025-11-24T18:07:00.000000",
     "complianceDomain": [
       "证券业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "IQUtUZ0B3BXzX1tXFWQT",
-    "name": "支付机构反洗钱和反恐怖融资管理办法",
-    "type": "定性",
-    "dimension": "企业信用风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "支付机构",
-    "fullText": "支付机构应当建立健全反洗钱和反恐怖融资内部控制制度，对可疑交易进行监测和分析。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-02T10:00:00.000000",
-    "complianceDomain": [
-      "支付服务",
-      "金融业"
     ],
     "regionCodes": [
       "CN"
@@ -17992,7 +17427,7 @@
   },
   {
     "id": "JAUtUZ0B3BXzX1tXFWIS",
-    "name": "快递暂行条例-实名收寄",
+    "name": "快递暂行条例-快件内件验视与拒收",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -18104,25 +17539,6 @@
     ]
   },
   {
-    "id": "JQUtUZ0B3BXzX1tXFVsM",
-    "name": "美国维吾尔强迫劳动预防法(UFLPA)-供应链溯源",
-    "type": "定性",
-    "dimension": "供应链风险",
-    "region": "美国",
-    "direction": "禁止",
-    "applicableSubject": "进口商",
-    "fullText": "除非进口商能提供清晰且令人信服的证据证明其货物并非全部或部分在新疆维吾尔自治区开采、生产或制造，否则美国海关和边境保护局将推定该货物属于强迫劳动产品并予以扣留。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T12:15:55.222333",
-    "complianceDomain": [
-      "纺织制造",
-      "光伏"
-    ],
-    "regionCodes": [
-      "US"
-    ]
-  },
-  {
     "id": "JQUtUZ0B3BXzX1tXFVwQ",
     "name": "医疗器械经营监督管理办法-库房条件",
     "type": "定性",
@@ -18220,7 +17636,7 @@
   },
   {
     "id": "JQUtUZ0B3BXzX1tXFWQT",
-    "name": "医疗广告管理办法-禁止内容",
+    "name": "医疗广告管理办法-功效安全保证及治愈率表述禁止",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -18277,7 +17693,7 @@
   },
   {
     "id": "JgUtUZ0B3BXzX1tXFVsM",
-    "name": "医疗器械监督管理条例-不良事件监测",
+    "name": "医疗器械监督管理条例-不良事件监测体系及机构人员配置",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -18336,7 +17752,7 @@
   },
   {
     "id": "JgUtUZ0B3BXzX1tXFWES",
-    "name": "互联网直播服务管理规定-内容审核",
+    "name": "互联网直播服务管理规定-信用等级与即时阻断",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -18392,13 +17808,13 @@
   },
   {
     "id": "JgUtUZ0B3BXzX1tXFWQT",
-    "name": "上市公司股东、董监高减持股份的若干规定",
+    "name": "上市公司股东、董监高减持股份的若干规定-首次减持前计划披露",
     "type": "定量",
     "dimension": "企业关联方风险",
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "大股东及董监高",
-    "fullText": "上市公司大股东、董监高计划通过证券交易所集中竞价交易减持股份，应当在首次卖出的15个交易日前向证券交易所报告并预先披露减持计划。\n适用主体或业务条件：上市公司。",
+    "fullText": "上市公司大股东、董监高计划通过证券交易所集中竞价交易减持股份，应当在首次卖出的15个交易日前向证券交易所报告并预先披露减持计划。",
     "quantitativeIndicator": 15.0,
     "createdAt": "2025-10-02T10:25:00.000000",
     "complianceDomain": [
@@ -18410,7 +17826,7 @@
   },
   {
     "id": "JwUtUZ0B3BXzX1tXFV0R",
-    "name": "特种设备安全法-事故责任",
+    "name": "特种设备安全法-事故单位民事赔偿责任",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -18469,7 +17885,7 @@
   },
   {
     "id": "JwUtUZ0B3BXzX1tXFVsM",
-    "name": "上市公司证券发行管理办法-资产负债率",
+    "name": "上市公司证券发行管理办法-可转债发行财务条件",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -18582,7 +17998,7 @@
   },
   {
     "id": "JwUtUZ0B3BXzX1tXFWQT",
-    "name": "建设工程安全生产管理条例-安全投入",
+    "name": "建设工程安全生产管理条例-安全措施费用用途与挪用禁止",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -18696,7 +18112,7 @@
   },
   {
     "id": "KAUtUZ0B3BXzX1tXFWIS",
-    "name": "上市公司收购管理办法-要约收购",
+    "name": "上市公司收购管理办法-交易所增持触发收购要约",
     "type": "定量",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -18744,25 +18160,6 @@
     "createdAt": "2025-10-02T10:35:00.000000",
     "complianceDomain": [
       "综合类"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "KQUtUZ0B3BXzX1tXFV4R",
-    "name": "禁止使用童工规定-举报奖励",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "可选",
-    "applicableSubject": "劳动保障行政部门",
-    "fullText": "任何单位或者个人发现使用童工的，有权向劳动保障行政部门、公安机关、工商行政管理部门或者其他有关部门举报。有关部门对举报人给予奖励。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-25T11:16:16.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
     ],
     "regionCodes": [
       "CN"
@@ -18836,7 +18233,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "海关",
-    "fullText": "海关统计人员对在统计过程中知悉的国家秘密、商业秘密和个人信息，负有保密义务。\n适用主体或业务条件：政府部门。",
+    "fullText": "海关统计人员对在统计过程中知悉的国家秘密、商业秘密和个人信息，负有保密义务。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-26T10:57:57.000000",
     "complianceDomain": [
@@ -18880,26 +18277,6 @@
     "complianceDomain": [
       "证券业",
       "基金业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "KQUtUZ0B3BXzX1tXFWQT",
-    "name": "网络交易监督管理办法-自动续费",
-    "type": "定量",
-    "dimension": "产品合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "网络交易经营者",
-    "fullText": "网络交易经营者采取自动展期、自动续费等方式提供服务的，应当在消费者接受服务前和自动展期、自动续费等日期前五日，以显著方式提请消费者注意。",
-    "quantitativeIndicator": 5.0,
-    "createdAt": "2025-10-02T10:40:00.000000",
-    "complianceDomain": [
-      "互联网",
-      "电子商务",
-      "电信运营"
     ],
     "regionCodes": [
       "CN"
@@ -19174,7 +18551,7 @@
   },
   {
     "id": "KwUtUZ0B3BXzX1tXFWES",
-    "name": "特种设备安全法-事故责任",
+    "name": "特种设备安全法-事故赔偿与主要负责人管理责任罚款",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -19237,7 +18614,7 @@
     "region": "美国",
     "direction": "禁止",
     "applicableSubject": "企业",
-    "fullText": "禁止任何形式的限制贸易的合同、联合或密谋。固定价格、划分市场等行为被视为本身违法。\n适用主体或业务条件：跨国企业。",
+    "fullText": "禁止任何形式的限制贸易的合同、联合或密谋。固定价格、划分市场等行为被视为本身违法。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T10:50:00.000000",
     "complianceDomain": [
@@ -19287,25 +18664,6 @@
     ]
   },
   {
-    "id": "LAUtUZ0B3BXzX1tXFV8R",
-    "name": "禁止使用童工规定-监护人责任",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "父母/监护人",
-    "fullText": "父母或者其他监护人应当依法履行监护职责，保护未成年人的身心健康，不得允许未满16周岁的未成年人被单位或者个人非法招用。",
-    "quantitativeIndicator": 16.0,
-    "createdAt": "2025-11-25T16:05:35.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "LAUtUZ0B3BXzX1tXFVsM",
     "name": "网络直播营销管理办法(试行)-未成年人保护",
     "type": "定量",
@@ -19327,13 +18685,13 @@
   },
   {
     "id": "LAUtUZ0B3BXzX1tXFVwQ",
-    "name": "网络交易监督管理办法-搭售",
+    "name": "网络交易监督管理办法-多选搭售默认同意禁止",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "网络交易经营者",
-    "fullText": "网络交易经营者以直接捆绑或者提供多种可选项方式向消费者搭售商品或者服务的，应当以显著方式提醒消费者注意。不得将搭售商品或者服务作为默认同意的选项。",
+    "fullText": "网络交易经营者以提供多种可选项方式向消费者搭售商品或者服务的，不得将搭售商品或者服务作为默认同意的选项。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T18:45:45.000000",
     "complianceDomain": [
@@ -19359,24 +18717,6 @@
     "complianceDomain": [
       "金融业",
       "贸易"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "LAUtUZ0B3BXzX1tXFWIS",
-    "name": "劳动争议调解仲裁法-时效",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "劳动者",
-    "fullText": "劳动争议申请仲裁的时效期间为一年。",
-    "quantitativeIndicator": 1.0,
-    "createdAt": "2025-11-24T13:23:00.000000",
-    "complianceDomain": [
-      "法律服务"
     ],
     "regionCodes": [
       "CN"
@@ -19596,13 +18936,13 @@
   },
   {
     "id": "LQUtUZ0B3BXzX1tXFWQT",
-    "name": "上市公司收购管理办法-一致行动人",
+    "name": "上市公司收购管理办法-一致行动关系认定",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "投资者",
-    "fullText": "投资者受同一主体控制的，或者投资者之间存在合伙、合作、联营等经济利益关系的，互为一致行动人。\n适用主体或业务条件：上市公司。",
+    "fullText": "投资者受同一主体控制的，或者投资者之间存在合伙、合作、联营等经济利益关系的，互为一致行动人。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T11:00:00.000000",
     "complianceDomain": [
@@ -19765,7 +19105,7 @@
   },
   {
     "id": "LgUtUZ0B3BXzX1tXFWQT",
-    "name": "票据法-追索权",
+    "name": "票据法-拒付后持票人追索对象",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -19972,25 +19312,6 @@
     ]
   },
   {
-    "id": "MAUtUZ0B3BXzX1tXFV0R",
-    "name": "烟花爆竹安全管理条例-燃放",
-    "type": "定性",
-    "dimension": "供应链风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "单位/个人",
-    "fullText": "禁止在法律法规规定的禁止燃放烟花爆竹的时间、地点和区域燃放烟花爆竹。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T23:05:05.000000",
-    "complianceDomain": [
-      "公共事业",
-      "文化传媒"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "MAUtUZ0B3BXzX1tXFV4R",
     "name": "海关行政处罚实施条例-减免税货物",
     "type": "定量",
@@ -20111,7 +19432,7 @@
     "region": "香港",
     "direction": "必要",
     "applicableSubject": "上市公司",
-    "fullText": "上市公司进行关连交易，必须遵守申报、公告及独立股东批准的规定，除非获得豁免。\n适用主体或业务条件：上市公司。",
+    "fullText": "上市公司进行关连交易，必须遵守申报、公告及独立股东批准的规定，除非获得豁免。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T11:15:00.000000",
     "complianceDomain": [
@@ -20119,26 +19440,6 @@
     ],
     "regionCodes": [
       "HK"
-    ]
-  },
-  {
-    "id": "MQUtUZ0B3BXzX1tXFV0R",
-    "name": "民用爆炸物品安全管理条例-储存库房",
-    "type": "定量",
-    "dimension": "供应链风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "民用爆炸物品从业单位",
-    "fullText": "民用爆炸物品应当储存在专用仓库内，并按照国家规定设置技术防范设施。专用仓库应当指定专人管理，看护人员应当24小时值班。",
-    "quantitativeIndicator": 24.0,
-    "createdAt": "2025-11-24T23:06:06.000000",
-    "complianceDomain": [
-      "采矿业",
-      "建筑工程",
-      "化工制造"
-    ],
-    "regionCodes": [
-      "CN"
     ]
   },
   {
@@ -20162,7 +19463,7 @@
   },
   {
     "id": "MQUtUZ0B3BXzX1tXFV8R",
-    "name": "商业银行理财业务监督管理办法-投资限制",
+    "name": "商业银行理财业务监督管理办法-禁止发行分级产品",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -20430,26 +19731,8 @@
     ]
   },
   {
-    "id": "MgUtUZ0B3BXzX1tXFWIS",
-    "name": "劳务派遣-同工同酬",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "用工单位",
-    "fullText": "用工单位应当按照同工同酬原则，对被派遣劳动者与本单位同类岗位劳动者实行相同的劳动报酬分配办法。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T13:29:00.000000",
-    "complianceDomain": [
-      "综合类"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "MgUtUZ0B3BXzX1tXFWMT",
-    "name": "劳动合同法-集体合同",
+    "name": "劳动合同法-集体合同草案民主讨论程序",
     "type": "定性",
     "dimension": "劳务合规风险",
     "region": "中国",
@@ -20640,7 +19923,7 @@
   },
   {
     "id": "MwUtUZ0B3BXzX1tXFWQT",
-    "name": "关于防范和处置非法集资条例",
+    "name": "关于防范和处置非法集资条例-无许可向不特定对象吸收资金禁止",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -20752,44 +20035,6 @@
     ]
   },
   {
-    "id": "NAUtUZ0B3BXzX1tXFWAS",
-    "name": "禁止使用童工规定-单位定义",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "可选",
-    "applicableSubject": "单位",
-    "fullText": "单位是指国家机关、社会团体、企业事业单位、民办非企业单位。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-25T13:33:33.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "NAUtUZ0B3BXzX1tXFWES",
-    "name": "禁止使用童工规定-定义",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "单位/个人",
-    "fullText": "禁止招用不满16周岁的未成年人。",
-    "quantitativeIndicator": 16.0,
-    "createdAt": "2025-11-26T11:09:09.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "NAUtUZ0B3BXzX1tXFWIS",
     "name": "中央企业投资监督管理办法-负面清单",
     "type": "定性",
@@ -20885,13 +20130,13 @@
   },
   {
     "id": "NQUtUZ0B3BXzX1tXFVsM",
-    "name": "反电信网络诈骗法-客户尽职调查",
+    "name": "反电信网络诈骗法-客户身份核验尽调与异常账号处置",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
     "direction": "必要",
-    "applicableSubject": "业务经营者",
-    "fullText": "电信业务经营者、银行业金融机构、非银行支付机构、互联网服务提供者应当依法对客户进行尽职调查，对存在异常开卡、开户、开号等情形的，有权拒绝提供服务。",
+    "applicableSubject": "电信业务经营者、银行业金融机构、非银行支付机构、互联网服务提供者",
+    "fullText": "适用条件：按客户所用金融、电信或互联网业务分别核对。银行业金融机构及非银行支付机构在开户、提供支付结算服务和业务关系存续期间开展客户尽职调查并依法识别受益所有人。电信业务经营者落实电话用户实名登记；电信及互联网服务提供者对本法第二十一条列举的服务依法核验真实身份信息。对异常办卡、开户可以加强核查或拒绝办理；互联网涉诈异常账号应重新核验，并依规定采取限制功能、暂停服务等措施。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T13:08:55.777888",
     "complianceDomain": [
@@ -20905,7 +20150,7 @@
   },
   {
     "id": "NQUtUZ0B3BXzX1tXFVwQ",
-    "name": "对外贸易法-国营贸易",
+    "name": "对外贸易法-国营贸易授权代理进出口",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -20924,7 +20169,7 @@
   },
   {
     "id": "NQUtUZ0B3BXzX1tXFWAS",
-    "name": "证券法-信息披露真实性",
+    "name": "证券法-发行人上市公司披露真实性",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -20948,7 +20193,7 @@
     "dimension": "企业国际合作风险",
     "region": "中国",
     "direction": "必要",
-    "applicableSubject": "境内机构",
+    "applicableSubject": "办理资本项目外汇支出的境内机构和个人",
     "fullText": "资本项目外汇支出，应当按照国务院外汇管理部门关于付汇与购汇的管理规定，凭有效单证以自有外汇支付或者向经营结汇、售汇业务的金融机构购汇支付。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-26T11:10:10.000000",
@@ -21005,7 +20250,7 @@
     "region": "中国",
     "direction": "可选",
     "applicableSubject": "采购人",
-    "fullText": "只能从唯一供应商处采购的，可以采用单一来源方式采购。\n适用主体或业务条件：政府采购。",
+    "fullText": "只能从唯一供应商处采购的，可以采用单一来源方式采购。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T11:40:00.000000",
     "complianceDomain": [
@@ -21094,7 +20339,7 @@
   },
   {
     "id": "NgUtUZ0B3BXzX1tXFVwQ",
-    "name": "公司法-监事会职权",
+    "name": "公司法-经营异常调查及专业协助费用",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -21132,13 +20377,13 @@
   },
   {
     "id": "NgUtUZ0B3BXzX1tXFWMT",
-    "name": "关于平台经济领域的反垄断指南-二选一",
+    "name": "关于平台经济领域的反垄断指南-平台二选一及交易条件限制",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
     "direction": "禁止",
-    "applicableSubject": "平台经济领域经营者",
-    "fullText": "禁止平台经营者要求平台内经营者在竞争性平台间进行“二选一”，或者对平台内经营者与其他平台的交易条件进行不合理限制。",
+    "applicableSubject": "具有市场支配地位的平台经济领域经营者",
+    "fullText": "具有市场支配地位的平台经济领域经营者，不得无正当理由，要求交易相对人在竞争性平台间进行“二选一”，或者限定交易相对人只能与其进行交易。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T18:18:00.000000",
     "complianceDomain": [
@@ -21157,7 +20402,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "中央企业",
-    "fullText": "中央企业应当设立合规委员会，与企业法治建设领导小组或者风险控制委员会等合署办公，统筹协调合规管理工作。\n适用主体或业务条件：国有企业。",
+    "fullText": "中央企业应当设立合规委员会，与企业法治建设领导小组或者风险控制委员会等合署办公，统筹协调合规管理工作。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T11:45:00.000000",
     "complianceDomain": [
@@ -21321,7 +20566,7 @@
   },
   {
     "id": "NwUtUZ0B3BXzX1tXFWQT",
-    "name": "机动车强制报废标准规定",
+    "name": "机动车强制报废标准规定-不同非营运车型里程引导报废",
     "type": "定量",
     "dimension": "供应链风险",
     "region": "中国",
@@ -21373,25 +20618,6 @@
       "机械制造",
       "建筑工程",
       "物流仓储"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "OAUtUZ0B3BXzX1tXFV8R",
-    "name": "禁止使用童工规定-法律责任单位",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "单位",
-    "fullText": "单位使用童工的，由劳动保障行政部门责令改正，并按照每使用一名童工每月处5000元罚款的标准给予处罚。",
-    "quantitativeIndicator": 5000.0,
-    "createdAt": "2025-11-25T16:17:47.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
     ],
     "regionCodes": [
       "CN"
@@ -21511,7 +20737,7 @@
   },
   {
     "id": "OQUtUZ0B3BXzX1tXFV8R",
-    "name": "外汇管理条例-违规购汇",
+    "name": "外汇管理条例-非法套汇",
     "type": "定量",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -21568,7 +20794,7 @@
   },
   {
     "id": "OQUtUZ0B3BXzX1tXFWAS",
-    "name": "反外国制裁法-反制措施种类",
+    "name": "反外国制裁法-境内财产查封扣押冻结措施",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -21604,24 +20830,6 @@
     ]
   },
   {
-    "id": "OQUtUZ0B3BXzX1tXFWMT",
-    "name": "医疗器械监督管理条例-分类管理",
-    "type": "定性",
-    "dimension": "产品合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "医疗器械企业",
-    "fullText": "国家对医疗器械按照风险程度实行分类管理。第一类风险程度低，实行常规管理；第三类具有较高风险，需要严格控制管理。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T18:21:00.000000",
-    "complianceDomain": [
-      "医疗器械"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "OQUtUZ0B3BXzX1tXFWQT",
     "name": "专利法-职务发明",
     "type": "定性",
@@ -21629,7 +20837,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "发明人",
-    "fullText": "执行本单位的任务或者主要是利用本单位的物质技术条件所完成的发明创造为职务发明创造。职务发明创造申请专利的权利属于该单位。\n适用主体或业务条件：研发机构。",
+    "fullText": "执行本单位的任务或者主要是利用本单位的物质技术条件所完成的发明创造为职务发明创造。职务发明创造申请专利的权利属于该单位。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T12:00:00.000000",
     "complianceDomain": [
@@ -21655,26 +20863,6 @@
       "机械制造",
       "建筑工程",
       "物流仓储"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "OgUtUZ0B3BXzX1tXFVsN",
-    "name": "网络安全审查办法-上市审查",
-    "type": "定量",
-    "dimension": "企业国际合作风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "网络平台运营者",
-    "fullText": "掌握超过 100万 用户个人信息的网络平台运营者赴国外上市，必须向网络安全审查办公室申报网络安全审查。",
-    "quantitativeIndicator": 1000000.0,
-    "createdAt": "2025-11-24T13:25:30.888999",
-    "complianceDomain": [
-      "互联网",
-      "数据服务",
-      "证券业"
     ],
     "regionCodes": [
       "CN"
@@ -21737,7 +20925,7 @@
   },
   {
     "id": "OgUtUZ0B3BXzX1tXFWMT",
-    "name": "关于防范和处置非法集资条例",
+    "name": "关于防范和处置非法集资条例-非法集资保本付息承诺禁止",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -21755,7 +20943,7 @@
   },
   {
     "id": "OgUtUZ0B3BXzX1tXFWQT",
-    "name": "医疗器械说明书和标签管理规定",
+    "name": "医疗器械说明书和标签管理规定-说明书标签真实完整及产品一致性",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -21829,25 +21017,6 @@
     ]
   },
   {
-    "id": "OwUtUZ0B3BXzX1tXFWES",
-    "name": "劳务派遣暂行规定-用工比例",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "用工单位",
-    "fullText": "用工单位使用的被派遣劳动者数量不得超过其用工总量的10%。",
-    "quantitativeIndicator": 0.1,
-    "createdAt": "2025-11-24T09:01:00.000000",
-    "complianceDomain": [
-      "建筑工程",
-      "物流仓储"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "OwUtUZ0B3BXzX1tXFWIS",
     "name": "机动车维修管理规定-配件",
     "type": "定性",
@@ -21904,7 +21073,7 @@
   },
   {
     "id": "PAUtUZ0B3BXzX1tXFV4R",
-    "name": "外汇管理条例-国际收支统计",
+    "name": "外汇管理条例-境内机构国际收支统计申报单",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -21980,25 +21149,6 @@
     ]
   },
   {
-    "id": "PAUtUZ0B3BXzX1tXFWES",
-    "name": "未成年人保护法（2024年修正）-招用年龄与未成年岗位保护",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "企业",
-    "fullText": "适用条件：中国境内企业招用未成年人时。不得招用未满16周岁的未成年人，国家另有规定的除外；文艺、体育特定招用按禁止使用童工规定第十三条核对监护人同意、专业人员及健康和义务教育保障。营业性娱乐场所、酒吧、互联网上网服务营业场所等不适宜未成年人活动的场所，不得招用已满16周岁的未成年人。依法招用已满16周岁的未成年人，应执行工种、劳动时间、劳动强度及保护措施规定，不得安排过重、有毒、有害等危害身心健康的劳动或危险作业。不得以特种工艺、一般实习或内部审批自行扩大国家另有规定的例外。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T09:02:00.000000",
-    "complianceDomain": [
-      "纺织制造",
-      "餐饮服务"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "PAUtUZ0B3BXzX1tXFWIS",
     "name": "进口废物管理目录",
     "type": "定性",
@@ -22043,7 +21193,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "对外劳务合作企业",
-    "fullText": "对外劳务合作企业应当在指定的银行开设专门账户，缴存不低于300万元人民币的对外劳务合作风险处置备用金。\n适用主体或业务条件：劳务派遣。",
+    "fullText": "对外劳务合作企业应当在指定的银行开设专门账户，缴存不低于300万元人民币的对外劳务合作风险处置备用金。",
     "quantitativeIndicator": 3000000.0,
     "createdAt": "2025-10-02T12:15:00.000000",
     "complianceDomain": [
@@ -22074,12 +21224,12 @@
   },
   {
     "id": "PQUtUZ0B3BXzX1tXFV4R",
-    "name": "证券法-内幕交易没收",
+    "name": "证券法-内幕信息公开前交易泄露及交易建议禁止",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
     "direction": "禁止",
-    "applicableSubject": "内幕交易行为人",
+    "applicableSubject": "内幕信息知情人和非法获取内幕信息的人",
     "fullText": "证券交易内幕信息的知情人或者非法获取内幕信息的人，在内幕信息公开前，不得买卖该证券，或者泄露该信息，或者建议他人买卖该证券。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-25T11:36:36.000000",
@@ -22302,27 +21452,8 @@
     ]
   },
   {
-    "id": "PgUtUZ0B3BXzX1tXFWIS",
-    "name": "消费者权益保护法-远程七日无理由退货及适用例外",
-    "type": "定量",
-    "dimension": "产品合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "经营者",
-    "fullText": "适用条件：中国生活消费中经营者通过网络、电视、电话、邮购等方式销售商品，按消费者权益保护法第二十五条办理无理由退货。消费者收到商品之日起七日内可以退货无须说明理由；消费者定作、鲜活易腐、在线下载或消费者拆封的音像制品及计算机软件等数字商品、交付报纸期刊不适用。其他依商品性质不宜退货的须消费者购买时确认，经营者不得擅自扩大范围；依实施条例第十九条显著标注提示确认，不得默认同意，未经确认不得拒绝。退回商品应完好；合理查验打开包装或调试且不影响原有品质功能外观的应予退货。质量瑕疵责任另按第二十四条等处理，不能以不适用无理由退货免除。七日保留收到商品的日历期间起点，不换为签订单或一百六十八小时。",
-    "quantitativeIndicator": 7.0,
-    "createdAt": "2025-11-24T14:00:00.000000",
-    "complianceDomain": [
-      "电子商务",
-      "零售业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "PgUtUZ0B3BXzX1tXFWMT",
-    "name": "劳动合同法-经济补偿支付",
+    "name": "劳动合同法-未付经济补偿责令支付及加付赔偿",
     "type": "定性",
     "dimension": "劳务合规风险",
     "region": "中国",
@@ -22340,7 +21471,7 @@
   },
   {
     "id": "PgUtUZ0B3BXzX1tXFWQT",
-    "name": "建设工程质量管理条例-保修期",
+    "name": "建设工程质量管理条例-基础主体结构与防水工程保修分支",
     "type": "定量",
     "dimension": "供应链风险",
     "region": "中国",
@@ -22498,7 +21629,7 @@
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "用人单位",
-    "fullText": "除培训服务期约定和竞业限制约定外，用人单位不得与劳动者约定由劳动者承担违约金。",
+    "fullText": "除劳动合同法第二十二条规定的专项培训服务期和第二十三条规定的竞业限制情形外，用人单位不得与劳动者约定由劳动者承担违约金。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T12:30:00.000000",
     "complianceDomain": [
@@ -22666,7 +21797,7 @@
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "组织者",
-    "fullText": "禁止任何组织或者个人从事传销活动。\n适用主体或业务条件：直销。",
+    "fullText": "禁止任何组织或者个人从事传销活动。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T12:35:00.000000",
     "complianceDomain": [
@@ -22792,7 +21923,7 @@
   },
   {
     "id": "QQUtUZ0B3BXzX1tXFWIS",
-    "name": "建设工程安全生产管理条例-安全投入",
+    "name": "建设工程安全生产管理条例-安全生产条件资金投入与挪用禁止",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -22886,7 +22017,7 @@
   },
   {
     "id": "QgUtUZ0B3BXzX1tXFV8R",
-    "name": "网络交易监督管理办法-隐私政策",
+    "name": "网络交易监督管理办法-平台协议规则公示",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -23018,25 +22149,6 @@
     ]
   },
   {
-    "id": "QgUtUZ0B3BXzX1tXFWQT",
-    "name": "反恐怖主义法-资产冻结",
-    "type": "定性",
-    "dimension": "企业国际合作风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "金融机构",
-    "fullText": "金融机构和特定非金融机构对国家反恐怖主义工作领导机构公告的恐怖活动组织和人员的资金或者其他资产，应当立即予以冻结。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-02T12:45:00.000000",
-    "complianceDomain": [
-      "银行业",
-      "金融业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "QwUtUZ0B3BXzX1tXFV4R",
     "name": "上市公司信息披露管理办法-董监高声明",
     "type": "定性",
@@ -23152,7 +22264,7 @@
   },
   {
     "id": "QwUtUZ0B3BXzX1tXFWQT",
-    "name": "民用航空安全检查规则",
+    "name": "民用航空安全检查规则-未经安检货物运输禁止",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -23231,7 +22343,7 @@
   },
   {
     "id": "RAUtUZ0B3BXzX1tXFWAS",
-    "name": "商业银行理财业务监督管理办法-信息登记",
+    "name": "商业银行理财业务监督管理办法-理财产品终止登记期限",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -23311,7 +22423,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "上市公司",
-    "fullText": "审计委员会成员应当为不在上市公司担任高级管理人员的董事，其中独立董事应当占半数以上。\n适用主体或业务条件：上市公司。",
+    "fullText": "审计委员会成员应当为不在上市公司担任高级管理人员的董事，其中独立董事应当占半数以上。",
     "quantitativeIndicator": 0.5,
     "createdAt": "2025-10-02T12:55:00.000000",
     "complianceDomain": [
@@ -23475,12 +22587,12 @@
   },
   {
     "id": "RgUtUZ0B3BXzX1tXFVsN",
-    "name": "关于平台经济领域的反垄断指南-二选一",
+    "name": "关于平台经济领域的反垄断指南-具有支配地位平台无正当理由限定交易",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
     "direction": "禁止",
-    "applicableSubject": "平台经济领域经营者",
+    "applicableSubject": "具有市场支配地位的平台经济领域经营者",
     "fullText": "具有市场支配地位的平台经济领域经营者，不得无正当理由，要求交易相对人在竞争性平台间进行“二选一”，或者限定交易相对人只能与其进行交易。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T14:06:50.555666",
@@ -23495,7 +22607,7 @@
   },
   {
     "id": "RgUtUZ0B3BXzX1tXFWES",
-    "name": "纳税信用管理办法-A级纳税人",
+    "name": "纳税信用管理办法-纳税申报及信用守法行为",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -23757,25 +22869,6 @@
     ]
   },
   {
-    "id": "SAUtUZ0B3BXzX1tXFV0R",
-    "name": "劳动合同法-劳务派遣比例",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "用工单位",
-    "fullText": "用工单位使用的被派遣劳动者数量不得超过其用工总量的10%。",
-    "quantitativeIndicator": 0.1,
-    "createdAt": "2025-11-24T23:29:29.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "SAUtUZ0B3BXzX1tXFVsN",
     "name": "女职工劳动保护特别规定-一般禁忌劳动与岗位告知",
     "type": "定性",
@@ -23819,8 +22912,8 @@
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
-    "direction": "可选",
-    "applicableSubject": "学校/教育机构",
+    "direction": "必要",
+    "applicableSubject": "大众传播媒介",
     "fullText": "大众传播媒介应当有针对性地面向社会进行网络安全宣传教育。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-25T17:32:30.000000",
@@ -23834,7 +22927,7 @@
   },
   {
     "id": "SAUtUZ0B3BXzX1tXFWES",
-    "name": "反垄断法-滥用市场支配地位",
+    "name": "反垄断法-单一经营者市场份额与支配地位推定",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -24118,7 +23211,7 @@
   },
   {
     "id": "SgUtUZ0B3BXzX1tXFWAS",
-    "name": "劳动合同法-劳务派遣协议",
+    "name": "劳动合同法-派遣单位与劳动者的固定期限合同",
     "type": "定量",
     "dimension": "劳务合规风险",
     "region": "中国",
@@ -24157,7 +23250,7 @@
   },
   {
     "id": "SgUtUZ0B3BXzX1tXFWIS",
-    "name": "外商投资安全审查办法",
+    "name": "外商投资安全审查办法-军工及军事设施周边投资安全审查",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -24199,7 +23292,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "上市公司",
-    "fullText": "关联自然人包括直接或间接持有上市公司5%以上股份的自然人。\n适用主体或业务条件：上市公司。",
+    "fullText": "关联自然人包括直接或间接持有上市公司5%以上股份的自然人。",
     "quantitativeIndicator": 0.05,
     "createdAt": "2025-10-02T13:25:00.000000",
     "complianceDomain": [
@@ -24289,7 +23382,7 @@
   },
   {
     "id": "SwUtUZ0B3BXzX1tXFVwQ",
-    "name": "商业银行大额风险暴露管理办法-集团客户",
+    "name": "商业银行大额风险暴露管理办法-非同业单一客户贷款及集团授信上限",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -24346,7 +23439,7 @@
   },
   {
     "id": "SwUtUZ0B3BXzX1tXFWMT",
-    "name": "互联网广告管理办法-竞价排名",
+    "name": "互联网广告管理办法-平台竞价排名服务广告标识",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -24389,7 +23482,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "网络运营者",
-    "fullText": "个人发现网络运营者收集、存储的其个人信息有错误的，有权要求网络运营者予以更正。网络运营者应当采取措施予以删除或者更正。",
+    "fullText": "个人发现网络运营者收集、存储的其个人信息有错误的，有权要求网络运营者予以更正；网络运营者应当采取措施予以更正。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T23:33:33.000000",
     "complianceDomain": [
@@ -24422,13 +23515,13 @@
   },
   {
     "id": "TAUtUZ0B3BXzX1tXFV8R",
-    "name": "证券法-操纵市场",
+    "name": "证券法-合谋对敲撤单等操纵市场手段禁止",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "任何单位/个人",
-    "fullText": "禁止任何人以单独或者通过合谋，集中资金优势、持股优势或者利用信息优势联合或者连续买卖，操纵证券市场。",
+    "fullText": "禁止任何人以下列手段操纵证券市场：单独或者通过合谋，集中资金优势、持股优势或者利用信息优势联合或者连续买卖；与他人串通，以事先约定的时间、价格和方式相互进行证券交易；在自己实际控制的账户之间进行证券交易；不以成交为目的，频繁或者大量申报并撤销申报。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-25T16:38:07.000000",
     "complianceDomain": [
@@ -24479,7 +23572,7 @@
   },
   {
     "id": "TAUtUZ0B3BXzX1tXFWAS",
-    "name": "上市公司章程指引-利润分配",
+    "name": "上市公司章程指引-三年现金分红累计比例条件",
     "type": "定量",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -24553,7 +23646,7 @@
   },
   {
     "id": "TAUtUZ0B3BXzX1tXFWQT",
-    "name": "网络游戏管理暂行办法-未成年人保护",
+    "name": "网络游戏管理暂行办法-用户实名注册与信息保存",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -24630,7 +23723,7 @@
   },
   {
     "id": "TQUtUZ0B3BXzX1tXFWES",
-    "name": "公司法-关联交易披露",
+    "name": "公司法-董事高管竞业与商业机会限制",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -24741,26 +23834,6 @@
     ]
   },
   {
-    "id": "TgUtUZ0B3BXzX1tXFV8R",
-    "name": "网络交易监督管理办法-自动续费",
-    "type": "定量",
-    "dimension": "产品合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "网络交易经营者",
-    "fullText": "网络交易经营者采取自动展期、自动续费等方式提供服务的，应当在消费者接受服务前和自动展期、自动续费等日期前5日，以显著方式提请消费者注意，由消费者自主选择。",
-    "quantitativeIndicator": 5.0,
-    "createdAt": "2025-11-25T16:40:09.000000",
-    "complianceDomain": [
-      "电子商务",
-      "互联网",
-      "零售业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "TgUtUZ0B3BXzX1tXFVsN",
     "name": "网络借贷信息中介机构业务活动管理暂行办法-借款余额上限",
     "type": "定量",
@@ -24800,7 +23873,7 @@
   },
   {
     "id": "TgUtUZ0B3BXzX1tXFWES",
-    "name": "企业会计准则第36号-关联方披露",
+    "name": "企业会计准则第36号-关联关系及交易要素附注披露",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -24824,7 +23897,7 @@
     "region": "英国",
     "direction": "禁止",
     "applicableSubject": "企业",
-    "fullText": "企业未能防止其关联人员（如员工、代理人）进行贿赂以获取商业利益的，将承担刑事责任。\n适用主体或业务条件：跨国企业。",
+    "fullText": "企业未能防止其关联人员（如员工、代理人）进行贿赂以获取商业利益的，将承担刑事责任。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T14:16:00.000000",
     "complianceDomain": [
@@ -24854,25 +23927,6 @@
     ]
   },
   {
-    "id": "TgUtUZ0B3BXzX1tXFWQT",
-    "name": "反洗钱法（2024年修订）-客户身份资料和交易记录保存",
-    "type": "定量",
-    "dimension": "企业国际合作风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "金融机构",
-    "fullText": "适用条件：依据2025年1月1日起施行的反洗钱法处理金融机构资料保存事项时。金融机构应保存客户身份资料和交易记录；身份资料的保存期从业务关系结束计算，交易信息的保存期从交易结束计算，两类资料均不得少于10年。",
-    "quantitativeIndicator": 10.0,
-    "createdAt": "2025-10-02T13:45:00.000000",
-    "complianceDomain": [
-      "银行业",
-      "金融业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "TwUtUZ0B3BXzX1tXFV4R",
     "name": "促进和规范数据跨境流动规定-申报情形与机制适用",
     "type": "定量",
@@ -24893,58 +23947,19 @@
   },
   {
     "id": "TwUtUZ0B3BXzX1tXFVsN",
-    "name": "对外承包工程管理条例-分包限制",
-    "type": "定量",
+    "name": "对外承包工程管理条例-分包资质与质量安全责任",
+    "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "对外承包工程企业",
-    "fullText": "对外承包工程企业不得将工程项目的核心部分分包。企业将非核心部分分包的，分包工程量不得超过总工程量的 50%（注：此比例根据不同具体项目和合同约定可能有所不同，但条例严禁转包和违规分包）。",
+    "fullText": "对外承包工程的单位分包工程项目，应通过专门协议或分包合同明确双方工程质量和安全生产管理责任，并统一协调管理。不得将项目分包给不具备相应资质的单位；建筑施工部分不得分包给未依法取得安全生产许可证的境内建筑施工企业。分包合同应明确分包单位不得转包或再分包，并由对外承包工程的单位监督执行。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T14:37:35.555666",
     "complianceDomain": [
       "建筑工程",
       "电力",
       "交通运输"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "TwUtUZ0B3BXzX1tXFVwQ",
-    "name": "安全生产许可证条例-许可证申领",
-    "type": "定性",
-    "dimension": "供应链风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "企业",
-    "fullText": "国家对矿山企业、建筑施工企业和危险化学品、烟花爆竹、民用爆破器材生产企业实行安全生产许可制度。企业未取得安全生产许可证的，不得从事生产活动。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T19:21:21.000000",
-    "complianceDomain": [
-      "建筑工程",
-      "采矿业",
-      "化工制造"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "TwUtUZ0B3BXzX1tXFWAS",
-    "name": "商业银行理财业务监督管理办法-关联交易披露",
-    "type": "定量",
-    "dimension": "企业信用风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "商业银行",
-    "fullText": "商业银行理财产品发生重大关联交易的，应当在交易发生之日起2个工作日内向投资者披露。",
-    "quantitativeIndicator": 2.0,
-    "createdAt": "2025-11-25T21:00:45.000000",
-    "complianceDomain": [
-      "银行业",
-      "金融业"
     ],
     "regionCodes": [
       "CN"
@@ -25007,7 +24022,7 @@
   },
   {
     "id": "TwUtUZ0B3BXzX1tXFWQT",
-    "name": "兽药管理条例-休药期",
+    "name": "兽药管理条例-使用主体安全用药与休药期",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -25253,7 +24268,7 @@
   },
   {
     "id": "UQUtUZ0B3BXzX1tXFWIS",
-    "name": "关于进一步加强塑料污染治理的意见",
+    "name": "关于进一步加强塑料污染治理的意见-超薄塑料购物袋厚度限制",
     "type": "定量",
     "dimension": "供应链风险",
     "region": "中国",
@@ -25329,7 +24344,7 @@
   },
   {
     "id": "UgUtUZ0B3BXzX1tXFVsN",
-    "name": "互联网广告管理办法-弹出广告",
+    "name": "互联网广告管理办法-弹出广告关闭与点击诱导限制",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -25360,7 +24375,8 @@
     "createdAt": "2025-11-24T19:24:24.000000",
     "complianceDomain": [
       "零售业",
-      "服务业"
+      "服务业",
+      "餐饮服务"
     ],
     "regionCodes": [
       "CN"
@@ -25368,7 +24384,7 @@
   },
   {
     "id": "UgUtUZ0B3BXzX1tXFWES",
-    "name": "反洗钱法-客户身份识别",
+    "name": "反洗钱法-建立业务关系时身份及受益所有人识别",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -25443,13 +24459,13 @@
   },
   {
     "id": "UwUtUZ0B3BXzX1tXFV0R",
-    "name": "商业银行互联网贷款管理暂行办法-联合贷款",
+    "name": "关于进一步规范商业银行互联网贷款业务的通知-联合贷款合作方出资比例",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "商业银行",
-    "fullText": "商业银行与合作机构共同出资发放贷款，单笔贷款中商业银行出资比例不得低于30%。",
+    "fullText": "商业银行与合作机构共同出资发放贷款，单笔贷款中合作方出资比例不得低于30%。",
     "quantitativeIndicator": 0.3,
     "createdAt": "2025-11-24T23:40:40.000000",
     "complianceDomain": [
@@ -25501,7 +24517,7 @@
   },
   {
     "id": "UwUtUZ0B3BXzX1tXFVwQ",
-    "name": "对外贸易法-知识产权保护",
+    "name": "对外贸易法-侵权货物技术服务进出口禁止措施",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -25521,7 +24537,7 @@
   },
   {
     "id": "UwUtUZ0B3BXzX1tXFWES",
-    "name": "产品质量法-不合格产品",
+    "name": "产品质量法-淘汰产品与产地厂名厂址造假禁止",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -25559,7 +24575,7 @@
   },
   {
     "id": "UwUtUZ0B3BXzX1tXFWMT",
-    "name": "医疗器械说明书和标签管理规定",
+    "name": "医疗器械说明书和标签管理规定-说明书标签真实性及误导禁止",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -25691,25 +24707,6 @@
     ]
   },
   {
-    "id": "VQUtUZ0B3BXzX1tXFV0R",
-    "name": "外汇管理条例-资本项目管理",
-    "type": "定性",
-    "dimension": "企业国际合作风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "境内机构/个人",
-    "fullText": "资本项目外汇支出，应当按照国务院外汇管理部门关于付汇与购汇的管理规定，凭有效单证以自有外汇支付或者向经营结汇、售汇业务的金融机构购汇支付。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T23:42:42.000000",
-    "complianceDomain": [
-      "金融业",
-      "贸易"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "VQUtUZ0B3BXzX1tXFV4R",
     "name": "上市公司信息披露管理办法-临时报告披露时限",
     "type": "定量",
@@ -25736,7 +24733,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "居民企业",
-    "fullText": "企业向税务机关报送年度企业所得税纳税申报表时，应当就其与关联方之间的业务往来，附送《中华人民共和国企业年度关联业务往来报告表》。\n适用主体或业务条件：跨国企业。",
+    "fullText": "企业向税务机关报送年度企业所得税纳税申报表时，应当就其与关联方之间的业务往来，附送《中华人民共和国企业年度关联业务往来报告表》。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T15:06:30.555666",
     "complianceDomain": [
@@ -25748,7 +24745,7 @@
   },
   {
     "id": "VQUtUZ0B3BXzX1tXFWES",
-    "name": "欧盟RoHS指令-有害物质限量",
+    "name": "欧盟RoHS指令-铅汞六价铬等物质含量限制",
     "type": "定量",
     "dimension": "产品合规风险",
     "region": "欧盟",
@@ -25922,27 +24919,8 @@
     ]
   },
   {
-    "id": "VgUtUZ0B3BXzX1tXFWMT",
-    "name": "劳动合同法-非全日制用工",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "用人单位",
-    "fullText": "非全日制用工小时计酬标准不得低于用人单位所在地人民政府规定的最低小时工资标准。劳动报酬结算支付周期最长不得超过15日。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T18:50:00.000000",
-    "complianceDomain": [
-      "零售业",
-      "餐饮服务"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "VgUtUZ0B3BXzX1tXFWQT",
-    "name": "关于规范金融机构资产管理业务的指导意见-杠杆率",
+    "name": "关于规范金融机构资产管理业务的指导意见-分级比例限制",
     "type": "定量",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -26035,25 +25013,6 @@
     ]
   },
   {
-    "id": "VwUtUZ0B3BXzX1tXFWQT",
-    "name": "禁止使用童工规定-文艺体育专业人员招用与保护",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "可选",
-    "applicableSubject": "用人单位",
-    "fullText": "适用条件：中国境内文艺、体育单位拟招用不满16周岁的专业文艺工作者、运动员时。经未成年人的父母或者其他监护人同意，可以依法招用，但应保障被招用人员身心健康和接受义务教育的权利。专业人员、实际活动及监护人同意须对应，不将这一条件扩展为所有文艺体育岗位均可招用不满16周岁人员。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-02T14:30:00.000000",
-    "complianceDomain": [
-      "文化传媒",
-      "体育"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "WAUtUZ0B3BXzX1tXFV0R",
     "name": "互联网用户公众账号信息服务管理规定-内容生产",
     "type": "定性",
@@ -26067,25 +25026,6 @@
     "complianceDomain": [
       "互联网",
       "文化传媒"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "WAUtUZ0B3BXzX1tXFV4R",
-    "name": "商业银行流动性风险管理办法-流动性比例",
-    "type": "定量",
-    "dimension": "企业信用风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "商业银行",
-    "fullText": "商业银行的流动性比例应当不低于25%。",
-    "quantitativeIndicator": 0.25,
-    "createdAt": "2025-11-25T12:13:13.000000",
-    "complianceDomain": [
-      "银行业",
-      "金融业"
     ],
     "regionCodes": [
       "CN"
@@ -26124,7 +25064,8 @@
     "createdAt": "2025-11-24T09:30:00.000000",
     "complianceDomain": [
       "软件开发",
-      "互联网"
+      "互联网",
+      "移动应用"
     ],
     "regionCodes": [
       "CN"
@@ -26225,14 +25166,14 @@
   },
   {
     "id": "WQUtUZ0B3BXzX1tXFVsN",
-    "name": "上市公司自律监管指引-业绩预告纠错",
+    "name": "上市公司自律监管指引-业绩预告差异核对与修正公告",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
-    "direction": "禁止",
+    "direction": "必要",
     "applicableSubject": "上市公司",
-    "fullText": "上市公司披露的业绩预告修正公告中，最新预计的净利润与原预计净利润差异幅度不得超过 50%，否则可能构成信披违规。",
-    "quantitativeIndicator": 0.5,
+    "fullText": "上市公司应按适用交易所、板块及规则版本核对业绩预告与最新预计或实际业绩的差异。达到适用规则规定的修正情形时，应及时披露修正公告并说明原因。差异幅度用于判断是否触发修正义务，不能直接作为业绩变动的禁止性上限。",
+    "quantitativeIndicator": null,
     "createdAt": "2025-11-24T15:19:30.444555",
     "complianceDomain": [
       "证券业",
@@ -26375,7 +25316,7 @@
   },
   {
     "id": "WgUtUZ0B3BXzX1tXFWES",
-    "name": "医疗器械监督管理条例-不良事件监测",
+    "name": "医疗器械监督管理条例-不良事件监测体系与主动监测",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -26437,7 +25378,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "外国投资者",
-    "fullText": "外国投资者或者外商投资企业应当通过企业登记系统以及企业信用信息公示系统向商务主管部门报送投资信息。\n适用主体或业务条件：外商投资。",
+    "fullText": "外国投资者或者外商投资企业应当通过企业登记系统以及企业信用信息公示系统向商务主管部门报送投资信息。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T14:45:00.000000",
     "complianceDomain": [
@@ -26546,7 +25487,7 @@
   },
   {
     "id": "WwUtUZ0B3BXzX1tXFWIS",
-    "name": "食品安全国家标准-食品添加剂使用标准(GB 2760)",
+    "name": "食品安全国家标准-食品添加剂使用范围与用量限制",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -26579,25 +25520,6 @@
     ],
     "regionCodes": [
       "IN"
-    ]
-  },
-  {
-    "id": "WwUtUZ0B3BXzX1tXFWQT",
-    "name": "民用爆炸物品安全管理条例-运输",
-    "type": "定性",
-    "dimension": "供应链风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "收货单位",
-    "fullText": "运输民用爆炸物品，收货单位应当向运达地县级人民政府公安机关提出申请，并提交相关材料。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-02T14:50:00.000000",
-    "complianceDomain": [
-      "民爆行业",
-      "物流仓储"
-    ],
-    "regionCodes": [
-      "CN"
     ]
   },
   {
@@ -26658,25 +25580,6 @@
     ]
   },
   {
-    "id": "XAUtUZ0B3BXzX1tXFWAS",
-    "name": "劳动合同法-劳务派遣比例",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "用人单位",
-    "fullText": "用人单位使用的被派遣劳动者数量不得超过其用工总量的10%。",
-    "quantitativeIndicator": 0.1,
-    "createdAt": "2025-11-25T21:13:58.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "XAUtUZ0B3BXzX1tXFWES",
     "name": "冲突矿产管理规范",
     "type": "定性",
@@ -26709,24 +25612,6 @@
     "complianceDomain": [
       "建筑工程",
       "房地产"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "XAUtUZ0B3BXzX1tXFWMT",
-    "name": "劳动合同法-违约金限制",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "用人单位",
-    "fullText": "除专项培训服务期约定和竞业限制约定外，用人单位不得与劳动者约定由劳动者承担违约金。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T18:56:00.000000",
-    "complianceDomain": [
-      "综合类"
     ],
     "regionCodes": [
       "CN"
@@ -26862,24 +25747,6 @@
     ],
     "regionCodes": [
       "GLOBAL"
-    ]
-  },
-  {
-    "id": "XQUtUZ0B3BXzX1tXFWMT",
-    "name": "征信业管理条例-异议处理",
-    "type": "定量",
-    "dimension": "企业信用风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "征信机构",
-    "fullText": "征信机构或者信息提供者收到异议申请，应当自收到异议之日起20日内进行核查和处理，并将结果书面答复异议人。",
-    "quantitativeIndicator": 20.0,
-    "createdAt": "2025-11-24T18:57:00.000000",
-    "complianceDomain": [
-      "银行业"
-    ],
-    "regionCodes": [
-      "CN"
     ]
   },
   {
@@ -27092,7 +25959,7 @@
   },
   {
     "id": "XwUtUZ0B3BXzX1tXFVwQ",
-    "name": "反外国制裁法-反制措施",
+    "name": "反外国制裁法-签证入境及境内财产反制措施",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -27241,26 +26108,6 @@
     ]
   },
   {
-    "id": "YAUtUZ0B3BXzX1tXFWAS",
-    "name": "网络安全法-用户信息更正",
-    "type": "定性",
-    "dimension": "产品合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "网络运营者",
-    "fullText": "个人发现网络运营者收集、存储的其个人信息有错误的，有权要求网络运营者予以更正。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-25T21:18:02.000000",
-    "complianceDomain": [
-      "互联网",
-      "数据服务",
-      "电子商务"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "YAUtUZ0B3BXzX1tXFWES",
     "name": "绿色供应链管理评价规范",
     "type": "定量",
@@ -27273,24 +26120,6 @@
     "createdAt": "2025-11-24T09:38:00.000000",
     "complianceDomain": [
       "环保服务"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "YAUtUZ0B3BXzX1tXFWIS",
-    "name": "禁止使用童工规定",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "用人单位",
-    "fullText": "用人单位使用童工的，由劳动保障行政部门按照每使用一名童工每月处5000元罚款的标准给予处罚。",
-    "quantitativeIndicator": 5000.0,
-    "createdAt": "2025-11-24T14:34:00.000000",
-    "complianceDomain": [
-      "综合类"
     ],
     "regionCodes": [
       "CN"
@@ -27601,7 +26430,7 @@
   },
   {
     "id": "YgUtUZ0B3BXzX1tXFWQT",
-    "name": "商业银行理财业务监督管理办法-合格投资者",
+    "name": "商业银行理财业务监督管理办法-公募理财单一投资者销售起点",
     "type": "定量",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -27620,12 +26449,12 @@
   },
   {
     "id": "YwUtUZ0B3BXzX1tXFV0R",
-    "name": "特种设备安全法-召回",
+    "name": "特种设备安全法-故障异常检查与继续使用条件",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
     "direction": "必要",
-    "applicableSubject": "特种设备制造单位",
+    "applicableSubject": "特种设备使用单位",
     "fullText": "特种设备出现故障或者发生异常情况，使用单位应当对其进行全面检查，消除事故隐患，方可继续使用。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T23:56:56.000000",
@@ -27946,24 +26775,6 @@
     ]
   },
   {
-    "id": "ZAUtUZ0B3BXzX1tXFWQT",
-    "name": "烟花爆竹安全管理条例-生产许可",
-    "type": "定性",
-    "dimension": "产品合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "生产企业",
-    "fullText": "未取得烟花爆竹安全生产许可证的，不得从事烟花爆竹生产活动。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-02T15:35:00.000000",
-    "complianceDomain": [
-      "烟花爆竹"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "ZQUtUZ0B3BXzX1tXFV0R",
     "name": "商业银行理财业务监督管理办法-净值化",
     "type": "定性",
@@ -28086,7 +26897,7 @@
     "region": "美国",
     "direction": "禁止",
     "applicableSubject": "企业",
-    "fullText": "禁止向外国政府官员提供金钱或其他有价物以获得或保留业务。\n适用主体或业务条件：跨国企业。",
+    "fullText": "禁止向外国政府官员提供金钱或其他有价物以获得或保留业务。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T09:43:00.000000",
     "complianceDomain": [
@@ -28324,7 +27135,7 @@
   },
   {
     "id": "ZwUtUZ0B3BXzX1tXFV4R",
-    "name": "证券法-虚假陈述",
+    "name": "证券法-虚假陈述造成投资者损失赔偿",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -28383,7 +27194,7 @@
   },
   {
     "id": "ZwUtUZ0B3BXzX1tXFVwQ",
-    "name": "私募集金运作管理办法-托管要求",
+    "name": "私募投资基金运作管理办法-托管要求",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -28667,44 +27478,6 @@
     ]
   },
   {
-    "id": "_QUtUZ0B3BXzX1tXFV4R",
-    "name": "禁止使用童工规定-定义",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "单位/个人",
-    "fullText": "童工是指未满16周岁，与单位或者个人发生劳动关系从事有经济收入的劳动或者从事个体劳动的少年、儿童。",
-    "quantitativeIndicator": 16.0,
-    "createdAt": "2025-11-25T13:09:09.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "_QUtUZ0B3BXzX1tXFVoM",
-    "name": "禁止使用童工规定",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "用人单位",
-    "fullText": "国家机关、社会团体、企业事业单位、民办非企业单位或者个体工商户，禁止招用不满 16 周岁的未成年人。",
-    "quantitativeIndicator": 16.0,
-    "createdAt": "2025-11-24T09:48:05.555444",
-    "complianceDomain": [
-      "纺织制造",
-      "玩具制造"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "_QUtUZ0B3BXzX1tXFVsQ",
     "name": "票据法-支票提示付款",
     "type": "定量",
@@ -28806,7 +27579,7 @@
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "国企领导人员",
-    "fullText": "国有企业领导人员不得利用职权为配偶、子女及其他特定关系人从事营利性经营活动提供便利条件。\n适用主体或业务条件：国有企业。",
+    "fullText": "国有企业领导人员不得利用职权为配偶、子女及其他特定关系人从事营利性经营活动提供便利条件。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T18:40:00.000000",
     "complianceDomain": [
@@ -28895,7 +27668,7 @@
   },
   {
     "id": "_gUtUZ0B3BXzX1tXFVwQ",
-    "name": "电子商务法-平台责任",
+    "name": "电子商务法-知情未处置侵权事项连带责任",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -28934,18 +27707,19 @@
   },
   {
     "id": "_gUtUZ0B3BXzX1tXFWES",
-    "name": "报废机动车回收管理办法实施细则-五大总成",
+    "name": "报废机动车回收管理办法实施细则-回收拆解企业五大总成出售条件",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
     "direction": "可选",
-    "applicableSubject": "回收企业",
-    "fullText": "报废机动车“五大总成”具备再制造条件的，可以出售给具有再制造能力的企业。",
+    "applicableSubject": "回收拆解企业",
+    "fullText": "回收拆解企业拆解的报废机动车“五大总成”具备再制造条件的，可以按照国家有关规定出售给具有再制造能力的企业。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T12:37:00.000000",
     "complianceDomain": [
       "汽车制造",
-      "再生资源"
+      "再生资源",
+      "汽车零部件"
     ],
     "regionCodes": [
       "CN"
@@ -28970,26 +27744,6 @@
     ]
   },
   {
-    "id": "_gUtUZ0B3BXzX1tXFWMT",
-    "name": "生产经营单位安全培训规定-三级培训适用人员",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "生产经营单位",
-    "fullText": "适用条件：依法适用生产经营单位安全培训规定，加工、制造业等生产单位的其他从业人员上岗前。应经过厂（矿）、车间（工段、区、队）、班组三级安全培训；单位按工作性质保证岗位安全操作和应急处置知识技能。煤矿、非煤矿山、危险化学品、烟花爆竹和金属冶炼等新上岗人员另按相应规定实施培训；建筑等行业的专项培训要求依适用规定确认，不将加工制造的三级形式直接扩为所有单位。一般及高危岗位的学时、再培训、调岗或复岗条件分别按规定核对。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-01T18:45:00.000000",
-    "complianceDomain": [
-      "建筑工程",
-      "制造业",
-      "采矿业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "_wUtUZ0B3BXzX1tXFV0R",
     "name": "残疾人就业条例-就业歧视禁止",
     "type": "定性",
@@ -29003,25 +27757,6 @@
     "complianceDomain": [
       "制造业",
       "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "_wUtUZ0B3BXzX1tXFVoM",
-    "name": "证券法-内幕交易",
-    "type": "定性",
-    "dimension": "企业关联方风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "内幕信息知情人",
-    "fullText": "证券交易内幕信息的知情人和非法获取内幕信息的人，在内幕信息公开前，不得买卖该证券，或者泄露该信息，或者建议他人买卖该证券。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T09:53:40.111999",
-    "complianceDomain": [
-      "证券业",
-      "基金业"
     ],
     "regionCodes": [
       "CN"
@@ -29124,7 +27859,7 @@
   },
   {
     "id": "_wUtUZ0B3BXzX1tXFWMT",
-    "name": "能效标识管理办法",
+    "name": "能效标识管理办法-目录产品能效标识位置",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -29564,7 +28299,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "公众公司",
-    "fullText": "公众公司应当制定关联交易管理制度，对关联交易的决策程序、回避表决等作出规定。\n适用主体或业务条件：新三板。",
+    "fullText": "公众公司应当制定关联交易管理制度，对关联交易的决策程序、回避表决等作出规定。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T15:55:00.000000",
     "complianceDomain": [
@@ -30168,7 +28903,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "社会组织",
-    "fullText": "未按照规定时限和要求向登记管理机关报送年度工作报告的，列入活动异常名录。\n适用主体或业务条件：社会组织。",
+    "fullText": "未按照规定时限和要求向登记管理机关报送年度工作报告的，列入活动异常名录。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T16:10:00.000000",
     "complianceDomain": [
@@ -30277,7 +29012,7 @@
     ],
     "direction": "必要",
     "applicableSubject": "广告主、广告经营者、广告发布者",
-    "fullText": "适用条件：中国境内商业广告涉及依法需行政许可事项或数据统计调查文摘引用等引证。涉及许可事项应与许可内容相符；引证须真实准确并表示出处，有适用范围及有效期限的应明确表示。商品服务性能价格允诺及附赠信息还应按第八条准确清楚表达。核对实际广告版本、引证对象范围期间和许可版本，证据差异预警与最终认定分开，非广告宣传按相应依据另核；不存在统一允许处理两天的广告真实性宽限期。",
+    "fullText": "适用条件：中国境内商业广告涉及依法需行政许可事项或数据统计调查文摘引用等引证。涉及许可事项应与许可内容相符；引证须真实准确并表示出处，有适用范围及有效期限的应明确表示。商品服务性能价格允诺及附赠信息还应按第八条准确清楚表达。核对实际广告版本、引证对象范围期间和许可版本，证据差异预警与最终认定分开，非广告宣传按相应依据另核。",
     "quantitativeIndicator": null,
     "createdAt": "2026-10-11T00:00:00",
     "complianceDomain": [
@@ -30443,25 +29178,6 @@
     "createdAt": "2026-10-12T13:26:33"
   },
   {
-    "id": "bAUtUZ0B3BXzX1tXFV0R",
-    "name": "禁止使用童工规定-介绍就业",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "单位/个人",
-    "fullText": "禁止任何单位或者个人为不满16周岁的未成年人介绍就业。",
-    "quantitativeIndicator": 16.0,
-    "createdAt": "2025-11-25T00:05:05.000000",
-    "complianceDomain": [
-      "人力资源",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "bAUtUZ0B3BXzX1tXFV4R",
     "name": "外汇管理条例-外汇担保",
     "type": "定性",
@@ -30539,7 +29255,7 @@
   },
   {
     "id": "bAUtUZ0B3BXzX1tXFWIS",
-    "name": "劳务派遣暂行规定-辅助性岗位",
+    "name": "劳务派遣暂行规定-辅助性岗位民主确定与公示",
     "type": "定性",
     "dimension": "劳务合规风险",
     "region": "中国",
@@ -30664,24 +29380,6 @@
       "电信运营",
       "金融业",
       "能源"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "bQUtUZ0B3BXzX1tXFWES",
-    "name": "公司法-股东出资",
-    "type": "定性",
-    "dimension": "企业关联方风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "股东",
-    "fullText": "股东应当按期足额缴纳公司章程中规定的各自所认缴的出资额。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T09:51:00.000000",
-    "complianceDomain": [
-      "投资服务"
     ],
     "regionCodes": [
       "CN"
@@ -31058,7 +29756,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "企业经营管理人员",
-    "fullText": "企业经营管理人员违反规定，未履行或未正确履行职责，造成国有资产损失的，应当追究责任。\n适用主体或业务条件：国有企业。",
+    "fullText": "企业经营管理人员违反规定，未履行或未正确履行职责，造成国有资产损失的，应当追究责任。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T16:25:00.000000",
     "complianceDomain": [
@@ -31188,7 +29886,7 @@
   },
   {
     "id": "bwUtUZ0B3BXzX1tXFWES",
-    "name": "网络安全法-关键信息基础设施",
+    "name": "网络安全法-重点保护与产品服务采购安全",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -31340,7 +30038,7 @@
     ],
     "direction": "必要",
     "applicableSubject": "用人单位",
-    "fullText": "适用条件：中国境内用人单位处理员工个人信息并出现第四十七条删除情形时。处理目的已实现、无法实现或不再必要，处理者停止提供产品或服务或保存期限届满，个人撤回同意，处理违反法律行政法规或约定，或法律行政法规规定的其他情形，应主动删除；未删除的个人有权请求删除。法律行政法规规定的保存期限未届满，或删除从技术上难以实现的，应停止除存储和必要安全保护之外的处理。须按实际信息、依据、目的和删除事由核对，企业自行延长保存不等于法定保留例外；停止其他处理不能作为已完成删除。本条删除要求不统一改为匿名化，适用其他明确允许匿名化的规定时另核其条件。",
+    "fullText": "适用条件：中国境内用人单位处理员工个人信息并出现第四十七条删除情形时。处理目的已实现、无法实现或不再必要，处理者停止提供产品或服务或保存期限届满，个人撤回同意，处理违反法律行政法规或约定，或法律行政法规规定的其他情形，应主动删除；未删除的个人有权请求删除。法律行政法规规定的保存期限未届满，或删除从技术上难以实现的，应停止除存储和必要安全保护之外的处理。须按实际信息、依据、目的和删除事由核对，企业自行延长保存不等于法定保留例外；停止其他处理不能作为已完成删除。删除与匿名化按各自适用条件分别判断，适用其他明确允许匿名化的规定时另核其条件。",
     "quantitativeIndicator": null,
     "createdAt": "2026-10-11T00:00:00",
     "complianceDomain": [
@@ -31482,27 +30180,6 @@
       "社交内容举报申诉链条"
     ],
     "createdAt": "2026-10-12T13:26:33"
-  },
-  {
-    "id": "c9970bed-a615-58de-9f1d-775f9c420629",
-    "name": "劳动合同法（2012年修正）-协商解除与劳动者主动解除路径",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "regionCodes": [
-      "CN"
-    ],
-    "direction": "可选",
-    "applicableSubject": "用人单位",
-    "fullText": "适用条件：用人单位与劳动者协商解除，或劳动者主动解除劳动合同时。双方协商一致可解除；劳动者一般提前三十日书面通知，试用期提前三日通知。单位未提供约定劳动保护条件、未及时足额付薪、未依法缴社保、违法规章损害权益、第二十六条第一款事由致合同无效，或其他法定事由，劳动者可依法解除；暴力威胁非法限制自由强迫劳动或违章强令危险作业危及安全，可立即解除而无需事先告知。解除提出者、协商结果及法定事由分别核对，不把一般提前通知套用即时解除。",
-    "quantitativeIndicator": null,
-    "createdAt": "2026-10-11T00:00:00",
-    "complianceDomain": [
-      "综合类"
-    ],
-    "tags": [
-      "协商解除与劳动者主动解除路径"
-    ]
   },
   {
     "id": "cAUtUZ0B3BXzX1tXFV0R",
@@ -31814,7 +30491,7 @@
   },
   {
     "id": "cQUtUZ0B3BXzX1tXFWES",
-    "name": "电子商务法-押金退还",
+    "name": "电子商务法-押金退还方式程序与条件",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -31875,7 +30552,7 @@
     "dimension": "企业信用风险",
     "region": "中国",
     "direction": "必要",
-    "applicableSubject": "市场主体",
+    "applicableSubject": "中国证监会及其派出机构",
     "fullText": "中国证监会及其派出机构将证券期货市场主体的诚信信息录入证券期货市场诚信档案数据库。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T16:40:00.000000",
@@ -31986,7 +30663,7 @@
     ],
     "direction": "必要",
     "applicableSubject": "用人单位",
-    "fullText": "适用条件：用人单位按现行出境规定确认采用个人信息出境标准合同路径提供员工信息时。2024年促进和规范数据跨境流动规定与本办法旧门槛不一致的，依2024年规定，不将标准合同备案作为全部员工出境义务。出境前评估目的范围方式合法正当必要、规模范围种类敏感程度和风险、接收方承诺及管理技术能力、篡改破坏泄露丢失非法利用风险及权益渠道、接收方所在国家地区政策法规对合同履行影响和其他安全事项。合同严格依附件订立，其他条款不得冲突；合同生效后方可出境，自生效之日起10个工作日内向所在地省级网信部门备案合同与影响评估报告并对真实性负责，备案不称为事前审批。目的范围种类敏感程度方式保存地点、接收方用途方式变化、延长境外保存期限，或接收地区政策法规变化等可能影响权益及其他影响权益情形，应重新评估，补充或重新订立合同并履行相应备案。不得数量拆分规避安全评估。",
+    "fullText": "适用条件：用人单位按现行出境规定确认采用个人信息出境标准合同路径提供员工信息时。2024年促进和规范数据跨境流动规定与本办法此前相应规定不一致的，依2024年规定，不将标准合同备案作为全部员工出境义务。出境前评估目的范围方式合法正当必要、规模范围种类敏感程度和风险、接收方承诺及管理技术能力、篡改破坏泄露丢失非法利用风险及权益渠道、接收方所在国家地区政策法规对合同履行影响和其他安全事项。合同严格依附件订立，其他条款不得冲突；合同生效后方可出境，自生效之日起10个工作日内向所在地省级网信部门备案合同与影响评估报告并对真实性负责，备案不称为事前审批。目的范围种类敏感程度方式保存地点、接收方用途方式变化、延长境外保存期限，或接收地区政策法规变化等可能影响权益及其他影响权益情形，应重新评估，补充或重新订立合同并履行相应备案。不得数量拆分规避安全评估。",
     "quantitativeIndicator": null,
     "createdAt": "2026-10-11T00:00:00",
     "complianceDomain": [
@@ -32133,7 +30810,7 @@
   },
   {
     "id": "cgUtUZ0B3BXzX1tXFWQT",
-    "name": "国际海运危险货物规则(IMDG Code)",
+    "name": "国际海运危险货物规则(IMDG Code)-危险货物分类包装标记积载隔离",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "全球",
@@ -32190,7 +30867,7 @@
   },
   {
     "id": "cwUtUZ0B3BXzX1tXFVsN",
-    "name": "快递暂行条例-实名收寄",
+    "name": "快递暂行条例-身份查验与内件验视要求",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -32296,25 +30973,6 @@
     "createdAt": "2025-11-24T19:19:00.000000",
     "complianceDomain": [
       "综合类"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "cwUtUZ0B3BXzX1tXFWQT",
-    "name": "报废机动车回收管理办法实施细则-五大总成",
-    "type": "定性",
-    "dimension": "供应链风险",
-    "region": "中国",
-    "direction": "可选",
-    "applicableSubject": "回收拆解企业",
-    "fullText": "回收拆解企业拆解的报废机动车“五大总成”具备再制造条件的，可以按照国家有关规定出售给具有再制造能力的企业。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-02T16:50:00.000000",
-    "complianceDomain": [
-      "再生资源",
-      "汽车零部件"
     ],
     "regionCodes": [
       "CN"
@@ -32628,25 +31286,6 @@
     ]
   },
   {
-    "id": "dAUtUZ0B3BXzX1tXFV0R",
-    "name": "证券法-保荐人职责",
-    "type": "定性",
-    "dimension": "企业关联方风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "保荐人",
-    "fullText": "保荐人应当对发行人的申请文件和信息披露资料进行审慎核查，督导发行人规范运作。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-25T00:13:13.000000",
-    "complianceDomain": [
-      "证券业",
-      "金融业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "dAUtUZ0B3BXzX1tXFV4R",
     "name": "安全生产法-安全生产责任险",
     "type": "定性",
@@ -32724,25 +31363,6 @@
     ]
   },
   {
-    "id": "dAUtUZ0B3BXzX1tXFWAS",
-    "name": "禁止使用童工规定-刑事责任",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "单位/个人",
-    "fullText": "拐骗童工，强迫童工劳动，使用童工从事高空、井下、放射性、高毒、易燃易爆以及国家规定的第四级体力劳动强度的劳动，使用不满14周岁的童工，或者造成童工死亡或者严重伤残的，依照刑法关于拐卖儿童罪、强迫劳动罪或者其他罪的规定，依法追究刑事责任。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-25T21:38:22.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "dAUtUZ0B3BXzX1tXFWES",
     "name": "海关法-如实申报",
     "type": "定性",
@@ -32804,7 +31424,7 @@
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "董监高",
-    "fullText": "上市公司董事、监事和高级管理人员在任职期间，每年转让的股份不得超过其所持有本公司股份总数的25%。\n适用主体或业务条件：上市公司。",
+    "fullText": "上市公司董事、监事和高级管理人员在任职期间，每年转让的股份不得超过其所持有本公司股份总数的25%。",
     "quantitativeIndicator": 0.25,
     "createdAt": "2025-10-02T16:55:00.000000",
     "complianceDomain": [
@@ -33218,7 +31838,7 @@
   },
   {
     "id": "dgUtUZ0B3BXzX1tXFVsN",
-    "name": "中华人民共和国大气污染防治法-超标排放",
+    "name": "中华人民共和国大气污染防治法-环境影响评价与逃避监管排放禁止",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -33448,7 +32068,7 @@
   },
   {
     "id": "dwUtUZ0B3BXzX1tXFWMT",
-    "name": "快递市场管理办法-用户信息安全",
+    "name": "快递市场管理办法-运单档案保管销毁与信息安全",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -33493,7 +32113,7 @@
     ],
     "direction": "必要",
     "applicableSubject": "承担相应职责的网络运营者、网络产品服务提供者",
-    "fullText": "适用条件：2026年1月1日起网络安全法适用的境内网络建设运营维护使用及相应产品服务。网络运营者依等级保护落实制度负责人、防攻击、运行事件监测日志至少六个月及数据分类重要数据备份加密。产品服务提供者满足强制要求、不设恶意程序、风险立即补救告知报告并在规定约定期内持续安全维护；关键设备专用产品仅在实际目录和要求内认证或检测合格后销售提供。网络运营者制定事件预案，发生危害网络安全事件立即启动补救并依法报告；网络信息安全投诉举报方式公开及时处理。角色与具体网络产品范围分别确认，六个月只针对相关日志，不给事件处置或投诉附造两天期限。",
+    "fullText": "适用条件：2026年1月1日起网络安全法适用的境内网络建设运营维护使用及相应产品服务。网络运营者依等级保护落实制度负责人、防攻击、运行事件监测日志至少六个月及数据分类重要数据备份加密。产品服务提供者满足强制要求、不设恶意程序、风险立即补救告知报告并在规定约定期内持续安全维护；关键设备专用产品仅在实际目录和要求内认证或检测合格后销售提供。网络运营者制定事件预案，发生危害网络安全事件立即启动补救并依法报告；网络信息安全投诉举报方式公开及时处理。角色与具体网络产品范围分别确认，六个月只针对相关日志，事件处置与投诉处理期限按各自适用要求核对。",
     "quantitativeIndicator": null,
     "createdAt": "2026-10-12T00:00:00",
     "complianceDomain": [
@@ -33657,25 +32277,6 @@
     ]
   },
   {
-    "id": "eAUtUZ0B3BXzX1tXFV0R",
-    "name": "禁止使用童工规定-法律责任",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "用人单位",
-    "fullText": "用人单位使用童工的，由劳动保障行政部门责令限期改正。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-25T00:17:17.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "eAUtUZ0B3BXzX1tXFV4R",
     "name": "外汇管理条例-违反规定罚款",
     "type": "定量",
@@ -33829,12 +32430,12 @@
   },
   {
     "id": "eQUtUZ0B3BXzX1tXFVsN",
-    "name": "劳动保障监察条例-投诉时效",
+    "name": "劳动保障监察条例-违法行为查处期限",
     "type": "定量",
     "dimension": "劳务合规风险",
     "region": "中国",
-    "direction": "可选",
-    "applicableSubject": "劳动者",
+    "direction": "必要",
+    "applicableSubject": "劳动保障行政部门",
     "fullText": "违反劳动保障法律、法规或者规章的行为在 2 年内未被劳动保障行政部门发现，也未被举报、投诉的，劳动保障行政部门不再查处。",
     "quantitativeIndicator": 2.0,
     "createdAt": "2025-11-24T17:03:30.555444",
@@ -34512,7 +33113,7 @@
     ],
     "direction": "必要",
     "applicableSubject": "个人信息处理者",
-    "fullText": "适用条件：适用个人信息保护法的处理活动。根据目的方式种类、权益影响及风险制定内部制度规程、分类管理、加密去标识化、合理操作权限、定期人员教育培训和应急预案并组织实施。敏感信息、自动决策、委托或独立提供公开出境及其他重大影响活动事前依法做影响评估，报告记录至少三年。发生或可能发生泄露篡改丢失立即补救并通知部门和个人，说明种类原因危害、补救和个人措施及联系方式；有效避免危害可不通知个人，部门认为可能危害仍可要求通知，不免通知部门。控制日志和实际行为对应，去标识化仍为个人信息，不把全部保存期限统一为三年。",
+    "fullText": "适用条件：适用个人信息保护法的处理活动。根据目的方式种类、权益影响及风险制定内部制度规程、分类管理、加密去标识化、合理操作权限、定期人员教育培训和应急预案并组织实施。敏感信息、自动决策、委托或独立提供公开出境及其他重大影响活动事前依法做影响评估，报告记录至少三年。发生或可能发生泄露篡改丢失立即补救并通知部门和个人，说明种类原因危害、补救和个人措施及联系方式；有效避免危害可不通知个人，部门认为可能危害仍可要求通知，不免通知部门。控制日志和实际行为对应，去标识化仍为个人信息，保存期限按记录类别及适用依据分别核对。",
     "quantitativeIndicator": null,
     "createdAt": "2026-10-12T00:00:00",
     "complianceDomain": [
@@ -34564,27 +33165,6 @@
       "信托参与方利益关系识别"
     ],
     "createdAt": "2026-10-12T13:26:33"
-  },
-  {
-    "id": "f3cd9508-b880-5353-891b-8c251a203c93",
-    "name": "劳动合同法（2012年修正）-证件财物担保禁止与强迫劳动即时解除",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "regionCodes": [
-      "CN"
-    ],
-    "direction": "禁止",
-    "applicableSubject": "用人单位",
-    "fullText": "适用条件：中国境内用人单位招用劳动者或履行劳动合同时。招用时不得扣押居民身份证及其他证件，不得要求担保或以其他名义收取财物。以暴力威胁或非法限制人身自由强迫劳动，或违章指挥强令冒险作业危及人身安全，劳动者可立即解除合同而无需事先告知。相应行为依法给予行政处罚，构成犯罪的依法追究刑事责任，造成损害承担赔偿责任。自愿提供资料与实际扣押、人员主张与确认事实分别核对，不能仅凭管理标签认定犯罪。",
-    "quantitativeIndicator": null,
-    "createdAt": "2026-10-11T00:00:00",
-    "complianceDomain": [
-      "综合类"
-    ],
-    "tags": [
-      "证件财物担保禁止与强迫劳动即时解除"
-    ]
   },
   {
     "id": "f447342b-4b52-5244-9325-6d054c9fc6eb",
@@ -34822,24 +33402,6 @@
     ]
   },
   {
-    "id": "fAUtUZ0B3BXzX1tXFWIS",
-    "name": "英国现代奴隶制法(Modern Slavery Act)",
-    "type": "定量",
-    "dimension": "企业国际合作风险",
-    "region": "英国",
-    "direction": "必要",
-    "applicableSubject": "商业机构",
-    "fullText": "在英国开展业务且年营业额超过3600万英镑的商业机构，必须每年发布《现代奴隶制声明》。",
-    "quantitativeIndicator": 36000000.0,
-    "createdAt": "2025-11-24T15:02:00.000000",
-    "complianceDomain": [
-      "综合类"
-    ],
-    "regionCodes": [
-      "GB"
-    ]
-  },
-  {
     "id": "fAUtUZ0B3BXzX1tXFWMT",
     "name": "化妆品安全技术规范-微生物",
     "type": "定量",
@@ -34970,24 +33532,6 @@
     ],
     "regionCodes": [
       "EU"
-    ]
-  },
-  {
-    "id": "fQUtUZ0B3BXzX1tXFWIS",
-    "name": "工会法-工会经费",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "企业",
-    "fullText": "建立工会组织的企业、事业单位、机关，应当按每月全部职工工资总额的2%向工会拨缴经费。",
-    "quantitativeIndicator": 0.02,
-    "createdAt": "2025-11-24T15:03:00.000000",
-    "complianceDomain": [
-      "综合类"
-    ],
-    "regionCodes": [
-      "CN"
     ]
   },
   {
@@ -35225,27 +33769,8 @@
     ]
   },
   {
-    "id": "fgUtUZ0B3BXzX1tXFV0R",
-    "name": "工伤保险条例-工伤医疗待遇",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "工伤职工",
-    "fullText": "治疗工伤所需费用符合工伤保险诊疗项目目录、工伤保险药品目录、工伤保险住院服务标准的，从工伤保险基金支付。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T23:59:59.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "fgUtUZ0B3BXzX1tXFV4R",
-    "name": "反外国制裁法-反制措施种类",
+    "name": "反外国制裁法-反制措施种类及组合",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -35282,25 +33807,6 @@
     ]
   },
   {
-    "id": "fgUtUZ0B3BXzX1tXFVwQ",
-    "name": "禁止使用童工规定-招用身份年龄核查与法定例外",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "用人单位",
-    "fullText": "适用条件：中国境内用人单位招用人员核对身份年龄时。应核查被招用人员的身份证，妥善保管录用登记和核查材料，禁止一般招用不满16周岁的未成年人。文艺、体育单位经父母或者其他监护人同意招用不满16周岁的专业文艺工作者、运动员时，应保障身心健康及接受义务教育的权利；不扩大为所有岗位的招用例外。学校、其他教育机构和职业培训机构依法组织不影响人身安全、身心健康的教育实践劳动、职业技能培训劳动不属于使用童工，不将一般实习自动归入例外。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T20:27:27.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "fgUtUZ0B3BXzX1tXFWAS",
     "name": "网络交易监督管理办法-信用评价",
     "type": "定性",
@@ -35318,25 +33824,6 @@
     ],
     "regionCodes": [
       "CN"
-    ]
-  },
-  {
-    "id": "fgUtUZ0B3BXzX1tXFWES",
-    "name": "国际劳工组织第105号废除强迫劳动公约-批准国禁止用途与废除措施",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "多地",
-    "direction": "禁止",
-    "applicableSubject": "已批准该公约且公约对其生效的成员国",
-    "fullText": "适用条件：成员国已经批准第105号废除强迫劳动公约且公约对其生效时。该国承诺废除并不得以强迫或强制劳动作为政治强制或教育及惩罚政治观点的手段、动员利用劳动力发展经济的方式、劳动纪律手段、惩罚参加罢工的方式，或种族社会民族宗教歧视手段，并采取有效措施保证立即完全废除这些用途。此公约义务主体为已批准成员国；企业实际经营和供应链事项应另核经营地实施法律、具体活动及合同要求，不能仅据国际劳工组织成员身份认定所有国家或企业直接承担相同义务。第29号公约与本公约是不同文件，须分别核对。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T10:08:00.000000",
-    "complianceDomain": [
-      "纺织制造",
-      "农业"
-    ],
-    "regionCodes": [
-      "MULTI"
     ]
   },
   {
@@ -35528,25 +34015,6 @@
     ]
   },
   {
-    "id": "fwUtUZ0B3BXzX1tXFWQT",
-    "name": "农药管理条例-经营许可",
-    "type": "定性",
-    "dimension": "供应链风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "农药经营者",
-    "fullText": "国家实行农药经营许可制度，经营农药必须取得农药经营许可证。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-02T17:50:00.000000",
-    "complianceDomain": [
-      "农业",
-      "化工制造"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "gAUtUZ0B3BXzX1tXFV0R",
     "name": "种子法-种子生产经营许可",
     "type": "定性",
@@ -35593,7 +34061,7 @@
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "科研人员",
-    "fullText": "严禁抄袭、剽窃、侵占他人研究成果，严禁伪造科研数据和研究结论，严禁在科研活动中弄虚作假。\n适用主体或业务条件：科研机构。",
+    "fullText": "严禁抄袭、剽窃、侵占他人研究成果，严禁伪造科研数据和研究结论，严禁在科研活动中弄虚作假。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T17:26:15.111000",
     "complianceDomain": [
@@ -35642,27 +34110,8 @@
     ]
   },
   {
-    "id": "gAUtUZ0B3BXzX1tXFWES",
-    "name": "证券法-内幕交易",
-    "type": "定性",
-    "dimension": "企业关联方风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "知情人",
-    "fullText": "禁止证券交易内幕信息的知情人和非法获取内幕信息的人利用内幕信息从事证券交易活动。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T10:10:00.000000",
-    "complianceDomain": [
-      "证券业",
-      "基金业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "gAUtUZ0B3BXzX1tXFWIS",
-    "name": "ISO 22000-食品安全管理体系",
+    "name": "ISO 22000-食品安全管理体系建立维护更新",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "国际",
@@ -35699,13 +34148,13 @@
   },
   {
     "id": "gAUtUZ0B3BXzX1tXFWQT",
-    "name": "上市公司收购管理办法-要约收购",
+    "name": "上市公司收购管理办法-持有控制比例触发增持要约",
     "type": "定量",
     "dimension": "企业关联方风险",
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "收购人",
-    "fullText": "收购人持有、控制一个上市公司的股份达到该公司已发行股份的30%时，继续增持股份的，应当发出要约。\n适用主体或业务条件：上市公司。",
+    "fullText": "收购人持有、控制一个上市公司的股份达到该公司已发行股份的30%时，继续增持股份的，应当发出要约。",
     "quantitativeIndicator": 0.3,
     "createdAt": "2025-10-02T17:55:00.000000",
     "complianceDomain": [
@@ -35925,25 +34374,6 @@
     ]
   },
   {
-    "id": "ggUtUZ0B3BXzX1tXFWES",
-    "name": "特种设备安全法-定期检验",
-    "type": "定性",
-    "dimension": "供应链风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "使用单位",
-    "fullText": "特种设备使用单位应当按照安全技术规范的要求，在检验合格有效期届满前一个月向特种设备检验机构提出定期检验要求。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T10:12:00.000000",
-    "complianceDomain": [
-      "建筑工程",
-      "机械制造"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "ggUtUZ0B3BXzX1tXFWIS",
     "name": "劳动法-法定节假日",
     "type": "定量",
@@ -36137,7 +34567,7 @@
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "慈善组织",
-    "fullText": "具有公开募捐资格的基金会年度管理费用不得超过当年总支出的10%。\n适用主体或业务条件：非营利组织。",
+    "fullText": "具有公开募捐资格的基金会年度管理费用不得超过当年总支出的10%。",
     "quantitativeIndicator": 0.1,
     "createdAt": "2025-11-25T08:05:05.000000",
     "complianceDomain": [
@@ -36263,7 +34693,7 @@
   },
   {
     "id": "hAUtUZ0B3BXzX1tXFWQT",
-    "name": "对外贸易法-国营贸易",
+    "name": "对外贸易法-未获授权经营国营贸易货物禁止",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -36341,7 +34771,7 @@
   },
   {
     "id": "hQUtUZ0B3BXzX1tXFVwQ",
-    "name": "海关企业信用管理办法-失信企业",
+    "name": "海关企业信用管理办法-失信企业查验稽查及担保措施",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -36569,13 +34999,13 @@
   },
   {
     "id": "hgUtUZ0B3BXzX1tXFWQT",
-    "name": "中央企业违规经营投资责任追究实施办法",
+    "name": "中央企业违规经营投资责任追究实施办法-经营投资资产损失及严重后果责任",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
     "direction": "必要",
-    "applicableSubject": "中央企业",
-    "fullText": "对违反规定、未履行或未正确履行职责造成国有资产损失或其他严重不良后果的经营管理人员，要严格追究责任。\n适用主体或业务条件：国有企业。",
+    "applicableSubject": "中央企业经营管理人员",
+    "fullText": "经营管理人员违反规定，未履行或未正确履行职责，在经营投资中造成国有资产损失或其他严重不良后果的，应当追究责任。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T18:25:00.000000",
     "complianceDomain": [
@@ -36722,24 +35152,6 @@
     ]
   },
   {
-    "id": "hwUtUZ0B3BXzX1tXFWQT",
-    "name": "禁止使用童工规定-罚款",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "用人单位",
-    "fullText": "用人单位使用童工的，由劳动保障行政部门按照每使用一名童工每月处5000元罚款的标准给予处罚。",
-    "quantitativeIndicator": 5000.0,
-    "createdAt": "2025-10-02T18:30:00.000000",
-    "complianceDomain": [
-      "综合类"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "iAUtUZ0B3BXzX1tXFV0R",
     "name": "证券期货经营机构私募资产管理业务管理办法-非标资产",
     "type": "定量",
@@ -36849,26 +35261,6 @@
     "complianceDomain": [
       "电信运营",
       "能源"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "iAUtUZ0B3BXzX1tXFWMT",
-    "name": "劳动法-延长工作时间条件与限制",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "企业",
-    "fullText": "适用条件：中国境内依法适用劳动法一般延长工作时间限制的劳动关系；先确认工时制度及实际时段。因生产经营需要，应与工会和劳动者协商；一般每日延长不超过一小时，特殊原因且保障劳动者身体健康时每日不超过三小时，每月不超过三十六小时。第四十二条规定的自然灾害、事故或其他威胁生命健康和财产安全需紧急处理的情形，设备、运输线路或公共设施故障影响生产和公共利益需及时抢修的情形，以及法律、行政法规规定的其他情形，延长工作时间不受第四十一条限制。特殊工时须另核有效批准、周期及适用规定，不能只凭合同名称排除限制；支付加班费不能替代工时限制核对。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-01T09:00:00.000000",
-    "complianceDomain": [
-      "汽车制造",
-      "电子制造",
-      "纺织制造"
     ],
     "regionCodes": [
       "CN"
@@ -37049,7 +35441,7 @@
   },
   {
     "id": "igUtUZ0B3BXzX1tXFVsN",
-    "name": "网络安全法-数据分类",
+    "name": "网络安全法-等级保护安全保护义务",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -37130,7 +35522,7 @@
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "经营者",
-    "fullText": "经营者不得采用财物或者其他手段贿赂下列单位或者个人，以谋取交易机会或者竞争优势。",
+    "fullText": "适用条件：2025年10月15日起适用反不正当竞争法的经营活动。经营者不得以给予财物或其他手段，贿赂交易相对方的工作人员、受交易相对方委托办理相关事务的单位或个人、利用职权或影响力影响交易的单位或个人，以谋取交易机会或竞争优势。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T09:05:00.000000",
     "complianceDomain": [
@@ -37150,7 +35542,7 @@
     "region": "美国",
     "direction": "必要",
     "applicableSubject": "上市公司",
-    "fullText": "上市公司需披露其温室气体排放量（Scope 1和Scope 2），以及气候相关风险对业务的影响。\n适用主体或业务条件：上市公司、跨国企业。",
+    "fullText": "上市公司需披露其温室气体排放量（Scope 1和Scope 2），以及气候相关风险对业务的影响。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T18:45:00.000000",
     "complianceDomain": [],
@@ -37333,7 +35725,7 @@
   },
   {
     "id": "jAUtUZ0B3BXzX1tXFV8R",
-    "name": "证券法-信息披露真实性",
+    "name": "证券法-信息披露义务人披露质量",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -37540,7 +35932,7 @@
   },
   {
     "id": "jQUtUZ0B3BXzX1tXFWIS",
-    "name": "医疗器械生产监督管理办法-质量负责人",
+    "name": "医疗器械生产监督管理办法-管理者代表与质量管理体系职责",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -37692,7 +36084,7 @@
   },
   {
     "id": "jgUtUZ0B3BXzX1tXFWQT",
-    "name": "纳税信用管理办法-A级纳税人",
+    "name": "纳税信用管理办法-A级纳税信用年度指标得分",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -37749,7 +36141,7 @@
   },
   {
     "id": "jwUtUZ0B3BXzX1tXFVwQ",
-    "name": "商业银行理财业务监督管理办法-合格投资者",
+    "name": "商业银行理财业务监督管理办法-合格投资者固定收益类投资金额",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -37805,25 +36197,6 @@
     ]
   },
   {
-    "id": "jwUtUZ0B3BXzX1tXFWMT",
-    "name": "供应商行为准则-禁止强迫劳动",
-    "type": "定性",
-    "dimension": "供应链风险",
-    "region": "全球",
-    "direction": "禁止",
-    "applicableSubject": "供应商",
-    "fullText": "供应商必须承诺其生产经营活动中不存在任何形式的强迫劳动、抵债劳动或契约奴役。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-01T09:30:00.000000",
-    "complianceDomain": [
-      "纺织制造",
-      "电子制造"
-    ],
-    "regionCodes": [
-      "GLOBAL"
-    ]
-  },
-  {
     "id": "jwUtUZ0B3BXzX1tXFWQT",
     "name": "国际劳工组织(ILO)第138号公约-最低就业年龄",
     "type": "定量",
@@ -37831,7 +36204,7 @@
     "region": "全球",
     "direction": "必要",
     "applicableSubject": "成员国",
-    "fullText": "准予就业的最低年龄不得低于完成义务教育的年龄，在任何情况下不得低于15岁。\n适用主体或业务条件：跨国企业。",
+    "fullText": "准予就业的最低年龄不得低于完成义务教育的年龄，在任何情况下不得低于15岁。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-02T19:10:00.000000",
     "complianceDomain": [
@@ -37919,26 +36292,6 @@
     ]
   },
   {
-    "id": "kAUtUZ0B3BXzX1tXFWMT",
-    "name": "商业银行资本管理办法-核心一级资本充足率",
-    "type": "定量",
-    "dimension": "企业信用风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "商业银行",
-    "fullText": "商业银行的核心一级资本充足率不得低于7.5%。",
-    "quantitativeIndicator": 0.075,
-    "createdAt": "2025-10-01T09:35:00.000000",
-    "complianceDomain": [
-      "银行业",
-      "金融租赁",
-      "信托业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "kAUtUZ0B3BXzX1tXFWQT",
     "name": "报废机动车回收管理办法-环保要求",
     "type": "定性",
@@ -37959,7 +36312,7 @@
   },
   {
     "id": "kQUtUZ0B3BXzX1tXFV0R",
-    "name": "快递市场管理办法-用户信息安全",
+    "name": "快递市场管理办法-运单档案及用户信息非法提供禁止",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -38401,25 +36754,6 @@
     ]
   },
   {
-    "id": "lAUtUZ0B3BXzX1tXFWAS",
-    "name": "商业银行流动性风险管理办法-流动性匹配率",
-    "type": "定量",
-    "dimension": "企业信用风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "商业银行",
-    "fullText": "商业银行的流动性匹配率应当不低于100%。",
-    "quantitativeIndicator": 1.0,
-    "createdAt": "2025-11-25T14:01:01.000000",
-    "complianceDomain": [
-      "银行业",
-      "金融业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "lAUtUZ0B3BXzX1tXFWES",
     "name": "绿色采购指南",
     "type": "定性",
@@ -38457,7 +36791,7 @@
   },
   {
     "id": "lAUtUZ0B3BXzX1tXFWMT",
-    "name": "欧盟RoHS指令-有害物质限量",
+    "name": "欧盟RoHS指令-镉含量限制",
     "type": "定量",
     "dimension": "产品合规风险",
     "region": "欧盟",
@@ -38496,7 +36830,7 @@
   },
   {
     "id": "lQUtUZ0B3BXzX1tXFVsN",
-    "name": "上市公司章程指引-对外担保",
+    "name": "上市公司章程指引-单笔担保净资产比例触发审议",
     "type": "定量",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -38534,18 +36868,20 @@
   },
   {
     "id": "lQUtUZ0B3BXzX1tXFWAS",
-    "name": "劳动合同法-试用期工资",
+    "name": "劳动合同法-试用期工资基准及当地最低工资",
     "type": "定量",
     "dimension": "劳务合规风险",
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "用人单位",
-    "fullText": "劳动者在试用期的工资不得低于本单位相同岗位最低档工资或者劳动合同约定工资的80%，并不得低于用人单位所在地的最低工资标准。",
+    "fullText": "劳动者在试用期的工资不得低于本单位相同岗位最低档工资或者劳动合同约定工资的 80%，并不得低于用人单位所在地的最低工资标准。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-25T23:51:01.000000",
     "complianceDomain": [
       "制造业",
-      "服务业"
+      "服务业",
+      "互联网",
+      "餐饮服务"
     ],
     "regionCodes": [
       "CN"
@@ -38951,24 +37287,6 @@
     ]
   },
   {
-    "id": "mAUtUZ0B3BXzX1tXFWES",
-    "name": "国有企业领导人员廉洁从业若干规定",
-    "type": "定性",
-    "dimension": "企业关联方风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "国企领导人员",
-    "fullText": "国有企业领导人员不得利用职权为配偶、子女及其他特定关系人从事营利性经营活动提供便利条件。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T10:34:00.000000",
-    "complianceDomain": [
-      "综合类"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "mAUtUZ0B3BXzX1tXFWIS",
     "name": "铁路危险货物运输管理规则",
     "type": "定性",
@@ -38982,25 +37300,6 @@
     "complianceDomain": [
       "铁路运输",
       "化工制造"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "mAUtUZ0B3BXzX1tXFWMT",
-    "name": "禁止使用童工规定",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "用人单位",
-    "fullText": "国家机关、社会团体、企业事业单位、民办非企业单位或者个体工商户，禁止招用不满16周岁的未成年人。",
-    "quantitativeIndicator": 16.0,
-    "createdAt": "2025-10-01T10:15:00.000000",
-    "complianceDomain": [
-      "纺织制造",
-      "餐饮服务"
     ],
     "regionCodes": [
       "CN"
@@ -39027,14 +37326,14 @@
   },
   {
     "id": "mQUtUZ0B3BXzX1tXFVsN",
-    "name": "网络安全法-个人信息保存时间",
-    "type": "定性",
+    "name": "网络安全法-网络日志留存期限",
+    "type": "定量",
     "dimension": "产品合规风险",
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "网络运营者",
     "fullText": "网络运营者留存网络日志的时间不得少于六个月。",
-    "quantitativeIndicator": null,
+    "quantitativeIndicator": 6.0,
     "createdAt": "2025-11-24T10:20:21.000000",
     "complianceDomain": [
       "互联网",
@@ -39104,7 +37403,7 @@
   },
   {
     "id": "mQUtUZ0B3BXzX1tXFWMT",
-    "name": "企业破产法-债务清偿顺序",
+    "name": "企业破产法-职工债权优先清偿",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -39142,7 +37441,7 @@
   },
   {
     "id": "mgUtUZ0B3BXzX1tXFVsN",
-    "name": "关于规范金融机构资产管理业务的指导意见-过渡期",
+    "name": "关于规范金融机构资产管理业务的指导意见-投资者适当性与保本保收益禁止",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -39277,7 +37576,7 @@
   },
   {
     "id": "mwUtUZ0B3BXzX1tXFWES",
-    "name": "欧盟碳边境调节机制(CBAM)",
+    "name": "欧盟碳边境调节机制(CBAM)-出口产品涉及的碳申报与证书事项",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "欧盟",
@@ -39733,25 +38032,6 @@
     ]
   },
   {
-    "id": "nwUtUZ0B3BXzX1tXFV0R",
-    "name": "劳动合同法-违约金限制",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "用人单位",
-    "fullText": "除培训服务期和竞业限制约定外，用人单位不得与劳动者约定由劳动者承担违约金。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-25T08:32:32.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "nwUtUZ0B3BXzX1tXFVsN",
     "name": "食品安全法-添加剂使用",
     "type": "定性",
@@ -39785,25 +38065,6 @@
     "complianceDomain": [
       "化工制造",
       "医药制造"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "nwUtUZ0B3BXzX1tXFWES",
-    "name": "能效标识管理办法",
-    "type": "定性",
-    "dimension": "产品合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "生产者",
-    "fullText": "列入《中华人民共和国实行能源效率标识的产品目录》的产品，应当标注能效标识。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T10:41:00.000000",
-    "complianceDomain": [
-      "家用电器",
-      "电子制造"
     ],
     "regionCodes": [
       "CN"
@@ -39868,7 +38129,7 @@
   },
   {
     "id": "oAUtUZ0B3BXzX1tXFV4R",
-    "name": "商业银行理财业务监督管理办法-合格投资者",
+    "name": "商业银行理财业务监督管理办法-理财产品销售起点",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -39944,7 +38205,7 @@
   },
   {
     "id": "oAUtUZ0B3BXzX1tXFWIS",
-    "name": "典当管理办法-注册资本",
+    "name": "典当管理办法-一般典当行最低注册资本",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -39972,7 +38233,7 @@
     "quantitativeIndicator": 0.0005,
     "createdAt": "2025-10-01T10:55:00.000000",
     "complianceDomain": [
-      "会计服务"
+      "综合类"
     ],
     "regionCodes": [
       "CN"
@@ -40056,7 +38317,7 @@
   },
   {
     "id": "oQUtUZ0B3BXzX1tXFWES",
-    "name": "国际海运危险货物规则(IMDG Code)",
+    "name": "国际海运危险货物规则(IMDG Code)-海运危险货物分类包装标记申报",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "国际",
@@ -40074,26 +38335,8 @@
     ]
   },
   {
-    "id": "oQUtUZ0B3BXzX1tXFWIS",
-    "name": "广播电视管理条例",
-    "type": "定性",
-    "dimension": "产品合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "广播电台/电视台",
-    "fullText": "禁止制作、播放含有危害国家安全、破坏民族团结、淫秽色情等内容的广播电视节目。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T15:39:00.000000",
-    "complianceDomain": [
-      "文化传媒"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "oQUtUZ0B3BXzX1tXFWMT",
-    "name": "欧盟碳边境调节机制(CBAM)",
+    "name": "欧盟碳边境调节机制(CBAM)-进口商碳排放申报与证书责任",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "欧盟",
@@ -40170,7 +38413,7 @@
   },
   {
     "id": "ogUtUZ0B3BXzX1tXFWIS",
-    "name": "企业破产法-债务清偿顺序",
+    "name": "企业破产法-职工债权社保税款及普通债权顺序",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -40208,7 +38451,7 @@
   },
   {
     "id": "owUtUZ0B3BXzX1tXFV0R",
-    "name": "电子商务法-押金退还",
+    "name": "电子商务法-押金退还程序及满足条件及时退还",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -40247,7 +38490,7 @@
   },
   {
     "id": "owUtUZ0B3BXzX1tXFVsN",
-    "name": "上市公司收购管理办法-一致行动人",
+    "name": "上市公司收购管理办法-上市公司权益合并计算",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -40379,26 +38622,6 @@
     ]
   },
   {
-    "id": "pAUtUZ0B3BXzX1tXFVsN",
-    "name": "安全生产法-事故隐患排查",
-    "type": "定性",
-    "dimension": "供应链风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "生产经营单位",
-    "fullText": "生产经营单位应当建立健全生产安全事故隐患排查治理制度，采取技术、管理措施，及时发现并消除事故隐患。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T10:31:32.000000",
-    "complianceDomain": [
-      "煤炭",
-      "化工制造",
-      "建筑工程"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "pAUtUZ0B3BXzX1tXFVwQ",
     "name": "上海证券交易所股票上市规则-关联自然人",
     "type": "定性",
@@ -40419,7 +38642,7 @@
   },
   {
     "id": "pAUtUZ0B3BXzX1tXFWES",
-    "name": "上市公司股东、董监高减持股份的若干规定",
+    "name": "上市公司股东、董监高减持股份的若干规定-集中竞价三个月减持比例",
     "type": "定量",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -40456,7 +38679,7 @@
   },
   {
     "id": "pAUtUZ0B3BXzX1tXFWMT",
-    "name": "女职工劳动保护特别规定-产假",
+    "name": "女职工劳动保护特别规定-基本产假与难产增加分支",
     "type": "定量",
     "dimension": "劳务合规风险",
     "region": "中国",
@@ -40628,33 +38851,14 @@
     ]
   },
   {
-    "id": "pgUtUZ0B3BXzX1tXFWAS",
-    "name": "商业银行资本管理办法-储备资本",
-    "type": "定量",
-    "dimension": "企业信用风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "商业银行",
-    "fullText": "商业银行应当在最低资本要求的基础上计提储备资本。储备资本要求为风险加权资产的2.5%。",
-    "quantitativeIndicator": 0.025,
-    "createdAt": "2025-11-26T00:08:18.000000",
-    "complianceDomain": [
-      "银行业",
-      "金融业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "pgUtUZ0B3BXzX1tXFWES",
-    "name": "合同法-不可抗力通知",
+    "name": "民法典-不可抗力通知与证明",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
     "direction": "必要",
-    "applicableSubject": "合同当事人",
-    "fullText": "当事人一方因不可抗力不能履行合同的，应当及时通知对方，以减轻可能给对方造成的损失。",
+    "applicableSubject": "当事人",
+    "fullText": "适用条件：2021年1月1日起适用民法典的合同履行。当事人因不可抗力不能履行合同，应及时通知对方以减轻可能造成的损失，并在合理期限内提供证明。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T10:48:00.000000",
     "complianceDomain": [
@@ -40684,26 +38888,6 @@
     ]
   },
   {
-    "id": "pgUtUZ0B3BXzX1tXFWMT",
-    "name": "征信业管理条例-不良信息保存期限",
-    "type": "定量",
-    "dimension": "企业信用风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "征信机构",
-    "fullText": "征信机构对个人不良信息的保存期限，自不良行为或者事件终止之日起为5年。",
-    "quantitativeIndicator": 5.0,
-    "createdAt": "2025-10-01T11:25:00.000000",
-    "complianceDomain": [
-      "银行业",
-      "金融租赁",
-      "信托业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "pwUtUZ0B3BXzX1tXFV0R",
     "name": "证券法-投资者适当性匹配",
     "type": "定性",
@@ -40724,7 +38908,7 @@
   },
   {
     "id": "pwUtUZ0B3BXzX1tXFVsN",
-    "name": "反洗钱法-客户身份识别",
+    "name": "反洗钱法-身份不明服务交易及匿名假名账户禁止",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -40762,33 +38946,14 @@
     ]
   },
   {
-    "id": "pwUtUZ0B3BXzX1tXFWES",
-    "name": "美国涉疆法案",
-    "type": "定性",
-    "dimension": "企业国际合作风险",
-    "region": "美国",
-    "direction": "禁止",
-    "applicableSubject": "进口商",
-    "fullText": "禁止进口涉及强迫劳动的产品，除非进口商能提供清晰令人信服的证据证明产品不涉及强迫劳动。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T10:49:00.000000",
-    "complianceDomain": [
-      "纺织制造",
-      "光伏"
-    ],
-    "regionCodes": [
-      "US"
-    ]
-  },
-  {
     "id": "pwUtUZ0B3BXzX1tXFWMT",
-    "name": "美国海外反腐败法(FCPA)-账簿记录",
+    "name": "美国海外反腐败法(FCPA)-账簿准确性与资产处置记录",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "美国",
     "direction": "必要",
     "applicableSubject": "发行人",
-    "fullText": "公司必须建立并保持账簿和记录，准确、公允地反映公司的交易和资产处置情况，防止行贿掩盖。\n适用主体或业务条件：跨国企业。",
+    "fullText": "公司必须建立并保持账簿和记录，准确、公允地反映公司的交易和资产处置情况，防止行贿掩盖。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T11:30:00.000000",
     "complianceDomain": [
@@ -40889,6 +39054,7 @@
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T10:50:00.000000",
     "complianceDomain": [
+      "互联网",
       "交通运输"
     ],
     "regionCodes": [
@@ -41126,19 +39292,20 @@
   },
   {
     "id": "qgUtUZ0B3BXzX1tXFWMT",
-    "name": "劳务派遣暂行规定-用工比例",
+    "name": "劳务派遣暂行规定-用工比例及计算口径",
     "type": "定量",
     "dimension": "劳务合规风险",
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "用工单位",
-    "fullText": "用工单位使用的被派遣劳动者数量不得超过其用工总量的10%。",
+    "fullText": "用工单位使用的被派遣劳动者数量不得超过其用工总量的10%。用工总量是指用工单位订立劳动合同人数与使用的被派遣劳动者人数之和。",
     "quantitativeIndicator": 0.1,
     "createdAt": "2025-10-01T11:45:00.000000",
     "complianceDomain": [
+      "建筑工程",
       "制造业",
-      "服务业",
-      "建筑工程"
+      "物流仓储",
+      "服务业"
     ],
     "regionCodes": [
       "CN"
@@ -41381,7 +39548,7 @@
     "region": "国际",
     "direction": "必要",
     "applicableSubject": "跨国企业",
-    "fullText": "跨国关联交易的定价应当符合“独立交易原则”（Arm's Length Principle）。\n适用主体或业务条件：跨国企业。",
+    "fullText": "跨国关联交易的定价应当符合“独立交易原则”（Arm's Length Principle）。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-24T10:55:00.000000",
     "complianceDomain": [
@@ -41552,7 +39719,7 @@
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "投标人",
-    "fullText": "投标人不得相互串通投标报价，不得排挤其他公平竞争的投标人，损害招标人或者其他投标人的合法权益。\n适用主体或业务条件：政府采购。",
+    "fullText": "投标人不得相互串通投标报价，不得排挤其他公平竞争的投标人，损害招标人或者其他投标人的合法权益。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T12:05:00.000000",
     "complianceDomain": [
@@ -41583,7 +39750,7 @@
   },
   {
     "id": "rwUtUZ0B3BXzX1tXFVsN",
-    "name": "医疗广告管理办法-禁止内容",
+    "name": "医疗广告管理办法-医疗技术诊疗疾病药物内容限制",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -41630,24 +39797,6 @@
     "fullText": "居民企业适用的企业所得税税率为25%。",
     "quantitativeIndicator": 0.25,
     "createdAt": "2025-11-24T10:57:00.000000",
-    "complianceDomain": [
-      "综合类"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "rwUtUZ0B3BXzX1tXFWIS",
-    "name": "中央企业违规经营投资责任追究实施办法",
-    "type": "定性",
-    "dimension": "企业关联方风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "中央企业经营管理人员",
-    "fullText": "经营管理人员违反规定，未履行或未正确履行职责，在经营投资中造成国有资产损失或其他严重不良后果的，应当追究责任。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T16:13:00.000000",
     "complianceDomain": [
       "综合类"
     ],
@@ -41902,26 +40051,6 @@
     ]
   },
   {
-    "id": "sQUtUZ0B3BXzX1tXFWMT",
-    "name": "App违法违规收集使用个人信息行为认定方法",
-    "type": "定性",
-    "dimension": "产品合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "App运营者",
-    "fullText": "App不得因用户不同意收集非必要个人信息，而拒绝用户使用其基本功能服务。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-01T12:20:00.000000",
-    "complianceDomain": [
-      "互联网",
-      "软件开发",
-      "移动应用"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "sgUtUZ0B3BXzX1tXFV0R",
     "name": "出口管制法-全程管理",
     "type": "定性",
@@ -42038,13 +40167,13 @@
   },
   {
     "id": "sgUtUZ0B3BXzX1tXFWMT",
-    "name": "证券法-虚假陈述",
+    "name": "证券法-披露信息真实准确完整及清晰易懂",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "信息披露义务人",
-    "fullText": "信息披露义务人披露的信息，应当真实、准确、完整，简明清晰，通俗易懂，不得有虚假记载、误导性陈述或者重大遗漏。\n适用主体或业务条件：上市公司。",
+    "fullText": "信息披露义务人披露的信息，应当真实、准确、完整，简明清晰，通俗易懂，不得有虚假记载、误导性陈述或者重大遗漏。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T12:25:00.000000",
     "complianceDomain": [
@@ -42170,25 +40299,6 @@
     ]
   },
   {
-    "id": "swUtUZ0B3BXzX1tXFWMT",
-    "name": "外商投资法-准入前国民待遇",
-    "type": "定性",
-    "dimension": "企业国际合作风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "国家",
-    "fullText": "国家对外商投资实行准入前国民待遇加负面清单管理制度。\n适用主体或业务条件：外商投资。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-01T12:30:00.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "tAUtUZ0B3BXzX1tXFV0R",
     "name": "安全生产法-保险",
     "type": "定性",
@@ -42248,7 +40358,7 @@
   },
   {
     "id": "tAUtUZ0B3BXzX1tXFWES",
-    "name": "女职工劳动保护特别规定-产假",
+    "name": "女职工劳动保护特别规定-基本产假天数",
     "type": "定量",
     "dimension": "劳务合规风险",
     "region": "中国",
@@ -42278,26 +40388,6 @@
     "complianceDomain": [
       "电信运营",
       "金融租赁"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "tAUtUZ0B3BXzX1tXFWMT",
-    "name": "合同法-不可抗力通知",
-    "type": "定性",
-    "dimension": "供应链风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "当事人",
-    "fullText": "当事人一方因不可抗力不能履行合同的，应当及时通知对方，以减轻可能给对方造成的损失。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-01T12:35:00.000000",
-    "complianceDomain": [
-      "物流仓储",
-      "贸易",
-      "制造业"
     ],
     "regionCodes": [
       "CN"
@@ -42363,7 +40453,7 @@
   },
   {
     "id": "tQUtUZ0B3BXzX1tXFWES",
-    "name": "证券法-虚假陈述",
+    "name": "证券法-报送报告与披露信息虚假记载禁止",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -42406,7 +40496,7 @@
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "企业",
-    "fullText": "企业应当严禁资金体外循环，切实防范资金营运风险。\n适用主体或业务条件：集团企业。",
+    "fullText": "企业应当严禁资金体外循环，切实防范资金营运风险。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T12:40:00.000000",
     "complianceDomain": [
@@ -42457,7 +40547,7 @@
   },
   {
     "id": "tgUtUZ0B3BXzX1tXFVsN",
-    "name": "劳务派遣暂行规定-辅助性岗位",
+    "name": "劳务派遣暂行规定-辅助性岗位定义及协商程序",
     "type": "定性",
     "dimension": "劳务合规风险",
     "region": "中国",
@@ -42495,7 +40585,7 @@
   },
   {
     "id": "tgUtUZ0B3BXzX1tXFWES",
-    "name": "反洗钱法-大额交易报告",
+    "name": "反洗钱法-人民币大额交易报告门槛",
     "type": "定量",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -42701,7 +40791,7 @@
   },
   {
     "id": "uAUtUZ0B3BXzX1tXFVsN",
-    "name": "证券法-投资者保护",
+    "name": "证券法-证券公司违法造成投资者损失赔偿",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -42889,26 +40979,8 @@
     ]
   },
   {
-    "id": "uQUtUZ0B3BXzX1tXFWIS",
-    "name": "商业银行互联网贷款管理暂行办法-联合贷款",
-    "type": "定量",
-    "dimension": "企业信用风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "商业银行",
-    "fullText": "商业银行与合作机构共同出资发放贷款，单笔贷款中合作方出资比例不得低于30%。",
-    "quantitativeIndicator": 0.3,
-    "createdAt": "2025-11-24T16:23:00.000000",
-    "complianceDomain": [
-      "银行业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "uQUtUZ0B3BXzX1tXFWMT",
-    "name": "加州消费者隐私法(CCPA)-选择退出权",
+    "name": "加州消费者隐私法(CCPA)-网页个人信息出售退出链接",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "美国加州",
@@ -43098,13 +41170,13 @@
   },
   {
     "id": "uwUtUZ0B3BXzX1tXFWMT",
-    "name": "关于规范上市公司与关联方资金往来及上市公司对外担保若干问题的通知",
+    "name": "关于规范上市公司与关联方资金往来及上市公司对外担保若干问题的通知-控股股东及关联方资金拆借限制",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "上市公司",
-    "fullText": "上市公司不得有偿或无偿地拆借资金给控股股东及其他关联方使用。\n适用主体或业务条件：上市公司。",
+    "fullText": "上市公司不得有偿或无偿地拆借资金给控股股东及其他关联方使用。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T13:10:00.000000",
     "complianceDomain": [
@@ -43215,7 +41287,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "用人单位",
-    "fullText": "劳动者从事高温作业的，依法享受岗位津贴。用人单位安排劳动者在35℃以上高温天气从事室外露天作业以及不能采取有效措施将工作场所温度降低到33℃以下的，应当向劳动者发放高温津贴。\n适用主体或业务条件：室外作业。",
+    "fullText": "劳动者从事高温作业的，依法享受岗位津贴。用人单位安排劳动者在35℃以上高温天气从事室外露天作业以及不能采取有效措施将工作场所温度降低到33℃以下的，应当向劳动者发放高温津贴。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T13:15:00.000000",
     "complianceDomain": [
@@ -43286,7 +41358,7 @@
   },
   {
     "id": "vQUtUZ0B3BXzX1tXFWIS",
-    "name": "机动车强制报废标准规定",
+    "name": "机动车强制报废标准规定-小微非营运客车年限与里程引导报废",
     "type": "定量",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -43344,7 +41416,7 @@
   },
   {
     "id": "vgUtUZ0B3BXzX1tXFVsN",
-    "name": "上市公司收购管理办法-要约收购",
+    "name": "上市公司收购管理办法-交易所增持全面或部分要约方式",
     "type": "定量",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -43477,24 +41549,6 @@
     ]
   },
   {
-    "id": "vwUtUZ0B3BXzX1tXFWES",
-    "name": "澳大利亚现代奴隶制法",
-    "type": "定性",
-    "dimension": "企业国际合作风险",
-    "region": "澳大利亚",
-    "direction": "必要",
-    "applicableSubject": "大型企业",
-    "fullText": "达到一定营收门槛的企业需提交年度声明，报告其供应链中的现代奴隶制风险及应对措施。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T11:13:00.000000",
-    "complianceDomain": [
-      "综合类"
-    ],
-    "regionCodes": [
-      "AU"
-    ]
-  },
-  {
     "id": "vwUtUZ0B3BXzX1tXFWIS",
     "name": "银行保险机构公司治理准则-股东义务",
     "type": "定性",
@@ -43610,24 +41664,6 @@
     ]
   },
   {
-    "id": "wAUtUZ0B3BXzX1tXFWIS",
-    "name": "劳动合同法-试用期工资",
-    "type": "定量",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "用人单位",
-    "fullText": "劳动者在试用期的工资不得低于本单位相同岗位最低档工资或者劳动合同约定工资的80%。",
-    "quantitativeIndicator": 0.8,
-    "createdAt": "2025-11-24T16:30:00.000000",
-    "complianceDomain": [
-      "综合类"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "wAUtUZ0B3BXzX1tXFWMT",
     "name": "道路运输车辆技术管理规定-车辆维护",
     "type": "定性",
@@ -43668,7 +41704,7 @@
   },
   {
     "id": "wQUtUZ0B3BXzX1tXFVsN",
-    "name": "劳动合同法-经济补偿支付",
+    "name": "劳动合同法-解除终止经济补偿支付义务",
     "type": "定性",
     "dimension": "劳务合规风险",
     "region": "中国",
@@ -43680,43 +41716,6 @@
     "complianceDomain": [
       "制造业",
       "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "wQUtUZ0B3BXzX1tXFVwQ",
-    "name": "反外国制裁法-反制清单",
-    "type": "定性",
-    "dimension": "企业国际合作风险",
-    "region": "中国",
-    "direction": "可选",
-    "applicableSubject": "国务院有关部门",
-    "fullText": "国务院有关部门可以将直接或者间接参与制定、决定、实施歧视性限制措施的个人、组织列入反制清单。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-24T21:35:35.000000",
-    "complianceDomain": [
-      "金融业",
-      "贸易"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "wQUtUZ0B3BXzX1tXFWES",
-    "name": "税收征收管理法-滞纳金",
-    "type": "定量",
-    "dimension": "企业信用风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "纳税人",
-    "fullText": "纳税人未按规定期限缴纳税款的，税务机关除责令限期缴纳外，从滞纳之日起，按日加收滞纳税款万分之五的滞纳金。",
-    "quantitativeIndicator": 0.0005,
-    "createdAt": "2025-11-24T11:15:00.000000",
-    "complianceDomain": [
-      "综合类"
     ],
     "regionCodes": [
       "CN"
@@ -43749,7 +41748,7 @@
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "企业",
-    "fullText": "企业与其关联方之间的业务往来，不符合独立交易原则而减少企业或者其关联方应纳税收入或者所得额的，税务机关有权按照合理方法调整。\n适用主体或业务条件：跨国企业。",
+    "fullText": "企业与其关联方之间的业务往来，不符合独立交易原则而减少企业或者其关联方应纳税收入或者所得额的，税务机关有权按照合理方法调整。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T13:40:00.000000",
     "complianceDomain": [
@@ -43761,7 +41760,7 @@
   },
   {
     "id": "wgUtUZ0B3BXzX1tXFV0R",
-    "name": "商业银行理财业务监督管理办法-信息登记",
+    "name": "商业银行理财业务监督管理办法-理财产品发行信息登记",
     "type": "定性",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -43800,7 +41799,7 @@
   },
   {
     "id": "wgUtUZ0B3BXzX1tXFVsN",
-    "name": "电子商务法-个人信息保护",
+    "name": "电子商务法-信息网络安全保护义务",
     "type": "定性",
     "dimension": "产品合规风险",
     "region": "中国",
@@ -44073,7 +42072,7 @@
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "上市公司",
-    "fullText": "上市公司连续三年虚增净利润金额较大，可能被实施重大违法强制退市。\n适用主体或业务条件：上市公司。",
+    "fullText": "上市公司连续三年虚增净利润金额较大，可能被实施重大违法强制退市。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T13:55:00.000000",
     "complianceDomain": [
@@ -44219,7 +42218,7 @@
   },
   {
     "id": "xgUtUZ0B3BXzX1tXFV4R",
-    "name": "证券法-短线交易收益",
+    "name": "证券法-六个月短线交易收益归属",
     "type": "定性",
     "dimension": "企业关联方风险",
     "region": "中国",
@@ -44257,7 +42256,7 @@
   },
   {
     "id": "xgUtUZ0B3BXzX1tXFVwQ",
-    "name": "商业银行理财业务监督管理办法-杠杆率",
+    "name": "商业银行理财业务监督管理办法-公募及私募理财杠杆分支",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
@@ -44382,24 +42381,6 @@
     "createdAt": "2025-11-24T16:37:00.000000",
     "complianceDomain": [
       "综合类"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "xwUtUZ0B3BXzX1tXFWMT",
-    "name": "上市公司治理准则-独立董事",
-    "type": "定量",
-    "dimension": "企业关联方风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "上市公司",
-    "fullText": "上市公司董事会成员中应当至少包括三分之一独立董事。\n适用主体或业务条件：上市公司。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-10-01T14:10:00.000000",
-    "complianceDomain": [
-      "证券业"
     ],
     "regionCodes": [
       "CN"
@@ -44537,25 +42518,6 @@
     ]
   },
   {
-    "id": "yQUtUZ0B3BXzX1tXFV0R",
-    "name": "禁止使用童工规定-吊销证照",
-    "type": "定性",
-    "dimension": "劳务合规风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "用人单位",
-    "fullText": "用人单位使用童工屡教不改的，由工商行政管理部门吊销营业执照或者由民政部门撤销民办非企业单位登记。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-25T09:15:15.000000",
-    "complianceDomain": [
-      "制造业",
-      "服务业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "yQUtUZ0B3BXzX1tXFV8S",
     "name": "商业银行流动性风险管理办法-净稳定资金比例",
     "type": "定量",
@@ -44632,25 +42594,6 @@
     ]
   },
   {
-    "id": "yQUtUZ0B3BXzX1tXFWIT",
-    "name": "商业特许经营管理条例-备案",
-    "type": "定量",
-    "dimension": "企业信用风险",
-    "region": "中国",
-    "direction": "必要",
-    "applicableSubject": "特许人",
-    "fullText": "特许人应当自首次订立特许经营合同之日起15日内，向商务主管部门备案。",
-    "quantitativeIndicator": 15.0,
-    "createdAt": "2025-11-24T16:39:00.000000",
-    "complianceDomain": [
-      "连锁经营",
-      "餐饮服务"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "yQUtUZ0B3BXzX1tXFWMT",
     "name": "化妆品监督管理条例-功效宣称",
     "type": "定性",
@@ -44710,7 +42653,7 @@
   },
   {
     "id": "ygUtUZ0B3BXzX1tXFVwQ",
-    "name": "兽药管理条例-休药期",
+    "name": "兽药管理条例-用药记录禁用药品及休药期后销售屠宰",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -44784,33 +42727,14 @@
     ]
   },
   {
-    "id": "ywUtUZ0B3BXzX1tXFV0R",
-    "name": "证券法-操纵市场",
-    "type": "定性",
-    "dimension": "企业关联方风险",
-    "region": "中国",
-    "direction": "禁止",
-    "applicableSubject": "任何单位/个人",
-    "fullText": "禁止任何人以下列手段操纵证券市场：单独或者通过合谋，集中资金优势、持股优势或者利用信息优势联合或者连续买卖；与他人串通，以事先约定的时间、价格和方式相互进行证券交易；在自己实际控制的账户之间进行证券交易；不以成交为目的，频繁或者大量申报并撤销申报。",
-    "quantitativeIndicator": null,
-    "createdAt": "2025-11-25T09:17:17.000000",
-    "complianceDomain": [
-      "证券业",
-      "金融业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
     "id": "ywUtUZ0B3BXzX1tXFV8S",
-    "name": "保险资金运用管理办法-权益类资产",
+    "name": "关于调整保险资金权益类资产监管比例有关事项的通知-权益类资产配置比例分支",
     "type": "定量",
     "dimension": "企业信用风险",
     "region": "中国",
     "direction": "禁止",
     "applicableSubject": "保险公司",
-    "fullText": "保险公司投资于权益类资产的账面余额，合计不高于本公司上季末总资产的30%。（注：根据公司偿付能力不同可浮动，此处取基准线）",
+    "fullText": "适用条件：依据金规〔2025〕12号核对保险公司及保险集团权益类资产配置比例。按上季末综合偿付能力充足率分档：低于100%时，上限为上季末总资产的10%；100%及以上但低于150%时为20%；150%及以上但低于250%时为30%；250%及以上但低于350%时为40%；350%及以上时为50%。实际计算须确认公司身份、账户范围及适用监管口径，不将30%作为所有保险公司的统一上限。",
     "quantitativeIndicator": null,
     "createdAt": "2025-11-25T18:46:43.000000",
     "complianceDomain": [
@@ -44898,7 +42822,7 @@
   },
   {
     "id": "ywUtUZ0B3BXzX1tXFWMT",
-    "name": "反外国制裁法-反制措施",
+    "name": "反外国制裁法-境内主体执行外国歧视性措施禁止",
     "type": "定性",
     "dimension": "企业国际合作风险",
     "region": "中国",
@@ -44975,7 +42899,7 @@
   },
   {
     "id": "zAUtUZ0B3BXzX1tXFVwQ",
-    "name": "劳动合同法-试用期解除",
+    "name": "劳动合同法-劳动者试用期解除通知期限",
     "type": "定量",
     "dimension": "劳务合规风险",
     "region": "中国",
@@ -45031,7 +42955,7 @@
   },
   {
     "id": "zAUtUZ0B3BXzX1tXFWMT",
-    "name": "电子商务法-平台责任",
+    "name": "电子商务法-知情未处置人身财产安全商品连带责任",
     "type": "定性",
     "dimension": "供应链风险",
     "region": "中国",
@@ -45170,7 +43094,7 @@
     "region": "中国",
     "direction": "必要",
     "applicableSubject": "国有企业",
-    "fullText": "国有企业要把党的领导融入公司治理各环节，明确党组织在公司法人治理结构中的法定地位。\n适用主体或业务条件：国有企业。",
+    "fullText": "国有企业要把党的领导融入公司治理各环节，明确党组织在公司法人治理结构中的法定地位。",
     "quantitativeIndicator": null,
     "createdAt": "2025-10-01T14:40:00.000000",
     "complianceDomain": [
@@ -45307,25 +43231,6 @@
       "化工制造",
       "环保服务",
       "制造业"
-    ],
-    "regionCodes": [
-      "CN"
-    ]
-  },
-  {
-    "id": "zwUtUZ0B3BXzX1tXFVsN",
-    "name": "出口管制法-临时管制",
-    "type": "定量",
-    "dimension": "企业国际合作风险",
-    "region": "中国",
-    "direction": "可选",
-    "applicableSubject": "国家出口管制管理部门",
-    "fullText": "经国务院批准，国家出口管制管理部门可以对出口管制清单以外的货物、技术和服务实施临时管制，并予以公告。临时管制的实施期限不超过2年。",
-    "quantitativeIndicator": 2.0,
-    "createdAt": "2025-11-24T11:15:15.000000",
-    "complianceDomain": [
-      "电子制造",
-      "军工"
     ],
     "regionCodes": [
       "CN"

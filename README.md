@@ -108,7 +108,7 @@ ES 初始化工具创建缺失索引，并为指标和法规索引导入候选�
 | [schema.sql](documents/schema.sql) | 数据表、索引与约束 |
 | [es_mappings.json](documents/es_mappings.json) | Elasticsearch 字段与检索配置 |
 | [indicator.json](documents/data/indicator.json) | 开发用指标库，1494条 |
-| [regulation.json](documents/data/regulation.json) | 开发用法规及管理要求库，2342条 |
+| [regulation.json](documents/data/regulation.json) | 开发用法规及管理要求库，2231条 |
 | [dicts](documents/dicts) | 地区、行业与领域字典 |
 
 ### 3. 配置模型与分类环境

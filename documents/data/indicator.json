@@ -847,7 +847,7 @@
   {
     "id": "0fc7f815-5a72-4db9-8096-ee07a5872150",
     "name": "工艺标准变化识别与文件更新时段",
-    "description": "记录发现标准变化、完成适用性核对和更新工艺文件的时间，说明变化范围及尚未更新事项，不设统一更新期限。核对材料：标准变更、适用性核对、文件版本、更新时间。计量项目：工艺标准变化获知至文件更新自然时长；公式：(process_document_updated_at - standard_change_confirmed_at).total_seconds / 3600；单位：HOURS；输入：standard_change_confirmed_at为标准变化发布或获知并有依据的时刻；process_document_updated_at为对应工艺文件完成更新并有版本记录的时刻。统计范围：entity、period、standardVersion、scopeBasis、timeBasis；口径：变化范围说明保留；尚未更新文件单列，不设统一更新期限，更新版本与适用产品对应。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "记录发现标准变化、完成适用性核对和更新工艺文件的时间，说明变化范围，尚未更新事项单独列出。核对材料：标准变更、适用性核对、文件版本、更新时间。计量项目：工艺标准变化获知至文件更新自然时长；公式：(process_document_updated_at - standard_change_confirmed_at).total_seconds / 3600；单位：HOURS；输入：standard_change_confirmed_at为标准变化发布或获知并有依据的时刻；process_document_updated_at为对应工艺文件完成更新并有版本记录的时刻。统计范围：entity、period、standardVersion、scopeBasis、timeBasis；口径：记录变化范围；尚未更新文件单列，更新期限按适用要求核对，更新版本与适用产品对应。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "f03b6ccb-69d6-4d5e-9ecb-9eaf0bb92bce",
@@ -956,7 +956,7 @@
   {
     "id": "1addca07-fc81-4707-8e77-013f9b15d532",
     "name": "机械电气设备安全要求验证情况",
-    "description": "将控制配置、运行模式及电气安全项目对应到测试，核对实际设备与样机版本差异，原标准引用另行核验。核对材料：控制配置、运行模式、测试报告、版本差异、依据核验。",
+    "description": "将控制配置、运行模式及电气安全项目对应到测试，核对实际设备与样机版本差异，标准引用依据与测试结论分别核对。核对材料：控制配置、运行模式、测试报告、版本差异、依据核验。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "3284adb4-c388-4178-b7f4-783b73f863db",
@@ -1357,7 +1357,7 @@
   {
     "id": "33d802ba-9398-4121-b7b6-c0812d224331",
     "name": "美国地区物质告知适用性资料",
-    "description": "按销售地区、产品材料及使用场景记录拟适用物质告知事项，核对证据和标签，旧法规名称仅保留作核验线索。核对材料：市场范围、材料资料、物质依据、告知标签、适用性核对。",
+    "description": "按销售地区、产品材料及使用场景记录拟适用物质告知事项，核对告知证据、标签与产品实际的对应关系。核对材料：市场范围、材料资料、物质依据、告知标签、适用性核对。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "4e817871-b4a6-4258-8418-973be4ad631b",
@@ -1862,7 +1862,7 @@
   {
     "id": "693c2372-ff0f-48e1-aa20-addb84148155",
     "name": "生产设备安全检查活动次数",
-    "description": "按设备及统计期间记录实际检查、检查项目和发现事项，区分计划次数与执行次数，不预设统一年度要求。核对材料：设备清单、检查计划、实际检查、问题记录。计量项目：实际设备安全检查次数；公式：completed_check_count；单位：ACTIVITIES；输入：completed_check_count为统计范围内已完成且按活动标识去重的设备检查次数。统计范围：entity、period、equipmentScope；口径：不计仅计划或取消的检查，不规定最低频次。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按设备及统计期间记录实际检查、检查项目和发现事项，区分计划次数与实际执行次数。核对材料：设备清单、检查计划、实际检查、问题记录。计量项目：实际设备安全检查次数；公式：completed_check_count；单位：ACTIVITIES；输入：completed_check_count为统计范围内已完成且按活动标识去重的设备检查次数。统计范围：entity、period、equipmentScope；口径：不计仅计划或取消的检查。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "3ba405ac-a1d4-41ec-82ae-00a9296929c5",
@@ -1901,7 +1901,7 @@
   {
     "id": "706ad401-6871-4a93-8a19-883b8010a88d",
     "name": "电气电子可编程安全系统要求验证情况",
-    "description": "按系统配置列出功能安全要求和采用依据版本，将验证项目与结果对应；原标准编号仅作为来源线索，需确认其适用性。核对材料：系统配置、要求清单、依据版本、验证报告。",
+    "description": "按系统配置列出功能安全要求和采用依据版本，将验证项目与结果逐项对应；采用依据版本的适用性需另行确认。核对材料：系统配置、要求清单、依据版本、验证报告。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "3284adb4-c388-4178-b7f4-783b73f863db",
@@ -2853,7 +2853,7 @@
   {
     "id": "be39cf7e-d8fa-52c8-ae97-aabdf6873969",
     "name": "医疗器械设计变更与验证资料对应完整情况",
-    "description": "对照变更内容、受影响版本、验证活动和结果的关系适用条件：医疗器械产品发生结构、材料、软件或预期用途的设计变更时。核对材料：设计变更、风险分析、产品版本、测试报告、变更确认、未解决事项。计量项目：医疗器械设计变更验证事项覆盖比例；公式：100 * validated_item_count / required_validation_item_count；单位：PERCENT；输入：validated_item_count为已具备对应版本测试及结果的验证事项数；required_validation_item_count为已确认变更影响分析提出的验证事项总数。统计范围：entity、designChange、productVersion、cutoff；口径：验证事项按要求和对象去重；比例不代替测试是否通过或未解决事项审核。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "核对变更内容、受影响版本与验证活动及结果的对应关系适用条件：医疗器械产品发生结构、材料、软件或预期用途的设计变更时。核对材料：设计变更、风险分析、产品版本、测试报告、变更确认、未解决事项。计量项目：医疗器械设计变更验证事项覆盖比例；公式：100 * validated_item_count / required_validation_item_count；单位：PERCENT；输入：validated_item_count为已具备对应版本测试及结果的验证事项数；required_validation_item_count为已确认变更影响分析提出的验证事项总数。统计范围：entity、designChange、productVersion、cutoff；口径：验证事项按要求和对象去重；比例不代替测试是否通过或未解决事项审核。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "3284adb4-c388-4178-b7f4-783b73f863db",
@@ -2871,7 +2871,7 @@
   {
     "id": "bec21429-412b-5efd-8848-81e7f4a07f80",
     "name": "通信交付配置差异补充验证情况",
-    "description": "核对交付与测试配置差异及相应影响说明或验证适用条件：通信设备变更天线、射频参数或固件配置时。核对材料：设备配置、射频测试、版本记录、交付清单、差异验证。计量项目：通信交付配置差异验证覆盖比例；公式：100 * validated_config_count / different_config_count；单位：PERCENT；输入：validated_config_count为有影响核对或所需补充验证依据的差异配置数；different_config_count为交付与原测试之间已确认存在差异的配置总数。统计范围：entity、deliveryScope、testVersion；口径：差异范围和所需验证先确认；没有差异时是无适用对象，不默认满分。输入、证据或统计范围未确认时不计算，不将缺失作为零。合规主题：通信设备射频配置与测试。",
+    "description": "核对交付与测试配置差异及相应影响说明或验证适用条件：通信设备变更天线、射频参数或固件配置时。核对材料：设备配置、射频测试、版本记录、交付清单、差异验证。计量项目：通信交付配置差异验证覆盖比例；公式：100 * validated_config_count / different_config_count；单位：PERCENT；输入：validated_config_count为有影响核对或所需补充验证依据的差异配置数；different_config_count为交付与原测试之间已确认存在差异的配置总数。统计范围：entity、deliveryScope、testVersion；口径：差异范围和所需验证先确认；没有差异时是无适用对象。输入、证据或统计范围未确认时不计算，不将缺失作为零。合规主题：通信设备射频配置与测试。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "476c07f9-d340-4c4c-b64c-2aa878d1f755",
@@ -2984,7 +2984,7 @@
   {
     "id": "c796d564-d768-4017-966c-96f661e8cfcf",
     "name": "生产过程必需记录完整情况",
-    "description": "按已确定工序记录清单核对批次、人员、设备和过程参数，统计缺失项并保留完整性检查口径。核对材料：工序记录清单、生产批次、设备日志、记录核对。计量项目：生产过程必需记录完整批次比例；公式：100 * complete_record_batch_count / checked_record_batch_count；单位：PERCENT；输入：complete_record_batch_count为按工序记录清单核对必需字段齐全的记录对应批次数；checked_record_batch_count为完成核对并有明确结论的批次记录总数。统计范围：entity、period、processScope、recordRequirement；口径：缺失项统计另行列示；同批多份记录不重复计批次，完整性启用口径固定。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按已确定工序记录清单核对批次、人员、设备和过程参数，统计缺失项并保留完整性检查口径。核对材料：工序记录清单、生产批次、设备日志、记录核对。计量项目：生产过程必需记录完整批次比例；公式：100 * complete_record_batch_count / checked_record_batch_count；单位：PERCENT；输入：complete_record_batch_count为按工序记录清单核对必需字段齐全的记录对应批次数；checked_record_batch_count为完成核对并有明确结论的批次记录总数。统计范围：entity、period、processScope、recordRequirement；口径：缺失项统计另行列示；同批多份记录不重复计批次，按明确的工序记录清单核对完整性。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "ab7a3461-0c97-46c5-8687-4cfda1b35c6e",
@@ -4686,7 +4686,7 @@
   {
     "id": "0595055f-7ca4-49d7-82bd-6840fa03df49",
     "name": "实际用工合同记录覆盖与签署节点",
-    "description": "先确认应签约人员范围，再统计对应合同记录覆盖比例并核对签署与用工起点，试用期身份不代替签约义务，删除统一100%表述。核对材料：用工名册、合同原件、签署台账、用工起点、适用范围。计量项目：信用检查用工合同记录覆盖比例；公式：100 * documented_signed_person_count / required_contract_person_count；单位：PERCENT；输入：documented_signed_person_count为本应签范围有当前主体期间对应签署合同原件资料的独立人员数；required_contract_person_count为实际用工人员中经核验确定应签约的独立人员总数。统计范围：entity、period、employmentScope、contractRequirementBasis；口径：与劳务维度同主题保留复用线索，不能同时重复加分；签署节点及条款有效性单独核对。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：信用检查合同签署相对用工起点小时差；公式：(signed_at - employment_started_at).total_seconds / 3600；单位：HOURS；输入：employment_started_at为有事实资料且精确到时刻的实际用工开始时间；signed_at为对应合同双方完成签署的确定时刻。统计范围：entity、employee、contract、timeBasis；口径：提前签署为负差值，未签署不填零；只有日期不能假定午夜，签约期限需另行核验。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "先确认应签约人员范围，再统计对应合同记录覆盖比例并核对签署与用工起点，试用期身份不代替签约义务。核对材料：用工名册、合同原件、签署台账、用工起点、适用范围。计量项目：信用检查用工合同记录覆盖比例；公式：100 * documented_signed_person_count / required_contract_person_count；单位：PERCENT；输入：documented_signed_person_count为本应签范围有当前主体期间对应签署合同原件资料的独立人员数；required_contract_person_count为实际用工人员中经核验确定应签约的独立人员总数。统计范围：entity、period、employmentScope、contractRequirementBasis；口径：签署节点及条款有效性单独核对。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：信用检查合同签署相对用工起点小时差；公式：(signed_at - employment_started_at).total_seconds / 3600；单位：HOURS；输入：employment_started_at为有事实资料且精确到时刻的实际用工开始时间；signed_at为对应合同双方完成签署的确定时刻。统计范围：entity、employee、contract、timeBasis；口径：提前签署为负差值，未签署不填零；只有日期不能假定午夜，签约期限需另行核验。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "86bd76d2-c46d-4482-a324-6004c7c6793e",
@@ -4795,7 +4795,7 @@
   {
     "id": "0d9d209c-a936-4d09-b108-31dd68da2588",
     "name": "贷款已确认逾期事件数量及金额比例",
-    "description": "先核验合同到期、展期和支付归属，再分别统计逾期事件数及到期未付本金占同范围已到期本金比例，删除一次和1%门槛。核对材料：贷款合同、展期资料、还款计划、支付归属、截止日明细。计量项目：贷款已确认逾期事件数量；公式：confirmed_overdue_event_count；单位：EVENTS；输入：confirmed_overdue_event_count为按已核验到期展期及支付归属确认发生逾期并按贷款义务事件去重的数量。统计范围：entity、period、loanScope、dueBasisVersion；口径：同一义务多次催收只计一件，不把未核验待处理项计为确定逾期；原一次门槛不启用。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：已到期未付本金占同队列到期本金比例；公式：100 * confirmed_due_unpaid_principal / confirmed_due_principal；单位：PERCENT；输入：confirmed_due_unpaid_principal为截止日同贷款队列已核验到期且未支付的本金金额；confirmed_due_principal为同队列截至该日已核验确已到期的本金总额。统计范围：entity、cutoff、loanCohort、currency、dueBasisVersion、amountUnit；口径：只核对本金，未到期本金不纳入；有效展期和付款归属先核验，异常金额另查，不采用1%门槛。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "先核验合同到期、展期和支付归属，再分别统计逾期事件数量，以及到期未付本金占同范围已到期本金的比例。核对材料：贷款合同、展期资料、还款计划、支付归属、截止日明细。计量项目：贷款已确认逾期事件数量；公式：confirmed_overdue_event_count；单位：EVENTS；输入：confirmed_overdue_event_count为按已核验到期展期及支付归属确认发生逾期并按贷款义务事件去重的数量。统计范围：entity、period、loanScope、dueBasisVersion；口径：同一义务多次催收只计一件，不把未核验待处理项计为确定逾期；输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：已到期未付本金占同队列到期本金比例；公式：100 * confirmed_due_unpaid_principal / confirmed_due_principal；单位：PERCENT；输入：confirmed_due_unpaid_principal为截止日同贷款队列已核验到期且未支付的本金金额；confirmed_due_principal为同队列截至该日已核验确已到期的本金总额。统计范围：entity、cutoff、loanCohort、currency、dueBasisVersion、amountUnit；口径：只核对本金，未到期本金不纳入；有效展期和付款归属先核验，异常金额另查。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "0d84f1d9-1a79-490b-8554-0e70f2a3b251",
@@ -5049,7 +5049,7 @@
   {
     "id": "22324c5d-863b-40ed-a55f-b67fc6120782",
     "name": "基础信用资料取得至归档自然时长",
-    "description": "以具体资料实际取得和可检索归档完成时刻计算自然小时，更新资料单独计件；删除未说明来源的24小时门槛。核对材料：资料清单、取得记录、归档日志、版本资料。计量项目：信用资料取得至归档自然时长；公式：(archived_at - received_at).total_seconds / 3600；单位：HOURS；输入：received_at为本资料版本有凭据的实际取得时刻；archived_at为本版本完成归档且可检索的确定时刻。统计范围：entity、record、recordVersion、timeBasis；口径：重复归档不重计，未归档不填零；仅自然小时，原24小时要求未作为有效期限。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "以具体资料实际取得和可检索归档完成时刻计算自然小时，更新资料单独计件。核对材料：资料清单、取得记录、归档日志、版本资料。计量项目：信用资料取得至归档自然时长；公式：(archived_at - received_at).total_seconds / 3600；单位：HOURS；输入：received_at为本资料版本有凭据的实际取得时刻；archived_at为本版本完成归档且可检索的确定时刻。统计范围：entity、record、recordVersion、timeBasis；口径：重复归档不重计，未归档不填零；仅自然小时。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "44eb0d24-4c82-4686-9b00-4b33145759dd",
@@ -5213,7 +5213,7 @@
   {
     "id": "2e3bed99-50be-4ea4-a6d4-17badecebf43",
     "name": "行业信用评价主体量表与等级记录",
-    "description": "核对评价机构、体系版本、评价范围和有效结果，不预设良好级，量表不同不直接比较。核对材料：评价报告、机构资料、量表版本、适用范围。",
+    "description": "核对评价机构、体系版本、评价范围和有效结果，量表版本不同的评价结果分别记录、不直接比较。核对材料：评价报告、机构资料、量表版本、适用范围。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "eb5de516-ec1c-4dc3-adb3-cf4d0b9bfba4",
@@ -5251,7 +5251,7 @@
   {
     "id": "32783285-7650-4820-b211-d214096f1de4",
     "name": "招投标相关事件来源与处理状态",
-    "description": "按招投标活动记录问题线索、事实、处理和更正，区分投诉与已确认违规，和年度同主题指标保留复用线索。核对材料：项目台账、投诉资料、事实文件、处理结果。",
+    "description": "按招投标活动记录问题线索、事实、处理和更正，区分投诉与已确认违规，同主题事项按同一记录口径核对。核对材料：项目台账、投诉资料、事实文件、处理结果。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "e5f3420b-569d-44bf-870f-59911d790b1e",
@@ -5380,7 +5380,7 @@
   {
     "id": "3eed5420-c382-4935-9c88-c58a839e2073",
     "name": "消费者投诉处理有效反馈满意比例",
-    "description": "采用明确反馈题项和满意分类，以有效反馈中明确满意的独立事项数除以有效反馈事项数；无反馈单列，不采用90%门槛。核对材料：投诉台账、反馈题项、分类规则、有效反馈、未反馈清单。计量项目：消费者投诉有效反馈满意比例；公式：100 * confirmed_satisfied_case_count / valid_feedback_case_count；单位：PERCENT；输入：confirmed_satisfied_case_count为同反馈题项及分类规则下有效反馈中明确满意的独立投诉事项数；valid_feedback_case_count为同范围有符合规则有效反馈的独立投诉事项总数。统计范围：entity、complaintCohort、feedbackQuestionVersion、satisfactionClassification、cutoff；口径：无反馈事项单列，重复答复按明确规则去重，不能把无反馈计满意；删除90%门槛。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "采用明确反馈题项和满意分类，以有效反馈中明确满意的独立事项数除以有效反馈事项数，无反馈事项单列。核对材料：投诉台账、反馈题项、分类规则、有效反馈、未反馈清单。计量项目：消费者投诉有效反馈满意比例；公式：100 * confirmed_satisfied_case_count / valid_feedback_case_count；单位：PERCENT；输入：confirmed_satisfied_case_count为同反馈题项及分类规则下有效反馈中明确满意的独立投诉事项数；valid_feedback_case_count为同范围有符合规则有效反馈的独立投诉事项总数。统计范围：entity、complaintCohort、feedbackQuestionVersion、satisfactionClassification、cutoff；口径：无反馈事项单列，重复答复按明确规则去重，不能把无反馈计满意；输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "076721a5-d5fb-41b6-82d7-4c4bda5ce1c9",
@@ -5399,7 +5399,7 @@
   {
     "id": "4062180c-2060-4532-9e0f-250c9f1058c2",
     "name": "息税前利润对利息费用覆盖倍数",
-    "description": "明确息税前利润和利息费用组成及会计期间后计算倍数，资本化利息口径注明，利润允许负值，不采用连续三季度三倍门槛。核对材料：利润资料、利息明细、会计口径、期间报表。计量项目：息税前利润对利息费用倍数；公式：earnings_before_interest_tax / interest_expense；单位：TIMES；输入：earnings_before_interest_tax为按明确会计归集口径得到的同期间息税前利润；interest_expense为同主体期间与所用归集口径相匹配的利息费用金额。统计范围：entity、period、statementScope、interestBasis、currency、statementVersion、amountUnit；口径：负利润产生负倍数应保留，零利息不输出无限倍数；资本化利息是否纳入须明确，原三倍门槛不启用。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "明确息税前利润和利息费用组成及会计期间后计算倍数，资本化利息口径注明，利润允许负值。核对材料：利润资料、利息明细、会计口径、期间报表。计量项目：息税前利润对利息费用倍数；公式：earnings_before_interest_tax / interest_expense；单位：TIMES；输入：earnings_before_interest_tax为按明确会计归集口径得到的同期间息税前利润；interest_expense为同主体期间与所用归集口径相匹配的利息费用金额。统计范围：entity、period、statementScope、interestBasis、currency、statementVersion、amountUnit；口径：负利润产生负倍数应保留，零利息不输出无限倍数；资本化利息是否纳入须明确。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "e34a9f25-7fc8-41ff-815c-132cd2029c03",
@@ -5565,7 +5565,7 @@
   {
     "id": "476236e9-1d21-4b92-9184-bc82a6099755",
     "name": "主营及各非主业收入构成比例",
-    "description": "明确业务分类后分别以主营收入和各非主业类别收入除以同主体期间收入总额，保留冲销及分类变化，不采用原70%与15%门槛。核对材料：收入明细、业务分类、总账报表、冲销资料。计量项目：主营收入占同期总收入比例；公式：100 * primary_net_revenue / total_net_revenue；单位：PERCENT；输入：primary_net_revenue为依据已确认业务分类归集同期间主营业务净收入；total_net_revenue为同主体期间和会计口径下总净收入。统计范围：entity、period、statementScope、revenueClassification、currency、statementVersion、amountUnit；口径：冲销保留符号，总收入非正不输出常规比例；不采用原70%门槛，分类变化须说明。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：具体非主业类别收入占比；公式：100 * category_net_revenue / total_net_revenue；单位：PERCENT；输入：category_net_revenue为本次选定非主业类别在同期间按明确分类归集的净收入；total_net_revenue为同主体期间会计口径下总净收入。统计范围：entity、period、statementScope、revenueCategory、revenueClassification、currency、statementVersion、amountUnit；口径：逐类别计算，不能把全部非主业合计当单一类别；总收入非正不输出比例，原15%门槛不启用。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "明确业务分类后分别以主营收入和各非主业类别收入除以同主体期间收入总额，保留冲销及分类变化，逐类别列示并说明分类变化。核对材料：收入明细、业务分类、总账报表、冲销资料。计量项目：主营收入占同期总收入比例；公式：100 * primary_net_revenue / total_net_revenue；单位：PERCENT；输入：primary_net_revenue为依据已确认业务分类归集同期间主营业务净收入；total_net_revenue为同主体期间和会计口径下总净收入。统计范围：entity、period、statementScope、revenueClassification、currency、statementVersion、amountUnit；口径：冲销保留符号，总收入非正不输出常规比例；分类变化须说明。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：具体非主业类别收入占比；公式：100 * category_net_revenue / total_net_revenue；单位：PERCENT；输入：category_net_revenue为本次选定非主业类别在同期间按明确分类归集的净收入；total_net_revenue为同主体期间会计口径下总净收入。统计范围：entity、period、statementScope、revenueCategory、revenueClassification、currency、statementVersion、amountUnit；口径：逐类别计算，不能把全部非主业合计当单一类别；总收入非正不输出比例。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "e3d153fc-771d-47f7-8d19-936d72721fc2",
@@ -5732,7 +5732,7 @@
   {
     "id": "554ad603-045d-492c-8928-3044aa7858a8",
     "name": "关联方资金占用确认至清偿自然时长",
-    "description": "按资金事项确认起点、实质清偿时刻和对应金额资料计算自然小时，未清偿和分批清偿另列，不自动使用原30日限值。核对材料：占用事实、确认时间、清偿凭证、款项归属。计量项目：资金占用确认至清偿自然时长；公式：(cleared_at - confirmed_at).total_seconds / 3600；单位：HOURS；输入：confirmed_at为该资金占用事项有事实和金额依据的确认时刻；cleared_at为该事项已确认全部对应金额实质清偿时刻。统计范围：entity、fundOccupation、clearanceBasis、timeBasis；口径：分批支付仅在确认最终清偿时作为完成，未清偿单列；原30日门槛不适用。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按资金事项确认起点、实质清偿时刻和对应金额资料计算自然小时，未清偿和分批清偿另列。核对材料：占用事实、确认时间、清偿凭证、款项归属。计量项目：资金占用确认至清偿自然时长；公式：(cleared_at - confirmed_at).total_seconds / 3600；单位：HOURS；输入：confirmed_at为该资金占用事项有事实和金额依据的确认时刻；cleared_at为该事项已确认全部对应金额实质清偿时刻。统计范围：entity、fundOccupation、clearanceBasis、timeBasis；口径：分批支付仅在确认最终清偿时作为完成，未清偿单列；输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "45092db5-a0eb-4ef9-abbb-75e2b4bebe5f",
@@ -5786,7 +5786,7 @@
   {
     "id": "5789b878-e12a-4aab-ba60-3c964e18ef7f",
     "name": "ESG评价量表等级与分值对应记录",
-    "description": "明确评价体系采用的是等级还是数值、对象及版本，BBB不能当作得分单位，删除统一BBB门槛。核对材料：ESG报告、量表定义、评价对象、版本说明。",
+    "description": "明确评价体系采用的是等级还是数值、对象及版本，等级标识与数值口径分别记录，等级标识不作为得分单位。核对材料：ESG报告、量表定义、评价对象、版本说明。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "c6b1124e-939e-4825-b72e-be66fdba426f",
@@ -5804,7 +5804,7 @@
   {
     "id": "57eae34d-af80-4aca-846d-918b42dd8f2f",
     "name": "缺陷事项确认至召回实际启动自然时长",
-    "description": "明确需启动召回的适用条件、起算事件及实际启动动作后计算自然小时，缺陷通知与确认区分，删除24小时统一期限。核对材料：缺陷资料、适用要求、起算依据、召回启动。计量项目：召回起算事项至实际启动自然时长；公式：(recall_started_at - confirmed_trigger_at).total_seconds / 3600；单位：HOURS；输入：confirmed_trigger_at为经适用条件和具体事实核验确定应启动召回的起算时刻；recall_started_at为该事项发生实际召回执行动作的确定时刻。统计范围：entity、defectEvent、recallScope、triggerBasis、timeBasis；口径：收到缺陷线索不自动等于召回条件成立，未启动单列，不使用24小时统一限值。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "明确需启动召回的适用条件、起算事件及实际启动动作后计算自然小时，缺陷通知与确认分别记录。核对材料：缺陷资料、适用要求、起算依据、召回启动。计量项目：召回起算事项至实际启动自然时长；公式：(recall_started_at - confirmed_trigger_at).total_seconds / 3600；单位：HOURS；输入：confirmed_trigger_at为经适用条件和具体事实核验确定应启动召回的起算时刻；recall_started_at为该事项发生实际召回执行动作的确定时刻。统计范围：entity、defectEvent、recallScope、triggerBasis、timeBasis；口径：收到缺陷线索不自动等于召回条件成立，未启动单列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "076721a5-d5fb-41b6-82d7-4c4bda5ce1c9",
@@ -5862,7 +5862,7 @@
   {
     "id": "5be19675-944e-4705-bafd-16f97544ecf8",
     "name": "合同纠纷完成处理的平均自然时长",
-    "description": "以同队列已完成事项从明确受理起点到实际完成的自然小时总和除以完成事项数，复杂事项单独分组，未完成事项另列，删除30天90天门槛。核对材料：争议队列、受理记录、完成依据、复杂分类、未结清单。计量项目：已完成合同纠纷平均自然时长；公式：completed_duration_hours_sum / completed_case_count；单位：HOURS；输入：completed_duration_hours_sum为同队列已完成事项按明确受理至完成节点计算的自然小时合计；completed_case_count为构成该合计且实际完成并有确定节点的独立事项数。统计范围：entity、disputeCohort、complexityClass、startBasis、completionBasis、cutoff、timeBasis；口径：每件事项时区及起止先核对，复杂分类先确认，未完成数量与等待时长单列；无完成样本不能给零均值，不采用30天90天门槛。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "以同队列已完成事项从明确受理起点到实际完成的自然小时总和除以完成事项数，复杂事项单独分组，未完成事项另列。核对材料：争议队列、受理记录、完成依据、复杂分类、未结清单。计量项目：已完成合同纠纷平均自然时长；公式：completed_duration_hours_sum / completed_case_count；单位：HOURS；输入：completed_duration_hours_sum为同队列已完成事项按明确受理至完成节点计算的自然小时合计；completed_case_count为构成该合计且实际完成并有确定节点的独立事项数。统计范围：entity、disputeCohort、complexityClass、startBasis、completionBasis、cutoff、timeBasis；口径：每件事项时区及起止先核对，复杂分类先确认，未完成数量与等待时长单列；无完成样本不能给零均值。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "13cb24df-c403-4a74-8337-8e00194c57d4",
@@ -5900,7 +5900,7 @@
   {
     "id": "5cb96c32-7c3a-4510-9c46-8c8a88da74c1",
     "name": "中标通知接收至合同签署自然时长",
-    "description": "以可核验通知接收时刻和完成签署时刻计算自然小时，重发通知去重，未签署单列；原30日要求须独立核验。核对材料：中标通知、接收凭据、签署资料、起算依据。计量项目：中标通知接收至签署自然时长；公式：(contract_signed_at - notice_received_at).total_seconds / 3600；单位：HOURS；输入：notice_received_at为对应有效中标通知实际接收时刻；contract_signed_at为对应合同双方完成签署时刻。统计范围：entity、awardEvent、contract、noticeVersion、timeBasis；口径：重发通知不能重置起点；未签署单列，合同在通知前签署需核对事件范围；原30日要求未核验不启用。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "以可核验通知接收时刻和完成签署时刻计算自然小时，重发通知去重，未签署单列。核对材料：中标通知、接收凭据、签署资料、起算依据。计量项目：中标通知接收至签署自然时长；公式：(contract_signed_at - notice_received_at).total_seconds / 3600；单位：HOURS；输入：notice_received_at为对应有效中标通知实际接收时刻；contract_signed_at为对应合同双方完成签署时刻。统计范围：entity、awardEvent、contract、noticeVersion、timeBasis；口径：重发通知不能重置起点；未签署单列，合同在通知前签署需核对事件范围；输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "2137804b-8afe-4688-95c7-f4df3620079d",
@@ -5973,7 +5973,7 @@
   {
     "id": "6236f1b0-da14-48b1-a7ca-b6d1e2b0c29b",
     "name": "核心供应商信用评级来源与分布",
-    "description": "记录评级机构、版本、主体和等级，按同一量表列示数量分布；不同评级不能直接换算，删除AA及80%预设门槛。核对材料：核心供应商、评级报告、等级量表、评级日期。",
+    "description": "记录评级机构、版本、主体和等级，按同一量表列示数量分布，不同评级不直接换算。核对材料：核心供应商、评级报告、等级量表、评级日期。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "791fb3c6-fe97-4256-9286-812f3ccae204",
@@ -6045,7 +6045,7 @@
   {
     "id": "6c921b4d-7786-4ec6-81af-092683cc1044",
     "name": "技术保密违约约定与损失金额依据",
-    "description": "分别列示合同约定、主张赔偿、已确认损失及处理结果，是否适用和因果关系另审，删除两倍损失门槛，损失未知不计算倍数。核对材料：保密合同、违约主张、损失依据、处理结果、金额明细。计量项目：技术保密确认赔偿与确认损失倍数；公式：confirmed_compensation_amount / confirmed_loss_amount；单位：TIMES；输入：confirmed_compensation_amount为同一技术保密事项中来源及状态明确的确认赔偿金额；confirmed_loss_amount为同事项依据已审核可对应的实际确认损失金额。统计范围：entity、secrecyEvent、compensationStatus、lossBasis、currency、amountUnit；口径：约定主张及判定金额不能混为同一分子，损失为零或未知不输出倍数；删除两倍限值，不推定责任成立。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：技术保密事项确认损失金额；公式：confirmed_loss_amount；单位：CURRENCY；输入：confirmed_loss_amount为同一技术保密事项中来源状态明确并有依据的实际确认损失金额。统计范围：entity、secrecyEvent、lossBasis、currency、amountUnit；口径：赔偿主张不当确认损失，损失未知不计算倍数；与合同约定条款分开记录。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：技术保密确认违约事件数量；公式：confirmed_breach_event_count；单位：EVENTS；输入：confirmed_breach_event_count为按约定与事实核对确认存在违约并有处理记录的独立事件数。统计范围：entity、period、secrecyScope、eventDedupBasis；口径：适用性和因果另审；违约主张未确认不计入，倍数与次数不合并定性。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "分别列示合同约定、主张赔偿、已确认损失及处理结果，是否适用和因果关系另审，损失未知时不计算倍数。核对材料：保密合同、违约主张、损失依据、处理结果、金额明细。计量项目：技术保密确认赔偿与确认损失倍数；公式：confirmed_compensation_amount / confirmed_loss_amount；单位：TIMES；输入：confirmed_compensation_amount为同一技术保密事项中来源及状态明确的确认赔偿金额；confirmed_loss_amount为同事项依据已审核可对应的实际确认损失金额。统计范围：entity、secrecyEvent、compensationStatus、lossBasis、currency、amountUnit；口径：约定主张及判定金额不能混为同一分子，损失为零或未知不输出倍数；不推定责任成立。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：技术保密事项确认损失金额；公式：confirmed_loss_amount；单位：CURRENCY；输入：confirmed_loss_amount为同一技术保密事项中来源状态明确并有依据的实际确认损失金额。统计范围：entity、secrecyEvent、lossBasis、currency、amountUnit；口径：赔偿主张不当确认损失，损失未知不计算倍数；与合同约定条款分开记录。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：技术保密确认违约事件数量；公式：confirmed_breach_event_count；单位：EVENTS；输入：confirmed_breach_event_count为按约定与事实核对确认存在违约并有处理记录的独立事件数。统计范围：entity、period、secrecyScope、eventDedupBasis；口径：适用性和因果另审；违约主张未确认不计入，倍数与次数不合并定性。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "ab0c1ef5-11cc-4820-965f-bfe5314d71e9",
@@ -6064,7 +6064,7 @@
   {
     "id": "6d248dc8-5ad4-4eb9-86db-9a34b0cee9f6",
     "name": "到期商业汇票实兑金额比例与拒付状态",
-    "description": "按同一到期队列计算已兑付金额占经确认应兑付金额比例，拒付、展期和部分兑付分别列示，不以100%或无记录替代事实核对。核对材料：汇票队列、到期依据、银行兑付、拒付资料、展期记录。计量项目：到期商业汇票实际兑付金额比例；公式：100 * allocated_paid_amount / confirmed_due_amount；单位：PERCENT；输入：allocated_paid_amount为本到期队列正确归属的实际兑付金额；confirmed_due_amount为本到期队列依据已核验有效变更确认应兑付金额。统计范围：entity、billCohort、cutoff、currency、dueBasisVersion、amountUnit；口径：拒付部分兑付及展期状态单列，异常超额需核对不截断比例；不以100%作为已审核规则。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：到期商业汇票确认拒付事件数量；公式：confirmed_dishonor_event_count；单位：EVENTS；输入：confirmed_dishonor_event_count为到期队列中经银行资料确认拒付并留有凭据的独立汇票事件数。统计范围：entity、period、billCohort、dishonorBasis；口径：部分兑付状态单列；拒付事件记录不替代责任认定。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：到期商业汇票有效展期记录数量；公式：confirmed_extension_item_count；单位：BILLS；输入：confirmed_extension_item_count为到期队列中经有效文件确认办理展期并保留款项归属的独立汇票件数。统计范围：entity、period、billCohort、extensionBasis；口径：展期有效性先核验；与拒付及已兑付分开列示，不以无记录当展期完成。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按同一到期队列计算已兑付金额占经确认应兑付金额比例，拒付、展期和部分兑付分别列示，兑付与拒付状态按凭据逐笔核对。核对材料：汇票队列、到期依据、银行兑付、拒付资料、展期记录。计量项目：到期商业汇票实际兑付金额比例；公式：100 * allocated_paid_amount / confirmed_due_amount；单位：PERCENT；输入：allocated_paid_amount为本到期队列正确归属的实际兑付金额；confirmed_due_amount为本到期队列依据已核验有效变更确认应兑付金额。统计范围：entity、billCohort、cutoff、currency、dueBasisVersion、amountUnit；口径：拒付部分兑付及展期状态单列，异常超额需核对不截断比例；兑付比例与是否满足约定的兑付义务分别判断。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：到期商业汇票确认拒付事件数量；公式：confirmed_dishonor_event_count；单位：EVENTS；输入：confirmed_dishonor_event_count为到期队列中经银行资料确认拒付并留有凭据的独立汇票事件数。统计范围：entity、period、billCohort、dishonorBasis；口径：部分兑付状态单列；拒付事件记录不替代责任认定。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：到期商业汇票有效展期记录数量；公式：confirmed_extension_item_count；单位：BILLS；输入：confirmed_extension_item_count为到期队列中经有效文件确认办理展期并保留款项归属的独立汇票件数。统计范围：entity、period、billCohort、extensionBasis；口径：展期有效性先核验；与拒付及已兑付分开列示，不以无记录当展期完成。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "0baca42a-c753-47b0-8ef6-bff1ef183f4b",
@@ -6081,7 +6081,7 @@
   {
     "id": "71a935ba-e7e2-4431-be75-6b1f44b39783",
     "name": "供应商违约责任事件及确认损失",
-    "description": "按独立事件列示合同责任、触发事实、企业责任确认和损失金额，次数与金额分别统计，删除一次及50万元门槛。核对材料：供应合同、违约事实、责任确认、损失凭据、事件台账。计量项目：供应商违约已确认责任事件数量；公式：confirmed_liability_event_count；单位：EVENTS；输入：confirmed_liability_event_count为同范围有对应供应商违约触发事实及本主体责任依据的独立事件数。统计范围：entity、period、supplierScope、liabilityBasis；口径：未决责任单列，同一事件多项损失不能计多件；不采用一次门槛。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：供应商违约对应确认损失金额；公式：confirmed_loss_amount；单位：CURRENCY；输入：confirmed_loss_amount为同一责任事件依据可核验且归属本主体的实际确认损失金额。统计范围：entity、liabilityEvent、lossBasis、currency、amountUnit；口径：未决索赔或预测损失不当确认金额，避免同项重复归集；删除50万元门槛。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按独立事件列示合同责任、触发事实、企业责任确认和损失金额，次数与金额分别统计。核对材料：供应合同、违约事实、责任确认、损失凭据、事件台账。计量项目：供应商违约已确认责任事件数量；公式：confirmed_liability_event_count；单位：EVENTS；输入：confirmed_liability_event_count为同范围有对应供应商违约触发事实及本主体责任依据的独立事件数。统计范围：entity、period、supplierScope、liabilityBasis；口径：未决责任单列，同一事件多项损失不能计多件；输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：供应商违约对应确认损失金额；公式：confirmed_loss_amount；单位：CURRENCY；输入：confirmed_loss_amount为同一责任事件依据可核验且归属本主体的实际确认损失金额。统计范围：entity、liabilityEvent、lossBasis、currency、amountUnit；口径：未决索赔或预测损失不当确认金额，避免同项重复归集；输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "791fb3c6-fe97-4256-9286-812f3ccae204",
@@ -6118,7 +6118,7 @@
   {
     "id": "74200f02-14bd-4acf-b61a-322f7ea44f82",
     "name": "非经常性损益与同期净利润比例",
-    "description": "明确项目归类及归属主体，以非经常性损益净额除以同口径净利润；保留符号，净利润非正时不输出常规比例，不使用15%门槛。核对材料：损益明细、项目分类、利润报表、合并范围。计量项目：非经常性损益占正净利润比例；公式：100 * nonrecurring_profit / net_profit；单位：PERCENT；输入：nonrecurring_profit为按已确认分类归集的同主体期间非经常性损益净额；net_profit为同主体期间会计归属口径下净利润。统计范围：entity、period、statementScope、profitAttribution、classificationBasis、currency、statementVersion、amountUnit；口径：保留损益正负，总净利润非正时该比例不可解释而不输出；比例可超过100%，不采用15%限值。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "明确项目归类及归属主体，以非经常性损益净额除以同口径净利润；保留损益正负符号，净利润非正时不输出常规比例。核对材料：损益明细、项目分类、利润报表、合并范围。计量项目：非经常性损益占正净利润比例；公式：100 * nonrecurring_profit / net_profit；单位：PERCENT；输入：nonrecurring_profit为按已确认分类归集的同主体期间非经常性损益净额；net_profit为同主体期间会计归属口径下净利润。统计范围：entity、period、statementScope、profitAttribution、classificationBasis、currency、statementVersion、amountUnit；口径：保留损益正负，总净利润非正时该比例不可解释而不输出；比例可超过100%。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "e3d153fc-771d-47f7-8d19-936d72721fc2",
@@ -6170,7 +6170,7 @@
   {
     "id": "77437974-3bb3-4b56-8419-e6a9910e613f",
     "name": "同一赊销应收队列已收本金比例",
-    "description": "以截止日正确归属到本赊销队列的已收本金除以经变更确认的本队列应收本金，付款期限、退款及核销分别记录，删除90天95%标准。核对材料：赊销合同、应收队列、回款归属、调整资料、截止日。计量项目：赊销应收队列本金回收比例；公式：100 * allocated_collected_principal / confirmed_cohort_principal；单位：PERCENT；输入：allocated_collected_principal为截止日已正确归属本队列且无重复归集的实际回收本金金额；confirmed_cohort_principal为本赊销队列依据有效合同变更退款核定的应收本金金额。统计范围：entity、receivableCohort、cutoff、currency、adjustmentBasis、amountUnit；口径：回款期限账龄及核销另列，超额回款须核对归属而不截断为100%；删除90天95%要求。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "以截止日正确归属到本赊销队列的已收本金除以经变更确认的本队列应收本金，付款期限、退款及核销分别记录。核对材料：赊销合同、应收队列、回款归属、调整资料、截止日。计量项目：赊销应收队列本金回收比例；公式：100 * allocated_collected_principal / confirmed_cohort_principal；单位：PERCENT；输入：allocated_collected_principal为截止日已正确归属本队列且无重复归集的实际回收本金金额；confirmed_cohort_principal为本赊销队列依据有效合同变更退款核定的应收本金金额。统计范围：entity、receivableCohort、cutoff、currency、adjustmentBasis、amountUnit；口径：回款期限账龄及核销另列，超额回款须核对归属而不截断为100%；输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "4c1b6a36-620d-4ef0-9bb9-a392e38a8ac1",
@@ -6206,7 +6206,7 @@
   {
     "id": "77a153d0-8653-4298-a8f8-e42552411d07",
     "name": "信用修复结果确认至适用公示自然时长",
-    "description": "核对实际结果确认、是否需公示及发布时刻后计算自然小时，原五个工作日门槛待核验，不能将自然小时当工作日。核对材料：修复结果、公示依据、发布凭据、起算资料。计量项目：信用修复结果确认至适用公示自然时长；公式：(published_at - confirmed_repair_at).total_seconds / 3600；单位：HOURS；输入：confirmed_repair_at为实际修复结果依据确定确认的时刻；published_at为适用公示事项实际发布正确结果的时刻。统计范围：entity、repairEvent、publicationRequirement、startBasis、timeBasis；口径：只有确认需公示时适用，原五个工作日未核验不能据小时判断达标，未公示单列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "核对实际结果确认、是否需公示及发布时刻，按确认至实际发布的自然小时计量，不将自然小时当作工作日。核对材料：修复结果、公示依据、发布凭据、起算资料。计量项目：信用修复结果确认至适用公示自然时长；公式：(published_at - confirmed_repair_at).total_seconds / 3600；单位：HOURS；输入：confirmed_repair_at为实际修复结果依据确定确认的时刻；published_at为适用公示事项实际发布正确结果的时刻。统计范围：entity、repairEvent、publicationRequirement、startBasis、timeBasis；口径：只有确认需公示时适用，未公示单列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "60338906-f4d5-45a3-916f-5c00ec1d0ee7",
@@ -6243,7 +6243,7 @@
   {
     "id": "78c98e04-4c8f-4dbe-a711-b1ae8f5ce82d",
     "name": "信用应急演练独立活动数量与记录",
-    "description": "按实际场景和活动去重统计已执行演练数量，保留人员、过程、发现和后续改进，删除每年两次统一要求。核对材料：演练计划、活动记录、场景人员、发现改进。计量项目：已执行信用应急演练活动数量；公式：executed_drill_count；单位：EVENTS；输入：executed_drill_count为同期间按实际独立场景活动去重且有执行资料的演练数量。统计范围：entity、period、drillScope、eventDedupBasis；口径：计划活动不计已执行，效果与改进另核对，不使用每年两次门槛。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按实际场景和活动去重统计已执行演练数量，记录人员、过程、发现和后续改进资料。核对材料：演练计划、活动记录、场景人员、发现改进。计量项目：已执行信用应急演练活动数量；公式：executed_drill_count；单位：EVENTS；输入：executed_drill_count为同期间按实际独立场景活动去重且有执行资料的演练数量。统计范围：entity、period、drillScope、eventDedupBasis；口径：计划活动不计已执行，效果与改进另核对。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "bde016d5-ecc4-4583-a6ac-5e156eea8611",
@@ -6423,7 +6423,7 @@
   {
     "id": "809cbf6d-c0ba-45c5-b841-bf8294da6c90",
     "name": "招投标信用评价来源与分值记录",
-    "description": "核对实际主管或平台体系、版本、主体、项目适用性及评价结果，分值含义须有来源，不设置90分通用门槛。核对材料：评价体系、版本主体、项目资料、分值结果。",
+    "description": "核对实际主管或平台体系、版本、主体、项目适用性及评价结果，分值含义须有来源。核对材料：评价体系、版本主体、项目资料、分值结果。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "255b4c88-88b0-4811-8128-b1bff86926bb",
@@ -6456,7 +6456,7 @@
   {
     "id": "81344eba-09a4-44a9-b018-ff1a7cf19fe5",
     "name": "合同案件确认赔偿金额占同期收入比例",
-    "description": "明确属于同主体期间的确定赔偿金额和收入口径后计算比例，主张金额、未决金额和实际支付分别列示，不采用0.5%限值。核对材料：案件结果、赔偿归属、收入报表、期间口径。计量项目：案件确认赔偿占同期收入比例；公式：100 * confirmed_compensation_amount / total_revenue；单位：PERCENT；输入：confirmed_compensation_amount为同主体期间范围中归属明确且依据确定的合同案件赔偿金额；total_revenue为同主体期间会计口径下总收入。统计范围：entity、period、statementScope、compensationRecognition、currency、statementVersion、amountUnit；口径：主张金额和未决金额不纳入，支付额与确认赔偿额不同；收入非正不计算，比例可超过100%，不采用0.5%限值。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "明确属于同主体期间的确定赔偿金额和收入口径后计算比例，主张金额、未决金额和实际支付分别列示。核对材料：案件结果、赔偿归属、收入报表、期间口径。计量项目：案件确认赔偿占同期收入比例；公式：100 * confirmed_compensation_amount / total_revenue；单位：PERCENT；输入：confirmed_compensation_amount为同主体期间范围中归属明确且依据确定的合同案件赔偿金额；total_revenue为同主体期间会计口径下总收入。统计范围：entity、period、statementScope、compensationRecognition、currency、statementVersion、amountUnit；口径：主张金额和未决金额不纳入，支付额与确认赔偿额不同；收入非正不计算，比例可超过100%。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "13cb24df-c403-4a74-8337-8e00194c57d4",
@@ -6509,7 +6509,7 @@
   {
     "id": "84c1cea0-8d3f-4036-b018-55e76d65861b",
     "name": "供应商反馈量表样本与评价记录",
-    "description": "明确供应商群体、题项、量表和有效反馈，满意评分来源可追溯，删除85分统一门槛，不将反馈评分当风险评分。核对材料：反馈量表、供应商样本、有效答卷、统计资料。",
+    "description": "明确供应商群体、题项、量表和有效反馈，满意评分来源可追溯，不将反馈评分当风险评分。核对材料：反馈量表、供应商样本、有效答卷、统计资料。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "61f64978-d01f-41ff-abd3-6b8d92704f80",
@@ -6526,7 +6526,7 @@
   {
     "id": "85de8a95-e767-470c-b1f8-e83ab0b59714",
     "name": "检查问题整改起点至完成自然时长",
-    "description": "按具体问题记录明确起点、要求节点和完成证据，计算自然小时并分组列示未结事项；删除一般15天重大30天统一门槛。核对材料：检查文件、问题分类、整改节点、完成资料、未结记录。计量项目：具体检查问题整改完成自然时长；公式：(verified_completed_at - correction_started_at).total_seconds / 3600；单位：HOURS；输入：correction_started_at为按明确要求核验的具体整改起算时刻；verified_completed_at为该问题对应整改经确认完成的时刻。统计范围：entity、inspectionIssue、issueClass、startBasis、completionBasis、timeBasis；口径：一般重大分类来源先确认，未结事项单列，提交报告不等于完成；不使用15天30天通用限值。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按具体问题记录明确起点、要求节点和完成证据，计算自然小时并分组列示未结事项。核对材料：检查文件、问题分类、整改节点、完成资料、未结记录。计量项目：具体检查问题整改完成自然时长；公式：(verified_completed_at - correction_started_at).total_seconds / 3600；单位：HOURS；输入：correction_started_at为按明确要求核验的具体整改起算时刻；verified_completed_at为该问题对应整改经确认完成的时刻。统计范围：entity、inspectionIssue、issueClass、startBasis、completionBasis、timeBasis；口径：一般重大分类来源先确认，未结事项单列，提交报告不等于完成；输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "ce16676c-9757-42b8-9090-c50ae4334d54",
@@ -6598,7 +6598,7 @@
   {
     "id": "8e40b5c2-c846-46b8-b5ea-5b8d6664ef30",
     "name": "信用公示信息变更至发布自然时长",
-    "description": "按变更事项核对发生、确认和实际发布时刻，计算明确起点到发布的自然小时；原20个工作日门槛待来源核验，不冒充工作日计算。核对材料：变更资料、确认记录、发布凭据、起算依据。计量项目：信用事项变更至发布自然时长；公式：(published_at - confirmed_changed_at).total_seconds / 3600；单位：HOURS；输入：confirmed_changed_at为具体事项按已确认起算依据确定的变更时刻；published_at为该事项正确版本实际公开发布时刻。统计范围：entity、changeItem、publicationVersion、startBasis、timeBasis；口径：实际发生和审批确认不能任意互换，原20个工作日未转为小时阈值；未发布单列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按变更事项核对发生、确认和实际发布时刻，计算明确起点到发布的自然小时，不将自然小时当作工作日。核对材料：变更资料、确认记录、发布凭据、起算依据。计量项目：信用事项变更至发布自然时长；公式：(published_at - confirmed_changed_at).total_seconds / 3600；单位：HOURS；输入：confirmed_changed_at为具体事项按已确认起算依据确定的变更时刻；published_at为该事项正确版本实际公开发布时刻。统计范围：entity、changeItem、publicationVersion、startBasis、timeBasis；口径：实际发生和审批确认不能任意互换；未发布单列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "26c16d4d-fd80-44e0-bf85-2f0144a32a76",
@@ -6723,7 +6723,7 @@
   {
     "id": "95abe619-1ea5-4d9f-b06a-e8f68346f644",
     "name": "上下游事件确认至相关方预警自然时长",
-    "description": "明确已确认事件和需通知对象，分别计算确认至实际发送预警的自然小时，发送与送达确认区分，删除48小时门槛。核对材料：事件确认、关联范围、通知要求、发送记录、接收资料。计量项目：信用事件确认至相关方预警发送自然时长；公式：(warning_sent_at - event_confirmed_at).total_seconds / 3600；单位：HOURS；输入：event_confirmed_at为明确触发事实的独立信用事件确认时刻；warning_sent_at为对本次选定应通知对象实际发送正确预警内容的时刻。统计范围：entity、creditEvent、recipient、notificationBasis、timeBasis；口径：逐对象计算，发送不等于送达；原48小时不作为限值，未通知对象单列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "针对已确认事件及对应通知对象，分别记录事件确认、预警发送和送达确认时点，计算确认至实际发送预警的自然小时，发送与送达情况分别核对。核对材料：事件确认、关联范围、通知要求、发送记录、接收资料。计量项目：信用事件确认至相关方预警发送自然时长；公式：(warning_sent_at - event_confirmed_at).total_seconds / 3600；单位：HOURS；输入：event_confirmed_at为明确触发事实的独立信用事件确认时刻；warning_sent_at为对本次选定应通知对象实际发送正确预警内容的时刻。统计范围：entity、creditEvent、recipient、notificationBasis、timeBasis；口径：逐对象计算，发送不等于送达；未通知对象单列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "5965cd99-6d44-44c2-85d6-e5ccd228863f",
@@ -6760,7 +6760,7 @@
   {
     "id": "9a369b9b-8c69-496f-b089-ec1a7764e59b",
     "name": "需评级客户的信用评级记录覆盖率",
-    "description": "根据经确认客户管理范围识别需评级客户，以具备对应主体期间评级资料的客户数除以应评级总数，不自动使用100万元门槛。核对材料：客户范围、评级要求、交易资料、评级报告。计量项目：需评级客户资料覆盖比例；公式：100 * documented_rated_customer_count / required_rated_customer_count；单位：PERCENT；输入：documented_rated_customer_count为本应评级范围具备对应主体及期间评级资料的独立客户数；required_rated_customer_count为经客户范围和评级要求确认应评级的独立客户总数。统计范围：entity、period、customerScope、ratingRequirementVersion；口径：不默认按100万元识别范围，外部或内部评级方法和版本分别标识。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "根据经确认客户管理范围识别需评级客户，以具备对应主体期间评级资料的客户数除以应评级总数。核对材料：客户范围、评级要求、交易资料、评级报告。计量项目：需评级客户资料覆盖比例；公式：100 * documented_rated_customer_count / required_rated_customer_count；单位：PERCENT；输入：documented_rated_customer_count为本应评级范围具备对应主体及期间评级资料的独立客户数；required_rated_customer_count为经客户范围和评级要求确认应评级的独立客户总数。统计范围：entity、period、customerScope、ratingRequirementVersion；口径：外部或内部评级方法和版本分别标识。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "4c1b6a36-620d-4ef0-9bb9-a392e38a8ac1",
@@ -6853,7 +6853,7 @@
   {
     "id": "9ba069cf-6c8a-437d-9b3a-ca2edd68e14a",
     "name": "研发投入归集金额占同期收入比例",
-    "description": "明确研发投入费用化及资本化归集口径后除以同主体期间收入总额，避免重复计算，行业标准未经核验不设门槛。核对材料：研发项目、投入明细、资本化资料、收入报表、归集口径。计量项目：确认研发投入占同期收入比例；公式：100 * confirmed_research_spend / total_revenue；单位：PERCENT；输入：confirmed_research_spend为同主体期间依费用化及资本化统一归集口径确认且无重复的研发投入金额；total_revenue为同主体期间会计口径下总收入。统计范围：entity、period、statementScope、researchSpendBasis、currency、amountUnit；口径：资本化转费用和跨项目分摊避免重复，收入非正不输出比例，行业门槛未核验不启用。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "明确研发投入费用化及资本化归集口径后除以同主体期间收入总额，避免重复计算，行业标准按适用依据核对。核对材料：研发项目、投入明细、资本化资料、收入报表、归集口径。计量项目：确认研发投入占同期收入比例；公式：100 * confirmed_research_spend / total_revenue；单位：PERCENT；输入：confirmed_research_spend为同主体期间依费用化及资本化统一归集口径确认且无重复的研发投入金额；total_revenue为同主体期间会计口径下总收入。统计范围：entity、period、statementScope、researchSpendBasis、currency、amountUnit；口径：资本化转费用和跨项目分摊避免重复，收入非正不输出比例，行业标准按适用版本和实际条件核对。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "59210a75-cb24-463d-a75e-908ff644bf68",
@@ -6943,7 +6943,7 @@
   {
     "id": "a538950b-0096-4cbd-bf64-1b29825236c8",
     "name": "原料交付节点与断料停产事实",
-    "description": "分别核对到货与约定节点、库存耗尽和停产事件及因果材料；交付延迟不能直接推定断料停产，交付节点与停产影响分别核对。核对材料：采购节点、到货记录、库存记录、停产资料、原因核查。计量项目：原料交付确认晚于约定节点次数；公式：delayed_delivery_event_count；单位：EVENTS；输入：delayed_delivery_event_count为按到货记录与采购约定节点核对确认延迟并有依据的独立交付事件数。统计范围：entity、period、materialScope、dueBasisVersion；口径：有效变更和争议先核对；延迟不直接推定断料停产，影响另查。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：原料断供停产已确认事件数量；公式：confirmed_halt_event_count；单位：EVENTS；输入：confirmed_halt_event_count为库存耗尽及停产事件经事实和因果核对确认的独立事件数。统计范围：entity、period、materialScope、causeBasis；口径：缺少因果证据时不归因于原料交付；事件影响范围单独评估。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "分别核对到货与约定节点、库存耗尽和停产事件及因果材料；交付延迟不能直接推定断料停产。核对材料：采购节点、到货记录、库存记录、停产资料、原因核查。计量项目：原料交付确认晚于约定节点次数；公式：delayed_delivery_event_count；单位：EVENTS；输入：delayed_delivery_event_count为按到货记录与采购约定节点核对确认延迟并有依据的独立交付事件数。统计范围：entity、period、materialScope、dueBasisVersion；口径：有效变更和争议先核对；延迟不直接推定断料停产，影响另查。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：原料断供停产已确认事件数量；公式：confirmed_halt_event_count；单位：EVENTS；输入：confirmed_halt_event_count为库存耗尽及停产事件经事实和因果核对确认的独立事件数。统计范围：entity、period、materialScope、causeBasis；口径：缺少因果证据时不归因于原料交付；事件影响范围单独评估。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "6e9c0422-b325-465b-a673-d9b32f597ac1",
@@ -7017,7 +7017,7 @@
   {
     "id": "a65bbdac-e8f9-4224-8c49-83907dc9cc26",
     "name": "信用事件确认至实际响应自然时长",
-    "description": "以独立事件确认时刻和首次实际响应动作时刻计算自然小时，重大分类须依据明确规则，删除一般24小时重大4小时门槛。核对材料：事件确认、分类规则、响应记录、时间依据。计量项目：信用事件确认至实际响应自然时长；公式：(first_actual_response_at - confirmed_event_at).total_seconds / 3600；单位：HOURS；输入：confirmed_event_at为明确事件事实及通知责任起点的确认时刻；first_actual_response_at为该事件首次实际处置或有效响应动作的确定时刻。统计范围：entity、creditEvent、eventClass、responseBasis、timeBasis；口径：自动告警不等于实际响应，一般重大类别依据需确认；不采用24小时四小时限值。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "以独立事件确认时刻和首次实际响应动作时刻计算自然小时，重大分类须依据明确规则。核对材料：事件确认、分类规则、响应记录、时间依据。计量项目：信用事件确认至实际响应自然时长；公式：(first_actual_response_at - confirmed_event_at).total_seconds / 3600；单位：HOURS；输入：confirmed_event_at为明确事件事实及通知责任起点的确认时刻；first_actual_response_at为该事件首次实际处置或有效响应动作的确定时刻。统计范围：entity、creditEvent、eventClass、responseBasis、timeBasis；口径：自动告警不等于实际响应，一般重大类别依据需确认；输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "bde016d5-ecc4-4583-a6ac-5e156eea8611",
@@ -7037,7 +7037,7 @@
   {
     "id": "a8f1401a-85dd-4bf3-83d5-1e899b247b55",
     "name": "关键设备故障维修启动与恢复时长",
-    "description": "对独立故障分别计算停机到实际启动维修、停机到恢复运行的自然小时，重复工单去重，未恢复单列，删除4小时与24小时统一门槛。核对材料：故障事件、停机日志、维修记录、恢复验证。计量项目：设备停机至维修启动自然时长；公式：(repair_started_at - stopped_at).total_seconds / 3600；单位：HOURS；输入：stopped_at为独立设备故障导致停机的确定时刻；repair_started_at为对该故障实际启动维修动作的确定时刻。统计范围：entity、equipment、failureEvent、timeBasis；口径：受理工单不等于维修启动，重复工单去重；原四小时门槛不使用。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：设备停机至运行恢复自然时长；公式：(restored_at - stopped_at).total_seconds / 3600；单位：HOURS；输入：stopped_at为独立设备故障导致停机的确定时刻；restored_at为有运行验证资料确认恢复的时刻。统计范围：entity、equipment、failureEvent、restoreCriterion、timeBasis；口径：维修结束不自动等于运行恢复，未恢复不给零；原24小时门槛不使用。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "对独立故障分别计算停机到实际启动维修、停机到恢复运行的自然小时，重复工单去重，未恢复单列。核对材料：故障事件、停机日志、维修记录、恢复验证。计量项目：设备停机至维修启动自然时长；公式：(repair_started_at - stopped_at).total_seconds / 3600；单位：HOURS；输入：stopped_at为独立设备故障导致停机的确定时刻；repair_started_at为对该故障实际启动维修动作的确定时刻。统计范围：entity、equipment、failureEvent、timeBasis；口径：受理工单不等于维修启动，重复工单去重；输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：设备停机至运行恢复自然时长；公式：(restored_at - stopped_at).total_seconds / 3600；单位：HOURS；输入：stopped_at为独立设备故障导致停机的确定时刻；restored_at为有运行验证资料确认恢复的时刻。统计范围：entity、equipment、failureEvent、restoreCriterion、timeBasis；口径：维修结束不自动等于运行恢复，未恢复不给零；输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "788e1a22-62c8-4224-a353-74a64e1ffcdf",
@@ -7057,7 +7057,7 @@
   {
     "id": "ab200b63-e0ec-42c7-ac40-f1e626e56d4e",
     "name": "跨境争议已结案件结果分布",
-    "description": "按同一已结队列记录裁决、和解及部分支持状态，如统计比例须先定义结果分类和分母；删除80%胜诉门槛，未决案件单列。核对材料：案件队列、仲裁结果、分类规则、处理状态。",
+    "description": "按同一已结队列记录裁决、和解及部分支持状态，如统计比例须先定义结果分类和分母，未决案件单列。核对材料：案件队列、仲裁结果、分类规则、处理状态。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "55a392fd-d8d0-4766-8994-863afa6dfc6f",
@@ -7074,7 +7074,7 @@
   {
     "id": "ad78db4c-221d-4c69-8076-c59291a52028",
     "name": "信息披露更正事件数量与涉及字段",
-    "description": "按独立披露版本更正事件统计数量，记录更正字段、原因及影响，主动更新和差错更正分开，删除不超过一次门槛。核对材料：披露版本、更正公告、字段差异、原因资料。计量项目：披露独立差错更正事件数量；公式：correction_event_count；单位：EVENTS；输入：correction_event_count为同期间按原披露版本及独立更正事件去重的确认差错更正数量。统计范围：entity、period、disclosureScope、correctionClassification；口径：主动信息更新和同一更正的重复发布不多计，核心数据影响另外记录；不采用一次门槛。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按独立披露版本更正事件统计数量，记录更正字段、原因及影响，主动更新和差错更正分开。核对材料：披露版本、更正公告、字段差异、原因资料。计量项目：披露独立差错更正事件数量；公式：correction_event_count；单位：EVENTS；输入：correction_event_count为同期间按原披露版本及独立更正事件去重的确认差错更正数量。统计范围：entity、period、disclosureScope、correctionClassification；口径：主动信息更新和同一更正的重复发布不多计，核心数据影响另外记录；输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "248f2d1b-adc1-4fd1-87f3-fc5ee495672c",
@@ -7092,7 +7092,7 @@
   {
     "id": "ae59a523-d148-47d5-82ef-91db664cf83f",
     "name": "客户评价题项量表与有效反馈",
-    "description": "核对评价来源、样本、题项和计分说明，评分未知不转零，删除60分通用门槛，不把客户评分直接作为风险评分。核对材料：客户样本、评价题项、量表说明、有效反馈。",
+    "description": "核对评价来源、样本、题项和计分说明，评分未知不转零，不把客户评分直接作为风险评分。核对材料：客户样本、评价题项、量表说明、有效反馈。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "61f64978-d01f-41ff-abd3-6b8d92704f80",
@@ -7165,7 +7165,7 @@
   {
     "id": "b1f55014-ef53-4078-82f5-648c1568c360",
     "name": "社保公积金核定应缴实缴及节点资料",
-    "description": "按人员项目月份分别核对核定金额、实际缴纳和到期节点，不把金额与逾期合成单一指标，适用范围先确认。核对材料：人员项目、核定资料、到期依据、缴费凭证、补缴明细。计量项目：信用检查社保公积金具体项目缴纳差额；公式：confirmed_due_contribution - allocated_paid_contribution；单位：CURRENCY；输入：confirmed_due_contribution为该人员月份具体险种或公积金组成经核验确认的应缴金额；allocated_paid_contribution为实际正确归属该人员月份同项目组成的缴纳金额。统计范围：entity、employee、contributionMonth、contributionItem、component、currency、verifiedBasis、amountUnit；口径：各险种和公积金及个人单位组成分别计算，补缴正确归属，时间节点另查；与劳务事项存在交叉待复用。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：社保公积金确认逾期未缴项数；公式：confirmed_overdue_person_item_count；单位：ITEMS；输入：confirmed_overdue_person_item_count为按核定金额及到期口径核对确认已逾期且未完成缴纳并经归属去重的人员项目月份项数。统计范围：entity、period、insuranceScope、contributionMonth、cutoff、verifiedBasis；口径：与金额差额分开统计；有效延期先核对，逾期时长另行核对，不合成单一节点指标。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按人员项目月份分别核对核定金额、实际缴纳和到期节点，不把金额与逾期合成单一指标，适用范围先确认。核对材料：人员项目、核定资料、到期依据、缴费凭证、补缴明细。计量项目：信用检查社保公积金具体项目缴纳差额；公式：confirmed_due_contribution - allocated_paid_contribution；单位：CURRENCY；输入：confirmed_due_contribution为该人员月份具体险种或公积金组成经核验确认的应缴金额；allocated_paid_contribution为实际正确归属该人员月份同项目组成的缴纳金额。统计范围：entity、employee、contributionMonth、contributionItem、component、currency、verifiedBasis、amountUnit；口径：各险种和公积金及个人单位组成分别计算，补缴正确归属，时间节点另查。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：社保公积金确认逾期未缴项数；公式：confirmed_overdue_person_item_count；单位：ITEMS；输入：confirmed_overdue_person_item_count为按核定金额及到期口径核对确认已逾期且未完成缴纳并经归属去重的人员项目月份项数。统计范围：entity、period、insuranceScope、contributionMonth、cutoff、verifiedBasis；口径：与金额差额分开统计；有效延期先核对，逾期时长另行核对，不合成单一节点指标。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "86bd76d2-c46d-4482-a324-6004c7c6793e",
@@ -7313,7 +7313,7 @@
   {
     "id": "beafbbc3-aaa5-408d-a63d-0a4df5e660ff",
     "name": "社会责任项目投入占同期收入比例",
-    "description": "明确实际项目及投入归集，以同主体期间确认投入金额除以收入总额，区分承诺、拨付和实际投入，删除0.5%统一要求。核对材料：项目清单、投入凭据、归集口径、收入报表。计量项目：社会责任项目实际投入占收入比例；公式：100 * confirmed_project_spend / total_revenue；单位：PERCENT；输入：confirmed_project_spend为按明确项目和支出组成归集本主体期间实际确认投入金额；total_revenue为同主体期间会计口径下总收入。统计范围：entity、period、projectScope、spendBasis、statementScope、currency、amountUnit；口径：承诺与拨付和实际投入分开，无收入不能推定比例为零；不使用0.5%普遍要求。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "明确实际项目及投入归集，以同主体期间确认投入金额除以收入总额，区分承诺、拨付和实际投入。核对材料：项目清单、投入凭据、归集口径、收入报表。计量项目：社会责任项目实际投入占收入比例；公式：100 * confirmed_project_spend / total_revenue；单位：PERCENT；输入：confirmed_project_spend为按明确项目和支出组成归集本主体期间实际确认投入金额；total_revenue为同主体期间会计口径下总收入。统计范围：entity、period、projectScope、spendBasis、statementScope、currency、amountUnit；口径：承诺与拨付和实际投入分开，无收入不能推定比例为零；输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "f80e1502-4878-4145-a7c2-be94f821bd41",
@@ -7443,7 +7443,7 @@
   {
     "id": "c4e77f6c-0ab4-441f-ac58-74fdfc481b0d",
     "name": "关键元器件可用库存消耗覆盖天数",
-    "description": "以同物料可用库存数量除以明确窗口内平均日消耗数量，冻结库存排除，单位一致；零消耗不输出无限天数，删除90天门槛。核对材料：物料清单、可用库存、领用记录、消耗窗口、单位换算。计量项目：关键元器件窗口平均日消耗数量；公式：confirmed_window_consumption / observed_day_count；单位：QUANTITY_PER_DAY；输入：confirmed_window_consumption为已确认窗口内同物料单位实际消耗总数量；observed_day_count为构成该窗口且有完整可比消耗记录的自然日数。统计范围：entity、material、observationWindow、quantityUnit、consumptionBasis；口径：窗口与完整记录日数先核对，停工日是否纳入须有明确需求口径，不用计划量代替实际消耗。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：关键元器件库存消耗覆盖天数；公式：available_inventory_quantity / confirmed_average_daily_consumption；单位：DAYS；输入：available_inventory_quantity为截止日已确认可用且排除冻结损坏等不可用库存的同物料数量；confirmed_average_daily_consumption为由同物料确认窗口实际消耗总数量除以完整可比自然日数得到的平均日消耗数量。统计范围：entity、material、cutoff、observationWindow、quantityUnit、consumptionBasis；口径：日均消耗必须对应component_average_daily_consumption口径，零消耗不能给无限天数；仅静态消耗覆盖估算，不证明实际能连续供货90天。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "以同物料可用库存数量除以明确窗口内平均日消耗数量，冻结库存排除，单位一致；零消耗不输出无限天数。核对材料：物料清单、可用库存、领用记录、消耗窗口、单位换算。计量项目：关键元器件窗口平均日消耗数量；公式：confirmed_window_consumption / observed_day_count；单位：QUANTITY_PER_DAY；输入：confirmed_window_consumption为已确认窗口内同物料单位实际消耗总数量；observed_day_count为构成该窗口且有完整可比消耗记录的自然日数。统计范围：entity、material、observationWindow、quantityUnit、consumptionBasis；口径：窗口与完整记录日数先核对，停工日是否纳入须有明确需求口径，不用计划量代替实际消耗。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：关键元器件库存消耗覆盖天数；公式：available_inventory_quantity / confirmed_average_daily_consumption；单位：DAYS；输入：available_inventory_quantity为截止日已确认可用且排除冻结损坏等不可用库存的同物料数量；confirmed_average_daily_consumption为由同物料确认窗口实际消耗总数量除以完整可比自然日数得到的平均日消耗数量。统计范围：entity、material、cutoff、observationWindow、quantityUnit、consumptionBasis；口径：日均消耗必须对应component_average_daily_consumption口径，零消耗不能给无限天数；仅静态消耗覆盖估算，不证明实际能连续供货90天。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "6e9c0422-b325-465b-a673-d9b32f597ac1",
@@ -7753,7 +7753,7 @@
   {
     "id": "d5302265-ffeb-4ad0-a11e-2c1f86f45998",
     "name": "按供应商类别分组信用审查记录覆盖率",
-    "description": "根据明确分类按核心和普通供应商分别计算有对应信用审查记录供应商数占本组需审查供应商总数，审查有效性另核对，删除100%90%门槛。核对材料：供应商分类、审查要求、供应商清单、审查记录。计量项目：分组供应商信用审查覆盖比例；公式：100 * documented_review_supplier_count / required_supplier_count；单位：PERCENT；输入：documented_review_supplier_count为本供应商类别应审范围中具备对应信用审查资料的独立供应商数；required_supplier_count为依据已确认分类及审查要求确定本组应审独立供应商总数。统计范围：entity、period、supplierCategory、classificationBasis、reviewRequirementVersion；口径：核心与普通分别按组计算，同供应商在同组去重；审查意见与有效期单独核对，不采用100%90%门槛。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "根据明确分类按核心和普通供应商分别计算有对应信用审查记录供应商数占本组需审查供应商总数，审查有效性另核对。核对材料：供应商分类、审查要求、供应商清单、审查记录。计量项目：分组供应商信用审查覆盖比例；公式：100 * documented_review_supplier_count / required_supplier_count；单位：PERCENT；输入：documented_review_supplier_count为本供应商类别应审范围中具备对应信用审查资料的独立供应商数；required_supplier_count为依据已确认分类及审查要求确定本组应审独立供应商总数。统计范围：entity、period、supplierCategory、classificationBasis、reviewRequirementVersion；口径：核心与普通分别按组计算，同供应商在同组去重；审查意见与有效期单独核对。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "791fb3c6-fe97-4256-9286-812f3ccae204",
@@ -7806,7 +7806,7 @@
   {
     "id": "d6fc3457-0ab2-43e0-806f-a606e740cc2d",
     "name": "行业信用评价可比群体排名比例",
-    "description": "明确同体系同期间有确定排名的可比群体，以本主体名次除以该群体有效主体数量，注明名次方向和并列处理，删除前20%门槛。核对材料：评价体系、群体名单、排名结果、并列规则。计量项目：同体系行业信用名次占群体数量比例；公式：100 * confirmed_rank_position / valid_ranked_population_count；单位：PERCENT；输入：confirmed_rank_position为本主体在同体系期间可比群体的有效名次；valid_ranked_population_count为同群体具备有效排名的主体总数。统计范围：entity、period、ratingSystemVersion、comparisonPopulation、tieRule；口径：名次从一开始，越小越靠前；并列名次规则先明确，不能解释为风险分值，不使用前20%门槛。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "明确同体系同期间有确定排名的可比群体，以本主体名次除以该群体有效主体数量，注明名次方向和并列处理。核对材料：评价体系、群体名单、排名结果、并列规则。计量项目：同体系行业信用名次占群体数量比例；公式：100 * confirmed_rank_position / valid_ranked_population_count；单位：PERCENT；输入：confirmed_rank_position为本主体在同体系期间可比群体的有效名次；valid_ranked_population_count为同群体具备有效排名的主体总数。统计范围：entity、period、ratingSystemVersion、comparisonPopulation、tieRule；口径：名次从一开始，越小越靠前；并列名次规则先明确，不能解释为风险分值。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "15787b79-2946-4f06-94ab-1053abc0ede2",
@@ -7988,7 +7988,7 @@
   {
     "id": "dafe7b32-4636-4c68-986e-3d929b41e983",
     "name": "信用修复确认成本占对应确认损失比例",
-    "description": "以同一信用事项实际归集修复成本除以可核验对应损失，承诺费用和假设损失单列，删除远小于的模糊判断。核对材料：信用事项、成本明细、支付凭据、损失依据。计量项目：信用修复确认成本占对应损失比例；公式：100 * confirmed_repair_cost / confirmed_corresponding_loss；单位：PERCENT；输入：confirmed_repair_cost为同信用事项已实际归集且可对应的修复成本金额；confirmed_corresponding_loss为同事项可核验对应损失金额。统计范围：entity、creditIssue、repairCostScope、lossBasis、currency、amountUnit；口径：不计仅承诺费用及假设损失，零损失不输出比例；比值不自动判定修复是否经济，不使用远小于阈值。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "以同一信用事项实际归集修复成本除以可核验对应损失，承诺费用和假设损失单列。核对材料：信用事项、成本明细、支付凭据、损失依据。计量项目：信用修复确认成本占对应损失比例；公式：100 * confirmed_repair_cost / confirmed_corresponding_loss；单位：PERCENT；输入：confirmed_repair_cost为同信用事项已实际归集且可对应的修复成本金额；confirmed_corresponding_loss为同事项可核验对应损失金额。统计范围：entity、creditIssue、repairCostScope、lossBasis、currency、amountUnit；口径：不计仅承诺费用及假设损失，零损失不输出比例；比值不自动判定修复是否经济。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "c5e0822c-2940-49cd-ba1f-cac491d1597f",
@@ -8006,7 +8006,7 @@
   {
     "id": "db8e5350-2b61-4ab9-92f0-8e19b678705a",
     "name": "已结劳动争议裁判不利结果比例",
-    "description": "先明确纳入仲裁或诉讼的已结案件和不利结果分类，再以有确定不利结果案件数除以同范围确定结果案件总数；部分支持与和解单列，删除5%门槛。核对材料：案件队列、处理文件、结果分类、送达生效、统计规则。计量项目：已结劳动争议确定不利结果比例；公式：100 * confirmed_adverse_case_count / concluded_case_count；单位：PERCENT；输入：confirmed_adverse_case_count为本已结队列按明确分类认定为不利结果的独立案件数；concluded_case_count为同队列有确定处理结果且符合分类纳入规则的独立案件数。统计范围：entity、caseCohort、cutoff、resultClassification；口径：仲裁诉讼口径明确，部分支持和和解不能随意算败诉，未决案件另列；不采用5%门槛。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "先明确纳入仲裁或诉讼的已结案件和不利结果分类，再以有确定不利结果案件数除以同范围确定结果案件总数；部分支持与和解单列。核对材料：案件队列、处理文件、结果分类、送达生效、统计规则。计量项目：已结劳动争议确定不利结果比例；公式：100 * confirmed_adverse_case_count / concluded_case_count；单位：PERCENT；输入：confirmed_adverse_case_count为本已结队列按明确分类认定为不利结果的独立案件数；concluded_case_count为同队列有确定处理结果且符合分类纳入规则的独立案件数。统计范围：entity、caseCohort、cutoff、resultClassification；口径：仲裁诉讼口径明确，部分支持和和解不能随意算败诉，未决案件另列；输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "86bd76d2-c46d-4482-a324-6004c7c6793e",
@@ -8266,7 +8266,7 @@
   {
     "id": "e99bb920-d199-488f-b026-e1ef1e5c834f",
     "name": "货损责任确认至对应赔付自然时长",
-    "description": "按损失事件的责任确认与实际对应赔付时刻计算自然小时，分批赔付单列；责任未确定或未赔付不填零，不采用72小时门槛。核对材料：货损事件、责任文件、赔付凭据、时点记录。计量项目：货损责任确认至赔付自然时长；公式：(compensation_completed_at - liability_confirmed_at).total_seconds / 3600；单位：HOURS；输入：liability_confirmed_at为同货损事项责任和应赔款已确认时刻；compensation_completed_at为对应款项实际赔付完成的确定时刻。统计范围：entity、cargoLoss、compensationItem、timeBasis；口径：分批支付完成点需明确，责任未确定及未赔付不填零；原72小时门槛不使用。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按损失事件的责任确认与实际对应赔付时刻计算自然小时，分批赔付单列；责任未确定或未赔付不填零。核对材料：货损事件、责任文件、赔付凭据、时点记录。计量项目：货损责任确认至赔付自然时长；公式：(compensation_completed_at - liability_confirmed_at).total_seconds / 3600；单位：HOURS；输入：liability_confirmed_at为同货损事项责任和应赔款已确认时刻；compensation_completed_at为对应款项实际赔付完成的确定时刻。统计范围：entity、cargoLoss、compensationItem、timeBasis；口径：分批支付完成点需明确，责任未确定及未赔付不填零；输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "6e9c0422-b325-465b-a673-d9b32f597ac1",
@@ -8302,7 +8302,7 @@
   {
     "id": "ea6d9a75-a506-4be1-b445-14d89c40c89e",
     "name": "断供确认至替代方案实际启动自然时长",
-    "description": "核对实际断供影响确认和具备执行动作的替代方案启动时刻，纸面预案与实际启动分开，删除30日统一门槛。核对材料：断供资料、影响确认、替代方案、执行记录。计量项目：断供确认至替代方案实际启动自然时长；公式：(alternative_started_at - interruption_confirmed_at).total_seconds / 3600；单位：HOURS；输入：interruption_confirmed_at为具体断供事实及业务影响已确认时刻；alternative_started_at为对应替代方案发生可核验执行动作的启动时刻。统计范围：entity、interruptionEvent、alternativePlan、timeBasis；口径：预案批准不是执行启动，未启动单列，不采用30日门槛。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "核对实际断供影响确认和具备执行动作的替代方案启动时刻，纸面预案与实际启动分开。核对材料：断供资料、影响确认、替代方案、执行记录。计量项目：断供确认至替代方案实际启动自然时长；公式：(alternative_started_at - interruption_confirmed_at).total_seconds / 3600；单位：HOURS；输入：interruption_confirmed_at为具体断供事实及业务影响已确认时刻；alternative_started_at为对应替代方案发生可核验执行动作的启动时刻。统计范围：entity、interruptionEvent、alternativePlan、timeBasis；口径：预案批准不是执行启动，未启动单列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "6e9c0422-b325-465b-a673-d9b32f597ac1",
@@ -8319,7 +8319,7 @@
   {
     "id": "eaed4c07-c5fe-4c55-a273-d9751ca3ea00",
     "name": "员工满意度调查量表与有效结果",
-    "description": "记录实际量表版本、样本、有效答卷和分布，平均分须明确题项权重及无效处理，删除85分门槛，不把满意度作为合规结论。核对材料：问卷版本、量表说明、样本名单、有效答卷、统计资料。",
+    "description": "记录实际量表版本、样本、有效答卷和分布，平均分须明确题项权重及无效处理，不把满意度作为合规结论。核对材料：问卷版本、量表说明、样本名单、有效答卷、统计资料。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "4d5e40b0-7039-401b-8b30-4a3935a9668b",
@@ -8409,7 +8409,7 @@
   {
     "id": "f33495cb-7426-43c4-aabb-c83bd12e3be2",
     "name": "残疾人就业保障金适用核定与缴纳记录",
-    "description": "原指标混合保障金与同工同酬，改为核对本主题实际保障金适用条件、核定和缴纳；同工同酬应在岗位待遇事项中独立检查，适用性待核验。核对材料：人员资料、适用要求、核定材料、缴纳凭证、豁免依据。",
+    "description": "核对本主题实际保障金适用条件、核定和缴纳记录；同工同酬在岗位待遇事项中单独检查，适用性待核验。核对材料：人员资料、适用要求、核定材料、缴纳凭证、豁免依据。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "4d5e40b0-7039-401b-8b30-4a3935a9668b",
@@ -8465,7 +8465,7 @@
   {
     "id": "f57ee4e2-3154-41ba-94c4-9c3c9c49bafd",
     "name": "合同纠纷调解达成并履行事项比例",
-    "description": "以有双方确认解决协议且有履行完成资料的调解事项数除以同范围实际进入调解的独立事项总数，未结和未知履行单列。核对材料：调解范围、争议台账、协议资料、履行凭据。计量项目：合同调解达成并履行事项比例；公式：100 * fulfilled_mediation_case_count / scoped_mediation_case_count；单位：PERCENT；输入：fulfilled_mediation_case_count为同调解范围有双方确定解决协议且有履行完成资料的独立事项数；scoped_mediation_case_count为本范围实际进入调解的独立合同纠纷事项总数。统计范围：entity、mediationCohort、cutoff；口径：多次调解会谈不计多件，未结与未知履行单列，不采用所有纠纷均调解成功的假设。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "以有双方确认解决协议且有履行完成资料的调解事项数除以同范围实际进入调解的独立事项总数，未结和未知履行单列。核对材料：调解范围、争议台账、协议资料、履行凭据。计量项目：合同调解达成并履行事项比例；公式：100 * fulfilled_mediation_case_count / scoped_mediation_case_count；单位：PERCENT；输入：fulfilled_mediation_case_count为同调解范围有双方确定解决协议且有履行完成资料的独立事项数；scoped_mediation_case_count为本范围实际进入调解的独立合同纠纷事项总数。统计范围：entity、mediationCohort、cutoff；口径：多次调解会谈不计多件，未结与未知履行单列，未达成协议的事项分别列示。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "13cb24df-c403-4a74-8337-8e00194c57d4",
@@ -8555,7 +8555,7 @@
   {
     "id": "fd19725f-c123-4991-b123-711def14afb3",
     "name": "监测指标阈值来源与核对结果记录",
-    "description": "核对实际监测指标、阈值版本、适用范围和结果，未审核阈值不能判断安全；删除95%统一比例，将监测值与风险结论分开。核对材料：指标清单、阈值依据、版本范围、监测结果。",
+    "description": "核对实际监测指标、阈值版本、适用范围和结果，未审核阈值不能判断安全，监测值与风险结论分开记录。核对材料：指标清单、阈值依据、版本范围、监测结果。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "697c81eb-c6b6-4fb4-a0a9-ca89fddb6c4a",
@@ -8574,7 +8574,7 @@
   {
     "id": "fe392bd9-dd59-4dab-b24f-1ff440c65437",
     "name": "合作方违约确认损失占对应交易金额比例",
-    "description": "先确认责任因果及损失归属，以同范围确认损失金额除以对应交易金额，不能混入未决索赔，不使用0.5%限值。核对材料：交易范围、违约事实、损失依据、交易金额、责任确认。计量项目：合作方违约损失占对应交易金额比例；公式：100 * confirmed_loss_amount / corresponding_transaction_amount；单位：PERCENT；输入：confirmed_loss_amount为同违约事项责任因果及归属经确认的实际损失金额；corresponding_transaction_amount为同范围对应交易按明确组成确认的金额。统计范围：entity、defaultScope、transactionScope、currency、lossBasis、amountUnit；口径：未决索赔和其他交易不混入，损失可能超过交易金额，不按对象覆盖率封顶；不采用0.5%门槛。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "先确认责任因果及损失归属，以同范围确认损失金额除以对应交易金额，不能混入未决索赔。核对材料：交易范围、违约事实、损失依据、交易金额、责任确认。计量项目：合作方违约损失占对应交易金额比例；公式：100 * confirmed_loss_amount / corresponding_transaction_amount；单位：PERCENT；输入：confirmed_loss_amount为同违约事项责任因果及归属经确认的实际损失金额；corresponding_transaction_amount为同范围对应交易按明确组成确认的金额。统计范围：entity、defaultScope、transactionScope、currency、lossBasis、amountUnit；口径：未决索赔和其他交易不混入，损失可能超过交易金额，不按对象覆盖率封顶；输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "0baca42a-c753-47b0-8ef6-bff1ef183f4b",
@@ -8591,7 +8591,7 @@
   {
     "id": "ffbf5c29-7b39-4741-aa39-84a72bc11823",
     "name": "关键信用监测独立预警事件数量",
-    "description": "按明确规则版本、指标范围和期间去重统计实际触发事件，误报和确认事件分开，删除每季度一次门槛，触发少不等于风险低。核对材料：监测规则、指标范围、预警日志、事件核查。计量项目：信用监测独立触发事件数量；公式：unique_warning_event_count；单位：EVENTS；输入：unique_warning_event_count为同指标范围规则版本期间内实际触发且按明确事件规则去重的数量。统计范围：entity、period、indicatorScope、monitorRuleVersion、eventDedupBasis；口径：误报与已确认异常分开，多条日志不等于多次事件，触发少不直接代表低风险。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按明确规则版本、指标范围和期间去重统计实际触发事件，误报和确认事件分开，触发少不等于风险低。核对材料：监测规则、指标范围、预警日志、事件核查。计量项目：信用监测独立触发事件数量；公式：unique_warning_event_count；单位：EVENTS；输入：unique_warning_event_count为同指标范围规则版本期间内实际触发且按明确事件规则去重的数量。统计范围：entity、period、indicatorScope、monitorRuleVersion、eventDedupBasis；口径：误报与已确认异常分开，多条日志不等于多次事件，触发少不直接代表低风险。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "697c81eb-c6b6-4fb4-a0a9-ca89fddb6c4a",
@@ -9705,7 +9705,7 @@
   {
     "id": "0364cc16-6256-48c1-9287-39d658f0dcda",
     "name": "监管检查确定管理问题事项数量",
-    "description": "按检查对象、事项编号和明确分类统计有有效文件确认的制度或执行问题数，重复复查不计新问题，撤销更正单列。核对材料：检查文件、问题编号、分类规则、更正资料。涉及关联交易要求时，依据具体控制或重大影响关系确认主体范围，一般合作不直接视为关联关系。计量项目：监管检查确定管理问题数量；公式：confirmed_management_issue_count；单位：ISSUES；输入：confirmed_management_issue_count为本检查范围按独立问题编号和明确类别统计有效文件确认的管理问题数。统计范围：entity、inspectionScope、period、classificationBasis、issueDedupRule；口径：复查同项不当新问题，更正撤销及未决事项单列，制度缺失与执行不足可另分组。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按检查对象、事项编号和明确分类统计经有效文件确认的制度或执行问题数，重复复查不计新问题，撤销更正单列。核对材料：检查文件、问题编号、分类规则、更正资料。涉及关联交易要求时，依据具体控制或重大影响关系确认主体范围，一般合作不直接视为关联关系。计量项目：监管检查确定管理问题数量；公式：confirmed_management_issue_count；单位：ISSUES；输入：confirmed_management_issue_count为本检查范围按独立问题编号和明确类别统计有效文件确认的管理问题数。统计范围：entity、inspectionScope、period、classificationBasis、issueDedupRule；口径：复查同项不当新问题，更正撤销及未决事项单列，制度缺失与执行不足可另分组。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "1a100ae5-eef6-47c2-bb3a-95cf69087e78",
@@ -10487,7 +10487,7 @@
   {
     "id": "39591cfe-c597-4e19-a740-179ad62fee64",
     "name": "股东历史确认问题事件数量",
-    "description": "按明确期间和股东范围去重统计依据明确的确认事件数，原历史频率评分去除，未核实线索和重复报道单列。核对材料：股东范围、事件台账、确认依据、观察期间。涉及关联交易要求时，依据具体控制或重大影响关系确认主体范围，一般合作不直接视为关联关系。计量项目：股东历史确认问题事件数量；公式：confirmed_issue_count；单位：EVENTS；输入：confirmed_issue_count为同股东范围期间按独立事件去重且有有效确认依据的问题数。统计范围：entity、shareholderScope、observationWindow、eventDedupBasis；口径：未核查线索及撤销事项状态单列，观察窗口固定；数量不直接判定风险等级。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按明确期间和股东范围去重统计依据明确的确认事件数，未核实线索和重复报道单列。核对材料：股东范围、事件台账、确认依据、观察期间。涉及关联交易要求时，依据具体控制或重大影响关系确认主体范围，一般合作不直接视为关联关系。计量项目：股东历史确认问题事件数量；公式：confirmed_issue_count；单位：EVENTS；输入：confirmed_issue_count为同股东范围期间按独立事件去重且有有效确认依据的问题数。统计范围：entity、shareholderScope、observationWindow、eventDedupBasis；口径：未核查线索及撤销事项状态单列，观察窗口固定；数量不直接判定风险等级。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "e9521a0a-94ac-4e20-9582-56e1858b2415",
@@ -10820,7 +10820,7 @@
   {
     "id": "5d45b70b-2853-40dc-9f9e-95a8868a6d88",
     "name": "股东事件适用处置节点完成比例",
-    "description": "先确认每个事件处置节点及期限依据，以按该节点完成且有证据事项数除以本范围已到期需完成事项数，未到期不混入分母。核对材料：事件清单、节点依据、完成资料、截止日。涉及关联交易要求时，依据具体控制或重大影响关系确认主体范围，一般合作不直接视为关联关系。计量项目：股东事件已到期处置节点完成比例；公式：100 * confirmed_on_node_completed_count / due_disposition_item_count；单位：PERCENT；输入：confirmed_on_node_completed_count为本范围有依据确认在适用处置节点完成的独立事项数；due_disposition_item_count为截止日已有明确到期节点且应完成的独立事项总数。统计范围：entity、eventScope、cutoff、dueRequirementVersion、completionCriterion；口径：未到期及节点未确认另列，有效延期先核对，不使用统一处置限值。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "先确认每个事件处置节点及期限依据，以按该节点完成且有证据事项数除以本范围已到期需完成事项数，未到期不混入分母。核对材料：事件清单、节点依据、完成资料、截止日。涉及关联交易要求时，依据具体控制或重大影响关系确认主体范围，一般合作不直接视为关联关系。计量项目：股东事件已到期处置节点完成比例；公式：100 * confirmed_on_node_completed_count / due_disposition_item_count；单位：PERCENT；输入：confirmed_on_node_completed_count为本范围有依据确认在适用处置节点完成的独立事项数；due_disposition_item_count为截止日已有明确到期节点且应完成的独立事项总数。统计范围：entity、eventScope、cutoff、dueRequirementVersion、completionCriterion；口径：未到期及节点未确认另列，有效延期先核对。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "02e744ed-ffba-4150-aec7-ad1efc8ea72a",
@@ -11955,7 +11955,7 @@
   {
     "id": "b933fbc0-7abe-402e-a709-8f91232181e8",
     "name": "子公司确认问题交易金额归集",
-    "description": "按主体、期间和固定问题金额性质归集确认问题交易金额，罚款或损失与交易额不混合。核对材料：子公司范围、交易明细、确认依据、金额性质。涉及关联交易要求时，依据具体控制或重大影响关系确认主体范围，一般合作不直接视为关联关系。计量项目：子公司确认问题交易归集金额；公式：confirmed_issue_transaction_amount；单位：CURRENCY；输入：confirmed_issue_transaction_amount为同子公司期间范围按固定交易金额口径归集且有确认问题依据的金额。统计范围：entity、subsidiary、period、issueScope、transactionAmountBasis、currency、amountUnit；口径：原金额得分去除，不能与罚款损失混合，跨分类重复项目需先处理。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按主体、期间和固定问题金额性质归集确认问题交易金额，罚款或损失与交易额不混合。核对材料：子公司范围、交易明细、确认依据、金额性质。涉及关联交易要求时，依据具体控制或重大影响关系确认主体范围，一般合作不直接视为关联关系。计量项目：子公司确认问题交易归集金额；公式：confirmed_issue_transaction_amount；单位：CURRENCY；输入：confirmed_issue_transaction_amount为同子公司期间范围按固定交易金额口径归集且有确认问题依据的金额。统计范围：entity、subsidiary、period、issueScope、transactionAmountBasis、currency、amountUnit；口径：不能与罚款损失混合，跨分类重复项目需先处理。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "cc29c3f4-7364-4ab1-99a6-490ed21498e5",
@@ -12175,7 +12175,7 @@
   {
     "id": "d283fa53-598d-4a88-af83-b7fe62ffacfd",
     "name": "高管适用合规培训记录覆盖率",
-    "description": "先识别实际任职职责和培训要求，以具备对应内容版本培训记录的高管人数除以应培训人数，年度安排采用具体依据，不统一规定次数。核对材料：任职清单、培训要求、内容版本、参与确认。涉及关联交易要求时，依据具体控制或重大影响关系确认主体范围，一般合作不直接视为关联关系。计量项目：高管适用合规培训记录覆盖比例；公式：100 * documented_trained_executive_count / required_executive_count；单位：PERCENT；输入：documented_trained_executive_count为本适用范围具备对应内容版本及参与资料的独立高管数；required_executive_count为依据实际任职职责与已确认培训要求应培训独立高管总数。统计范围：entity、period、executiveScope、trainingRequirementVersion；口径：不推定统一年度培训频次，培训考核结果和实际应用另核对。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "先识别实际任职职责和培训要求，以具备对应内容版本培训记录的高管人数除以应培训人数，年度安排按已确认依据核对。核对材料：任职清单、培训要求、内容版本、参与确认。涉及关联交易要求时，依据具体控制或重大影响关系确认主体范围，一般合作不直接视为关联关系。计量项目：高管适用合规培训记录覆盖比例；公式：100 * documented_trained_executive_count / required_executive_count；单位：PERCENT；输入：documented_trained_executive_count为本适用范围具备对应内容版本及参与资料的独立高管数；required_executive_count为依据实际任职职责与已确认培训要求应培训独立高管总数。统计范围：entity、period、executiveScope、trainingRequirementVersion；口径：培训考核结果和实际应用另核对。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "38ad7bb2-3d44-4867-abb7-23b2f474fb77",
@@ -12290,7 +12290,7 @@
   {
     "id": "d719430b-a4b4-4bd1-ae51-7e21843b4f5d",
     "name": "舆情发现至实际应对平均自然时长",
-    "description": "原平均响应时间占比缺少分母，改为同队列具备确定节点事项发现至实际应对自然小时合计除以事项数，未响应单列，不推定比例或统一期限。核对材料：公开线索、发现依据、应对动作、时间记录。涉及关联交易要求时，依据具体控制或重大影响关系确认主体范围，一般合作不直接视为关联关系。计量项目：公开线索发现至实际应对平均自然时长；公式：responded_event_hours_sum / responded_event_count；单位：HOURS；输入：responded_event_hours_sum为同队列有依据发现时刻至实际应对启动时刻自然小时合计；responded_event_count为构成该合计且实际启动应对有资料的独立事项数。统计范围：entity、publicEventCohort、discoveryBasis、responseBasis、cutoff、timeBasis；口径：原时间占比未定义分母，使用明确均值；未响应另列，舆情主张和确认事实不同，不推定统一期限。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按同队列具备确定节点的事项，以有依据的发现时刻至实际应对启动时刻自然小时合计除以事项数，计算发现至实际应对平均自然时长，未响应事项单列。核对材料：公开线索、发现依据、应对动作、时间记录。涉及关联交易要求时，依据具体控制或重大影响关系确认主体范围，一般合作不直接视为关联关系。计量项目：公开线索发现至实际应对平均自然时长；公式：responded_event_hours_sum / responded_event_count；单位：HOURS；输入：responded_event_hours_sum为同队列有依据发现时刻至实际应对启动时刻自然小时合计；responded_event_count为构成该合计且实际启动应对有资料的独立事项数。统计范围：entity、publicEventCohort、discoveryBasis、responseBasis、cutoff、timeBasis；口径：未响应另列，舆情主张和确认事实不同，不推定统一期限。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "d5b6b8f1-0a6b-43da-865e-82a95b17a3ca",
@@ -12347,7 +12347,7 @@
   {
     "id": "d8414c69-c161-4943-868d-297931ee918d",
     "name": "子公司历史确认问题交易事件数量",
-    "description": "按实际子公司、期间和独立交易问题事件统计有确定依据数量，未确认线索与交易额分别列示。核对材料：子公司清单、事件台账、交易资料、确认依据。涉及关联交易要求时，依据具体控制或重大影响关系确认主体范围，一般合作不直接视为关联关系。计量项目：子公司历史确认交易问题事件数量；公式：confirmed_transaction_issue_count；单位：EVENTS；输入：confirmed_transaction_issue_count为同子公司范围期间按独立问题事件去重且有明确确认依据的数量。统计范围：entity、subsidiaryScope、observationWindow、eventDedupBasis、confirmationBasis；口径：未核实线索与交易金额另列，原历史频率得分去除。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按实际子公司、期间和独立交易问题事件统计有确定依据数量，未确认线索与交易额分别列示。核对材料：子公司清单、事件台账、交易资料、确认依据。涉及关联交易要求时，依据具体控制或重大影响关系确认主体范围，一般合作不直接视为关联关系。计量项目：子公司历史确认交易问题事件数量；公式：confirmed_transaction_issue_count；单位：EVENTS；输入：confirmed_transaction_issue_count为同子公司范围期间按独立问题事件去重且有明确确认依据的数量。统计范围：entity、subsidiaryScope、observationWindow、eventDedupBasis、confirmationBasis；口径：未核实线索与交易金额另列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "cc29c3f4-7364-4ab1-99a6-490ed21498e5",
@@ -14473,7 +14473,7 @@
   {
     "id": "09518aab-64bd-476f-aebe-993b69b20253",
     "name": "跨境数字资产结算事实与适用核查",
-    "description": "记录实际支付资产、主体、地点、交易和技术路径，对应所识别要求及处理依据，不保留发现即停止的一概指令。核对材料：结算事实、资产资料、主体地点、要求来源、处理核查。",
+    "description": "记录实际支付资产、主体、地点、交易和技术路径，逐项对应所识别要求及处理依据，并按适用要求核对实际处理情况。核对材料：结算事实、资产资料、主体地点、要求来源、处理核查。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "1a4c9e9e-38df-48bf-8d06-369eab34c180",
@@ -15012,7 +15012,7 @@
   {
     "id": "24ef6aad-b380-4f4a-ad31-8cc3620edd62",
     "name": "缺少业务用途依据的数据字段记录",
-    "description": "核对每类字段对应任务、取得方式及用途依据，未知解释和审核确认无用途分开，与范围指标保留复用线索，不直接计违法。核对材料：字段清单、任务用途、取得依据、审核记录。",
+    "description": "核对每类字段对应任务、取得方式及用途依据，未知解释和审核确认无用途分开，不直接计违法。核对材料：字段清单、任务用途、取得依据、审核记录。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "7485c02c-b739-4fc1-ad1a-9aebfdfb281b",
@@ -15031,7 +15031,7 @@
   {
     "id": "257a7203-eddc-4d2d-b148-d87a7193bf52",
     "name": "公共职务招待事项用途支出与授权",
-    "description": "核对参与身份、活动目的、实际费用及审批，合理性须有具体业务及适用依据，不统一设招待规模标准。核对材料：活动安排、人员身份、支出凭据、审批依据。",
+    "description": "核对参与身份、活动目的、实际费用及审批，合理性按具体业务及适用依据核对。核对材料：活动安排、人员身份、支出凭据、审批依据。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "92cfed4a-4ecf-43f0-9943-bc90dbf55595",
@@ -15823,7 +15823,7 @@
   {
     "id": "4b69517a-d165-5ca6-8daf-982b977db6e8",
     "name": "出口渔产品交付与冷链批次衔接情况",
-    "description": "核对交付批次、分批关系及冷链记录是否连续对应适用条件：渔产品跨境交付涉及捕捞或养殖、加工及冷链时。核对材料：生产记录、加工批次、合分批记录、冷链记录、交付资料。合规主题：国际渔产品生产加工冷链衔接。",
+    "description": "核对交付批次、分批关系及冷链记录是否连续对应。适用条件：渔产品跨境交付涉及捕捞或养殖、加工及冷链时。核对材料：生产记录、加工批次、合批及分批记录、冷链记录、交付资料。合规主题：国际渔产品生产加工冷链衔接。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "b3f86402-efac-4087-91b0-412e505f4b1e",
@@ -16394,7 +16394,7 @@
   {
     "id": "6ca769a3-9abd-4b1c-9f28-060a1906aff2",
     "name": "跨境收付外汇手续适用与对应资料",
-    "description": "按实际收付主体、业务、币种及期间识别拟适用外汇手续，将所需资料与交易对应，不推定所有业务统一使用原核销机制。核对材料：交易收付、主体资料、外汇要求、提交凭据。",
+    "description": "按实际收付主体、业务、币种及期间识别拟适用外汇手续，将所需资料与交易逐项对应，手续要求按实际业务分别确认。核对材料：交易收付、主体资料、外汇要求、提交凭据。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "28fca925-7a48-4904-be60-811c681b5d73",
@@ -17017,7 +17017,7 @@
   {
     "id": "91b0bd81-8767-436b-ac7a-fe0ad8a8f19b",
     "name": "可比相关市场销售份额比例",
-    "description": "先明确产品地域期间市场及计量单位，以企业同口径销售量或额除以该市场总量或额，来源和估计性质说明。核对材料：市场定义、销售资料、总量来源、计量单位、估计说明。计量项目：可比相关市场销售份额比例（市场总量含估计）；公式：100 * enterprise_market_sales_amount / comparable_market_total_value；单位：PERCENT；输入：enterprise_market_sales_amount为同市场产品地域期间及计量口径下经确认的企业销售金额；comparable_market_total_value为同口径市场总量或总额（含说明来源及估计性质的合计）。统计范围：entity、period、marketDefinition、salesUnit、marketDataSource、currency、amountUnit、marketEstimationMethodReviewConfirmed；口径：市场须按产品地域期间明确定义；数量与金额口径不互换；删除原50%与70%支配地位推断，估计口径未经方法审核不输出。输入、证据或统计范围未确认时不计算，不将缺失作为零。估计结果需另行确认方法与输入依据，与实际支出分开，不直接相加。",
+    "description": "先明确产品地域期间市场及计量单位，以企业同口径销售量或额除以该市场总量或额，来源和估计性质说明。核对材料：市场定义、销售资料、总量来源、计量单位、估计说明。计量项目：可比相关市场销售份额比例（市场总量含估计）；公式：100 * enterprise_market_sales_amount / comparable_market_total_value；单位：PERCENT；输入：enterprise_market_sales_amount为同市场产品地域期间及计量口径下经确认的企业销售金额；comparable_market_total_value为同口径市场总量或总额（含说明来源及估计性质的合计）。统计范围：entity、period、marketDefinition、salesUnit、marketDataSource、currency、amountUnit、marketEstimationMethodReviewConfirmed；口径：市场须按产品地域期间明确定义；数量与金额口径不互换；估计口径未经方法审核不输出。输入、证据或统计范围未确认时不计算，不将缺失作为零。估计结果需另行确认方法与输入依据，与实际支出分开，不直接相加。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "a7271654-971a-45f6-b329-3cb099eb20e6",
@@ -17305,7 +17305,7 @@
   {
     "id": "a6b21c99-972d-456c-9747-2b3b64cde32a",
     "name": "跨境产品碳相关要求识别与输入资料",
-    "description": "按实际产品编码、流向、主体和期间核对所识别碳相关要求及排放输入，覆盖范围和税费计算先核验，不直接沿用原范围税率假定。核对材料：产品流向、主体资料、要求版本、排放输入、核对记录。",
+    "description": "按实际产品编码、流向、主体和期间核对所识别碳相关要求及排放输入，覆盖范围和税费计算依据先核验。核对材料：产品流向、主体资料、要求版本、排放输入、核对记录。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "fc4a2563-c781-415f-a48d-9734499ea5b9",
@@ -17805,7 +17805,7 @@
   {
     "id": "c199497f-d67e-4b78-82cc-e280aa2d41e7",
     "name": "咨询及法律服务合作协议关键事项确认缺漏比例",
-    "description": "按咨询及法律服务合作协议核对应含事项，以审核确认缺漏事项数除以已审核确定结论的应含事项数；未审核和适用条件不确定的事项单列。核对材料：协议版本、事项依据、审核范围、缺漏结论。计量项目：合作协议应含关键事项确认缺漏比例（同文来源）；公式：100 * confirmed_missing_item_count / reviewed_required_item_count；单位：PERCENT；输入：confirmed_missing_item_count为审核确认本协议版本缺少或内容不足的应含关键事项数；reviewed_required_item_count为已审核且结论确定的应含关键事项总数。统计范围：entity、period、protocolVersion、reviewBasis；口径：与同文原指标保留重复线索，不为区分编号虚构差异；应含清单先确认，未审核单列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按咨询及法律服务合作协议核对应含事项，以审核确认缺漏事项数除以已审核确定结论的应含事项数；未审核和适用条件不确定的事项单列。核对材料：协议版本、事项依据、审核范围、缺漏结论。计量项目：合作协议应含关键事项确认缺漏比例；公式：100 * confirmed_missing_item_count / reviewed_required_item_count；单位：PERCENT；输入：confirmed_missing_item_count为审核确认本协议版本缺少或内容不足的应含关键事项数；reviewed_required_item_count为已审核且结论确定的应含关键事项总数。统计范围：entity、period、protocolVersion、reviewBasis；口径：应含清单先确认，未审核单列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "d2cca3cc-dce1-434a-9dd9-cb511b2afe47",
@@ -19934,7 +19934,7 @@
   {
     "id": "1605ce8c-83a6-4d2d-a8c9-926c1f625e5f",
     "name": "仓库消防设施检查验证记录比例",
-    "description": "按实际检查设施和适用项目统计有确认结果的设施数及检查总数，区分未检查、待复验及异常，不预设通过率限值。核对材料：设施清单、检查项目、检查结果、复验记录。计量项目：仓库消防设施检查结果记录比例；公式：100 * confirmed_result_facility_count / checked_facility_count；单位：PERCENT；输入：confirmed_result_facility_count为检查后具有确定结果并留有验证记录的设施数；checked_facility_count为实际完成检查的设施总数。统计范围：entity、period、facilityScope、checkCriterionVersion；口径：未检查和待复验单列；记完整的通过率限值不使用，检查记录与设施状态分别核对。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按实际检查设施和适用项目统计有确认结果的设施数及检查总数，区分未检查、待复验及异常。核对材料：设施清单、检查项目、检查结果、复验记录。计量项目：仓库消防设施检查结果记录比例；公式：100 * confirmed_result_facility_count / checked_facility_count；单位：PERCENT；输入：confirmed_result_facility_count为检查后具有确定结果并留有验证记录的设施数；checked_facility_count为实际完成检查的设施总数。统计范围：entity、period、facilityScope、checkCriterionVersion；口径：未检查和待复验单列；检查记录与设施状态分别核对。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "f01c1f8b-349c-43f9-b796-ee306fbaaf4b",
@@ -20591,7 +20591,7 @@
   {
     "id": "48970e0a-2b24-4f52-bb1e-cab9baa1216a",
     "name": "供应商债务到期与实际付款时段",
-    "description": "按合同到期时点及实际付款记录计算各笔未付或迟付时长，平均值须明确债务范围和统计数量，不预设七天等评级区间。核对材料：供应商合同、应付明细、付款记录、到期口径。计量项目：供应商到期延迟付款平均自然时长；公式：late_payment_hours_sum / settled_overdue_item_count；单位：HOURS；输入：late_payment_hours_sum为已付款项从合同到期时点至实际付款时点的自然小时合计；settled_overdue_item_count为构成该合计且付款时点明确的已付款项数。统计范围：entity、period、supplierScope、dueBasis、timeBasis；口径：到期口径依据合同确认；未付款项单列，只统计已完成付款的延迟时长，不冒充评级区间。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按合同到期时点及实际付款记录计算各笔未付或迟付时长，平均值须明确债务范围和统计数量。核对材料：供应商合同、应付明细、付款记录、到期口径。计量项目：供应商到期延迟付款平均自然时长；公式：late_payment_hours_sum / settled_overdue_item_count；单位：HOURS；输入：late_payment_hours_sum为已付款项从合同到期时点至实际付款时点的自然小时合计；settled_overdue_item_count为构成该合计且付款时点明确的已付款项数。统计范围：entity、period、supplierScope、dueBasis、timeBasis；口径：到期口径依据合同确认；未付款项单列，只统计已完成付款的延迟时长。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "4914c209-95c2-49e2-9d97-7a3d3e4a7321",
@@ -20681,7 +20681,7 @@
   {
     "id": "524daea2-c2e3-4868-9bf5-1c04999009f3",
     "name": "设备改造费用与账面原值比例",
-    "description": "将确认改造费用对应实际设备，以同币种同会计口径费用除以该设备原值，区分资本化和费用化，不设置成本分档。核对材料：设备档案、账面原值、改造凭证、会计口径。计量项目：设备改造费用占账面原值比例；公式：100 * confirmed_reform_cost / equipment_original_value；单位：PERCENT；输入：confirmed_reform_cost为同设备同币种经确认归属本改造任务的费用金额；equipment_original_value为该设备同口径账面原值。统计范围：entity、equipment、reformTask、approvalBasis、currency、amountUnit；口径：资本化和费用化区分列示；改造费用先与实际设备对应，比例不设成本分档阈值。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "将确认改造费用对应实际设备，以同币种同会计口径费用除以该设备原值，区分资本化和费用化。核对材料：设备档案、账面原值、改造凭证、会计口径。计量项目：设备改造费用占账面原值比例；公式：100 * confirmed_reform_cost / equipment_original_value；单位：PERCENT；输入：confirmed_reform_cost为同设备同币种经确认归属本改造任务的费用金额；equipment_original_value为该设备同口径账面原值。统计范围：entity、equipment、reformTask、approvalBasis、currency、amountUnit；口径：资本化和费用化区分列示；改造费用先与实际设备对应。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "db8da4b0-34c7-4df6-a3fd-77d86c39153b",
@@ -20828,7 +20828,7 @@
   {
     "id": "5da4520e-8f8f-48ee-8789-f84272488dc1",
     "name": "产品批次全过程记录可追溯比例",
-    "description": "列出需覆盖的采购、生产和交付环节，以各环节标识连续对应的批次数除以核对范围内批次总数，不预设百分之百阈值。核对材料：追溯范围、来源批次、生产记录、交付记录。计量项目：产品批次全过程记录可追溯比例；公式：100 * traceable_batch_count / checked_batch_count；单位：PERCENT；输入：traceable_batch_count为采购生产交付各环节标识连续对应的批次数；checked_batch_count为核对范围内需核验追溯的批次总数。统计范围：entity、period、processScope、traceabilityBasis；口径：追溯范围先列环节；某环节断链即不计可追溯，不预设百分之百阈值。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "列出需覆盖的采购、生产和交付环节，以各环节标识连续对应的批次数除以核对范围内批次总数。核对材料：追溯范围、来源批次、生产记录、交付记录。计量项目：产品批次全过程记录可追溯比例；公式：100 * traceable_batch_count / checked_batch_count；单位：PERCENT；输入：traceable_batch_count为采购生产交付各环节标识连续对应的批次数；checked_batch_count为核对范围内需核验追溯的批次总数。统计范围：entity、period、processScope、traceabilityBasis；口径：追溯范围先列环节；某环节断链即不计可追溯。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "7efa8209-5e55-4f24-9ab5-0a9f632eecf1",
@@ -20902,7 +20902,7 @@
   {
     "id": "60b5016b-df98-4206-9d63-235f4a90efd9",
     "name": "供应商登记公示事项核对缺口数量",
-    "description": "按具体登记主体和适用事项核对公示或报送资料，统计需补充核验的供应商数；旧年检措辞不自动转为当前义务。核对材料：主体登记、事项依据、公示资料、报送记录。计量项目：供应商登记公示事项核对缺口数量；公式：supplier_with_gap_count；单位：PROVIDERS；输入：supplier_with_gap_count为核对后需要补充核验公示或报送资料的供应商数。统计范围：entity、period、filingScope、requirementBasis；口径：旧年检措辞不自动转为当前义务；缺口指待复核状态，非已认定漏报。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按具体登记主体和适用事项核对公示或报送资料，统计需补充核验的供应商数。核对材料：主体登记、事项依据、公示资料、报送记录。计量项目：供应商登记公示事项核对缺口数量；公式：supplier_with_gap_count；单位：PROVIDERS；输入：supplier_with_gap_count为核对后需要补充核验公示或报送资料的供应商数。统计范围：entity、period、filingScope、requirementBasis；口径：缺口指待复核状态，非已认定漏报。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "cd4a7d11-7451-40e7-9ccf-6a4c18c72f84",
@@ -21119,7 +21119,7 @@
   {
     "id": "6d626db3-c914-452f-825f-189c650befe2",
     "name": "装卸操作要求偏离事件次数",
-    "description": "按装卸对象及作业要求核对实际操作，记录已确认的偏离事件及调查，重复记录按同一事件去重。核对材料：装卸要求、作业记录、异常报告、核查资料。计量项目：装卸操作确认偏离要求次数；公式：confirmed_handling_deviation_count；单位：EVENTS；输入：confirmed_handling_deviation_count为按装卸对象及作业要求核对后确认的偏离事件数（按事件去重）。统计范围：entity、period、operationScope、requirementBasis；口径：重复记录按同一事件合并；偏离原因和责任分别调查，不设统一合格率。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按装卸对象及作业要求核对实际操作，记录已确认的偏离事件及调查，重复记录按同一事件去重。核对材料：装卸要求、作业记录、异常报告、核查资料。计量项目：装卸操作确认偏离要求次数；公式：confirmed_handling_deviation_count；单位：EVENTS；输入：confirmed_handling_deviation_count为按装卸对象及作业要求核对后确认的偏离事件数（按事件去重）。统计范围：entity、period、operationScope、requirementBasis；口径：重复记录按同一事件合并；偏离原因和责任分别调查。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "eb55df79-abbb-4264-a061-304cb1e9a7a4",
@@ -21397,7 +21397,7 @@
   {
     "id": "7b78f1f1-9df8-47fe-9f18-6c82b7b0229d",
     "name": "销售合同争议处理时段",
-    "description": "记录争议受理、事实核查、协商或程序处理及结案节点，逐案保留暂停原因；平均时长需明确案件范围和已结案数量。核对材料：合同争议、受理记录、处理节点、结案资料。计量项目：已结案销售合同争议平均处理自然时长；公式：closed_dispute_hours_sum / closed_dispute_case_count；单位：HOURS；输入：closed_dispute_hours_sum为已结案争议从受理至结案的自然小时合计；closed_dispute_case_count为构成该合计且结案节点确定的独立争议案件数。统计范围：entity、disputeCohort、acceptanceBasis、caseClosureBasis、cutoff、timeBasis；口径：逐案保留暂停原因并先核对；未结案单列，平均时长不冒充工作日，也不预设处理期限。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "记录争议受理、事实核查、协商或程序处理及结案节点，逐案保留暂停原因；平均时长需明确案件范围和已结案数量。核对材料：合同争议、受理记录、处理节点、结案资料。计量项目：已结案销售合同争议平均处理自然时长；公式：closed_dispute_hours_sum / closed_dispute_case_count；单位：HOURS；输入：closed_dispute_hours_sum为已结案争议从受理至结案的自然小时合计；closed_dispute_case_count为构成该合计且结案节点确定的独立争议案件数。统计范围：entity、disputeCohort、acceptanceBasis、caseClosureBasis、cutoff、timeBasis；口径：逐案保留暂停原因并先核对；未结案单列，平均时长不冒充工作日。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "62172aad-6c99-490d-bba2-86adc32a7a4b",
@@ -21470,7 +21470,7 @@
   {
     "id": "87076e27-ebc2-4427-a48e-0ae901a4213b",
     "name": "业务资格办理各阶段时段",
-    "description": "按申请记录受理、补正、批准或终止节点，说明办理范围及暂停依据，未完成申请不作为已办结平均周期。核对材料：资格申请、受理回执、补正记录、结果时点。计量项目：业务资格办理阶段平均自然时长；公式：completed_stage_hours_sum / completed_application_count；单位：HOURS；输入：completed_stage_hours_sum为按选定办理阶段从受理或补正节点至批准或终止的自然小时合计；completed_application_count为构成该合计且阶段节点确定、已办结的独立申请数。统计范围：entity、licenseCohort、stageScope、startBasis、completionBasis、cutoff、timeBasis；口径：未完成申请不作为已办结平均周期；暂停依据说明保留，不预设法定办理期限。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按申请记录受理、补正、批准或终止节点，说明办理范围及暂停依据，未完成申请不作为已办结平均周期。核对材料：资格申请、受理回执、补正记录、结果时点。计量项目：业务资格办理阶段平均自然时长；公式：completed_stage_hours_sum / completed_application_count；单位：HOURS；输入：completed_stage_hours_sum为按选定办理阶段从受理或补正节点至批准或终止的自然小时合计；completed_application_count为构成该合计且阶段节点确定、已办结的独立申请数。统计范围：entity、licenseCohort、stageScope、startBasis、completionBasis、cutoff、timeBasis；口径：未完成申请不作为已办结平均周期；记录暂停事由及依据，办理期限按适用要求核对。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "652df20d-bc4e-41e4-b8ac-d1236a50267c",
@@ -21561,7 +21561,7 @@
   {
     "id": "8c509c87-ca91-4301-bf93-62835824e3e0",
     "name": "要求变更调整支出与供应链预算比例",
-    "description": "将已确认变更相关支出对应到具体调整任务，以同范围同期间支出除以相应预算，预算口径和币种一致，不设置分档阈值。核对材料：变更要求、调整任务、支出凭证、预算口径。计量项目：要求变更调整支出占相应预算比例；公式：100 * confirmed_change_spend_amount / corresponding_budget_amount；单位：PERCENT；输入：confirmed_change_spend_amount为同范围同期间已确认归属变更调整任务的支出金额；corresponding_budget_amount为同范围同期间相应供应链预算金额。统计范围：entity、period、changeTaskScope、currency、amountUnit；口径：预算口径统一为经批准的相同范围；支出与预算用途对应，比例不设分档阈值也不评支出合理性。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "将已确认变更相关支出对应到具体调整任务，以同范围同期间支出除以相应预算，预算口径和币种一致。核对材料：变更要求、调整任务、支出凭证、预算口径。计量项目：要求变更调整支出占相应预算比例；公式：100 * confirmed_change_spend_amount / corresponding_budget_amount；单位：PERCENT；输入：confirmed_change_spend_amount为同范围同期间已确认归属变更调整任务的支出金额；corresponding_budget_amount为同范围同期间相应供应链预算金额。统计范围：entity、period、changeTaskScope、currency、amountUnit；口径：预算口径统一为经批准的相同范围；支出与预算用途对应，也不评支出合理性。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "a46e1d1d-adc9-43a6-86cf-995451e36cc6",
@@ -21863,7 +21863,7 @@
   {
     "id": "ad798053-2cfa-43ac-9c8d-401a188b7b8f",
     "name": "原材料替换实际费用构成",
-    "description": "分别记录替代材料采购、验证和过程调整费用，将费用对应具体替换任务及期间，同币种汇总且避免重复归集。核对材料：替换方案、采购凭证、验证支出、调整费用。计量项目：原材料替换采购费用归集金额；公式：confirmed_purchase_cost；单位：CURRENCY；输入：confirmed_purchase_cost为替代材料采购经确认归属替换任务的实际费用金额。统计范围：entity、period、substitutionTask、currency、amountUnit；口径：并与验证和调整费用分开记录；避免重复归集，数量口径另查。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：原材料替换验证费用归集金额；公式：confirmed_validation_cost；单位：CURRENCY；输入：confirmed_validation_cost为替代材料验证环节经确认归属替换任务的实际费用金额。统计范围：entity、period、substitutionTask、currency、amountUnit；口径：验证范围与替换方案对应；与采购和过程调整费用分开列示。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：原材料替换过程调整费用归集金额；公式：confirmed_adjustment_cost；单位：CURRENCY；输入：confirmed_adjustment_cost为替换引起的过程调整经确认归属替换任务的实际费用金额。统计范围：entity、period、substitutionTask、currency、amountUnit；口径：调整事项与常规运行费用分开；缺少任务对应关系时不计入。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "分别记录替代材料采购、验证和过程调整费用，将费用对应具体替换任务及期间，同币种汇总且避免重复归集。核对材料：替换方案、采购凭证、验证支出、调整费用。计量项目：原材料替换采购费用归集金额；公式：confirmed_purchase_cost；单位：CURRENCY；输入：confirmed_purchase_cost为替代材料采购经确认归属替换任务的实际费用金额。统计范围：entity、period、substitutionTask、currency、amountUnit；口径：与验证和调整费用分开记录；避免重复归集，数量口径另查。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：原材料替换验证费用归集金额；公式：confirmed_validation_cost；单位：CURRENCY；输入：confirmed_validation_cost为替代材料验证环节经确认归属替换任务的实际费用金额。统计范围：entity、period、substitutionTask、currency、amountUnit；口径：验证范围与替换方案对应；与采购和过程调整费用分开列示。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：原材料替换过程调整费用归集金额；公式：confirmed_adjustment_cost；单位：CURRENCY；输入：confirmed_adjustment_cost为替换引起的过程调整经确认归属替换任务的实际费用金额。统计范围：entity、period、substitutionTask、currency、amountUnit；口径：调整事项与常规运行费用分开；缺少任务对应关系时不计入。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "db8da4b0-34c7-4df6-a3fd-77d86c39153b",
@@ -22134,7 +22134,7 @@
   {
     "id": "c0698865-9ef8-4875-a7b5-3dd1969a3ee8",
     "name": "供应链设备升级实施时段",
-    "description": "按设备升级任务记录批准、实施和验收时点，平均时长明确任务数量和暂停口径，不预设三十天等分档。核对材料：升级任务、批准记录、实施日志、验收时点。计量项目：设备升级任务平均实施自然时长；公式：upgrade_task_hours_sum / completed_upgrade_task_count；单位：HOURS；输入：upgrade_task_hours_sum为设备升级从批准至验收完成的自然小时合计；completed_upgrade_task_count为构成该合计且验收节点确定的独立任务数。统计范围：entity、upgradeCohort、approvalBasis、acceptanceBasis、cutoff、timeBasis；口径：暂停口径先明确；未完成任务单列，自然小时不设三十天等分档，不冒充工作日。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按设备升级任务记录批准、实施和验收时点，平均时长明确任务数量和暂停口径。核对材料：升级任务、批准记录、实施日志、验收时点。计量项目：设备升级任务平均实施自然时长；公式：upgrade_task_hours_sum / completed_upgrade_task_count；单位：HOURS；输入：upgrade_task_hours_sum为设备升级从批准至验收完成的自然小时合计；completed_upgrade_task_count为构成该合计且验收节点确定的独立任务数。统计范围：entity、upgradeCohort、approvalBasis、acceptanceBasis、cutoff、timeBasis；口径：暂停口径先明确；未完成任务单列，自然小时不冒充工作日。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "a46e1d1d-adc9-43a6-86cf-995451e36cc6",
@@ -22280,7 +22280,7 @@
   {
     "id": "c83c517c-b7e2-45dd-a80f-822690e56ed5",
     "name": "市场适用性核对待调整产品种类数",
-    "description": "按具体市场、产品及拟适用要求列出需进一步调整或核查的产品种类，未来退出市场不作为已确认事实。核对材料：市场产品清单、要求依据、适用性核对、调整计划。计量项目：市场适用性核对待调整产品种类数；公式：pending_adjustment_kind_count；单位：KINDS；输入：pending_adjustment_kind_count为按具体市场产品及拟适用要求列出需进一步调整或核查的产品种类数。统计范围：entity、period、marketScope、requirementBasis；口径：未来退出市场不作为已确认事实；种类依据要求版本核对，不预设调整完成率。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按具体市场、产品及拟适用要求列出需进一步调整或核查的产品种类，未来退出市场不作为已确认事实。核对材料：市场产品清单、要求依据、适用性核对、调整计划。计量项目：市场适用性核对待调整产品种类数；公式：pending_adjustment_kind_count；单位：KINDS；输入：pending_adjustment_kind_count为按具体市场产品及拟适用要求列出需进一步调整或核查的产品种类数。统计范围：entity、period、marketScope、requirementBasis；口径：未来退出市场不作为已确认事实；按实际要求版本核对产品种类与调整情况。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "652df20d-bc4e-41e4-b8ac-d1236a50267c",
@@ -22297,7 +22297,7 @@
   {
     "id": "cb8f85ae-01d7-481a-874b-4fe2f6a08125",
     "name": "生产环保设施运行记录覆盖情况",
-    "description": "按设施和应运行时段核对实际状态、停机及异常记录，比例统计采用不重叠时段，不预设正常率限值。核对材料：设施清单、运行安排、运行日志、停机异常。计量项目：生产环保设施运行记录覆盖比例；公式：100 * documented_running_segment_count / required_running_segment_count；单位：PERCENT；输入：documented_running_segment_count为应运行时段中具备实际状态记录的不重叠时段数；required_running_segment_count为按设施和应运行安排确认需记录的不重叠时段总数。统计范围：entity、period、facilityScope、recordRequirementVersion；口径：时段按设施与时间组合去重；停机异常不是记录缺失，正常率限值另审，未知运行状态单列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按设施和应运行时段核对实际状态、停机及异常记录，比例统计采用不重叠时段。核对材料：设施清单、运行安排、运行日志、停机异常。计量项目：生产环保设施运行记录覆盖比例；公式：100 * documented_running_segment_count / required_running_segment_count；单位：PERCENT；输入：documented_running_segment_count为应运行时段中具备实际状态记录的不重叠时段数；required_running_segment_count为按设施和应运行安排确认需记录的不重叠时段总数。统计范围：entity、period、facilityScope、recordRequirementVersion；口径：时段按设施与时间组合去重；停机异常不是记录缺失，未知运行状态单列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "99d513c3-eff7-4aa1-8a07-3a1a0274bd1c",
@@ -23681,7 +23681,7 @@
   {
     "id": "03372de0-1336-4329-8992-08e7efec6d26",
     "name": "社会保险应缴实缴金额及缴费节点",
-    "description": "按人员险种和月份核对经确认应缴额、实缴额、到期节点和补缴，分别列示金额差额与节点执行情况，不合并为单一达标率。核对材料：缴费核定、人员险种、缴费明细、到期依据、到账补缴。计量项目：社会保险核定应缴实缴差额；公式：confirmed_payable_amount - allocated_paid_amount；单位：CURRENCY；输入：confirmed_payable_amount为本人员险种月份依据经核验确认的应缴金额；allocated_paid_amount为已确认正确归属该人员险种月份的实缴金额。统计范围：entity、employee、insuranceType、contributionMonth、currency、verifiedContributionBasis、amountUnit；口径：正负差额保留，个人和单位组成分别归集；缴费及时性独立审核，补缴须按所属月份归集。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：社保公积金到期缴费节点完成比例；公式：100 * confirmed_on_node_paid_person_item_count / due_payment_person_item_count；单位：PERCENT；输入：confirmed_on_node_paid_person_item_count为在适用节点完成对应缴存并经归属核验去重的人员险种月份项数；due_payment_person_item_count为截止日已到期且应完成缴费的人员险种月份项总数。统计范围：entity、period、insuranceScope、contributionMonth、cutoff、verifiedContributionBasis；口径：与金额差额分开统计；有效延期先核对，缺缴项目单列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "按人员险种和月份核对经确认应缴额、实缴额、到期节点和补缴，金额差额与节点执行情况分别列示。核对材料：缴费核定、人员险种、缴费明细、到期依据、到账补缴。计量项目：社会保险核定应缴实缴差额；公式：confirmed_payable_amount - allocated_paid_amount；单位：CURRENCY；输入：confirmed_payable_amount为本人员险种月份依据经核验确认的应缴金额；allocated_paid_amount为已确认正确归属该人员险种月份的实缴金额。统计范围：entity、employee、insuranceType、contributionMonth、currency、verifiedContributionBasis、amountUnit；口径：正负差额保留，个人和单位组成分别归集；缴费及时性独立审核，补缴须按所属月份归集。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：社保公积金到期缴费节点完成比例；公式：100 * confirmed_on_node_paid_person_item_count / due_payment_person_item_count；单位：PERCENT；输入：confirmed_on_node_paid_person_item_count为在适用节点完成对应缴存并经归属核验去重的人员险种月份项数；due_payment_person_item_count为截止日已到期且应完成缴费的人员险种月份项总数。统计范围：entity、period、insuranceScope、contributionMonth、cutoff、verifiedContributionBasis；口径：与金额差额分开统计；有效延期先核对，缺缴项目单列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "8fc07408-cd21-440b-96e9-d57921f94663",
@@ -24409,7 +24409,7 @@
   {
     "id": "43c56a70-ca61-4bea-9b37-ae3a2ad140e2",
     "name": "劳动制度满意度调查样本与结果记录",
-    "description": "明确调查对象、题目量表、邀请人数、有效答卷和统计方法，保留不回应及样本偏差；满意度不能替代具体合规事项检查。核对材料：问卷版本、邀请名单、有效答卷、量表说明、统计记录。计量项目：劳动制度调查实际邀请人数；公式：invited_employee_count；单位：PERSONS；输入：invited_employee_count为调查期间按明确对象范围实际发出邀请并去重的独立员工数。统计范围：entity、period、surveyScope、questionnaireVersion；口径：重复邀请按人去重；对象范围与问卷版本先确认。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：劳动制度调查有效答卷份数；公式：valid_response_count；单位：RESPONSES；输入：valid_response_count为按量表和规则确认有效且可分类的独立答卷份数。统计范围：entity、period、surveyScope、validityRule；口径：不回应与结余单列；满意度不能替代具体合规检查，样本偏差说明保留。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "明确调查对象、题目量表、邀请人数、有效答卷和统计方法，记录不回应情况及样本偏差；满意度不能替代具体合规事项检查。核对材料：问卷版本、邀请名单、有效答卷、量表说明、统计记录。计量项目：劳动制度调查实际邀请人数；公式：invited_employee_count；单位：PERSONS；输入：invited_employee_count为调查期间按明确对象范围实际发出邀请并去重的独立员工数。统计范围：entity、period、surveyScope、questionnaireVersion；口径：重复邀请按人去重；对象范围与问卷版本先确认。输入、证据或统计范围未确认时不计算，不将缺失作为零。计量项目：劳动制度调查有效答卷份数；公式：valid_response_count；单位：RESPONSES；输入：valid_response_count为按量表和规则确认有效且可分类的独立答卷份数。统计范围：entity、period、surveyScope、validityRule；口径：不回应与结余单列；满意度不能替代具体合规检查，记录样本偏差及适用范围。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "ed4a2774-fdd9-4358-b58a-2c8a4bce962f",
@@ -24519,7 +24519,7 @@
   {
     "id": "4ad95dd2-bcfb-4c74-bbe0-2832045c9f84",
     "name": "已确认超时加班人员期间比例",
-    "description": "以已审核确认超出适用工时限值的人员期间组合数除以完成工时审核的同范围组合总数；未审核组合单列，期间单位须一致。核对材料：人员期间、考勤资料、限值依据、审核结论、未审清单。计量项目：已审核超时加班人员期间比例；公式：100 * confirmed_exceedance_person_period_count / concluded_person_period_count；单位：PERCENT；输入：confirmed_exceedance_person_period_count为已完成审核且确认超出适用限值的人员期间组合数；concluded_person_period_count为同工时制度及期间粒度范围内完成审核且有确定结论的人员期间组合总数。统计范围：entity、period、workingTimeType、periodGranularity、limitBasisVersion；口径：未审和不确定组合单列；分子确认须有实际工时与已核验适用限值，不能设统一最大时长。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "以已审核确认超出适用工时限值的人员期间组合数除以完成工时审核的同范围组合总数；未审核组合单列，期间单位须一致。核对材料：人员期间、考勤资料、限值依据、审核结论、未审清单。计量项目：已审核超时加班人员期间比例；公式：100 * confirmed_exceedance_person_period_count / concluded_person_period_count；单位：PERCENT；输入：confirmed_exceedance_person_period_count为已完成审核且确认超出适用限值的人员期间组合数；concluded_person_period_count为同工时制度及期间粒度范围内完成审核且有确定结论的人员期间组合总数。统计范围：entity、period、workingTimeType、periodGranularity、limitBasisVersion；口径：未审和不确定组合单列；分子确认须有实际工时与已核验适用限值。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "75e66825-d511-4060-ae66-a8277b87fff4",
@@ -25438,7 +25438,7 @@
   {
     "id": "8169f4fc-f04d-4551-814d-2de5fa85f2eb",
     "name": "劳动合同违约金约定金额与适用事由",
-    "description": "逐项记录违约金约定、触发事由、金额及计算依据，将约定金额与实际主张分别列示；删除年薪XX百分比占位标准，适用性待依据审核。核对材料：劳动合同、培训协议、竞业协议、金额明细、主张依据。计量项目：具体约定违约金金额；公式：recorded_penalty_amount；单位：CURRENCY；输入：recorded_penalty_amount为同一人员合同及触发事由条款中有明确计算依据并确认的约定违约金金额。统计范围：entity、employee、contract、triggerItem、currency、contractVersion、amountUnit；口径：约定金额与实际主张分开；浮动金额需先确认输入和算法，XX占位或条款适用性未知不填金额，不据金额认定条款有效。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "逐项记录违约金约定、触发事由、金额及计算依据，将约定金额与实际主张分别列示；适用性待依据审核。核对材料：劳动合同、培训协议、竞业协议、金额明细、主张依据。计量项目：具体约定违约金金额；公式：recorded_penalty_amount；单位：CURRENCY；输入：recorded_penalty_amount为同一人员合同及触发事由条款中有明确计算依据并确认的约定违约金金额。统计范围：entity、employee、contract、triggerItem、currency、contractVersion、amountUnit；口径：约定金额与实际主张分开；浮动金额需先确认输入和算法，金额依据或条款适用性未确认时不输出金额，不据金额认定条款有效。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "5bd98fd3-4762-4306-8338-f3805ee54fac",
@@ -26041,7 +26041,7 @@
   {
     "id": "9ef43a40-751c-4ad3-813d-d54a02a430b0",
     "name": "高管薪酬适用披露事项资料覆盖率",
-    "description": "先核验主体和期间内具体披露要求，再以具有对应已披露资料的事项数除以本范围适用事项总数；披露内容准确性另核对。核对材料：主体类别、披露要求、事项清单、披露版本、审核记录。计量项目：高管薪酬适用披露事项资料覆盖比例；公式：100 * documented_disclosure_item_count / required_disclosure_item_count；单位：PERCENT；输入：documented_disclosure_item_count为适用清单内具有已披露且对应版本资料的事项数；required_disclosure_item_count为依据经核验主体类型及期间要求确认适用的披露事项总数。统计范围：entity、period、disclosureScope、requirementVersion；口径：不把原达标率当风险分数；已披露不等于内容准确，缺失和未核验事项另列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
+    "description": "先核验主体和期间内具体披露要求，再以具有对应已披露资料的事项数除以本范围适用事项总数；披露内容准确性另核对。核对材料：主体类别、披露要求、事项清单、披露版本、审核记录。计量项目：高管薪酬适用披露事项资料覆盖比例；公式：100 * documented_disclosure_item_count / required_disclosure_item_count；单位：PERCENT；输入：documented_disclosure_item_count为适用清单内具有已披露且对应版本资料的事项数；required_disclosure_item_count为依据经核验主体类型及期间要求确认适用的披露事项总数。统计范围：entity、period、disclosureScope、requirementVersion；口径：已披露不等于内容准确，缺失和未核验事项另列。输入、证据或统计范围未确认时不计算，不将缺失作为零。",
     "type": "定量",
     "indicatorLevel": 3,
     "parentIndicatorId": "0cf54441-4b25-468f-aedf-151fb442e623",
@@ -26136,7 +26136,7 @@
   {
     "id": "a1a2a6dd-f31a-474c-a62f-7dbc7281f402",
     "name": "海外劳工事件应急场景与责任安排",
-    "description": "按实际目的地识别罢工、集体争议或安全等具体场景，核对联络、责任及处置步骤与演练资料，不设统一频次。核对材料：目的地场景、应急方案、责任联络、演练资料、处置记录。",
+    "description": "按实际目的地识别罢工、集体争议或安全等具体场景，核对联络、责任及处置步骤与演练资料。核对材料：目的地场景、应急方案、责任联络、演练资料、处置记录。",
     "type": "定性",
     "indicatorLevel": 3,
     "parentIndicatorId": "2942122d-27e4-456f-bfba-2d4902d46532",

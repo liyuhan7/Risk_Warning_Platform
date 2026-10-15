@@ -1804,55 +1804,6 @@
       ]
     },
     {
-      "regulationId": "4wUtUZ0B3BXzX1tXFVwQ",
-      "sources": [
-        {
-          "title": "中华人民共和国劳动合同法（2012年修正）",
-          "url": "https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2023/art_0abfdd261c03417b949df19d869add8d.html",
-          "articles": [
-            "第三十一条"
-          ],
-          "checkedAt": "2026-10-11"
-        },
-        {
-          "authority": "工资支付暂行规定",
-          "title": "工资支付暂行规定",
-          "url": "https://rsj.sh.gov.cn/trlzyhshbzbgz_17256/20200617/t0035_1388318.html",
-          "articles": [
-            "第二条",
-            "第六条",
-            "第十一条",
-            "第十三条"
-          ],
-          "checkedAt": "2026-10-11"
-        }
-      ],
-      "notes": [
-        "原正文把工资支付记录保存条款归到劳动合同法并等同所有加班记录，拆清条款出处和对象。"
-      ]
-    },
-    {
-      "regulationId": "4wUtUZ0B3BXzX1tXFWAS",
-      "sources": [
-        {
-          "authority": "禁止使用童工规定",
-          "title": "禁止使用童工规定",
-          "url": "https://www.beijing.gov.cn/zhengce/zhengcefagui/qtwj/200210/t20021001_779887.html",
-          "articles": [
-            "第二条",
-            "第四条",
-            "第十三条",
-            "第十四条"
-          ],
-          "checkedAt": "2026-10-11",
-          "effectiveFrom": "2002-12-01"
-        }
-      ],
-      "notes": [
-        "原身份证复印件强制要求超出第四条正文；保留登记核查材料责任，不额外创造统一复制或永久保存义务。"
-      ]
-    },
-    {
       "regulationId": "4wUtUZ0B3BXzX1tXFWES",
       "sources": [
         {
@@ -2623,7 +2574,7 @@
       ]
     },
     {
-      "regulationId": "7AUtUZ0B3BXzX1tXFV0R",
+      "regulationId": "qAUtUZ0B3BXzX1tXFWES",
       "sources": [
         {
           "title": "中华人民共和国劳动法第四章",
@@ -2648,6 +2599,11 @@
             "第六条",
             "第七条"
           ],
+          "checkedAt": "2026-10-11"
+        },
+        {
+          "url": "https://rshj.yantai.gov.cn/art/2020/4/27/art_23397_2838247.html",
+          "articles": "第三条至第七条",
           "checkedAt": "2026-10-11"
         }
       ],
@@ -3939,7 +3895,7 @@
       ]
     },
     {
-      "regulationId": "FwUtUZ0B3BXzX1tXFVsM",
+      "regulationId": "tgUtUZ0B3BXzX1tXFWMT",
       "sources": [
         {
           "authority": "住房公积金管理条例（2019年修订）",
@@ -3962,6 +3918,11 @@
           "articles": [
             "第三部分"
           ],
+          "checkedAt": "2026-10-11"
+        },
+        {
+          "url": "https://gjj.beijing.gov.cn/web/zwgk61/_300587/_300688/362049/index.html",
+          "articles": "第三部分；住房公积金管理条例第十八条、第二十条",
           "checkedAt": "2026-10-11"
         }
       ],
@@ -4392,41 +4353,6 @@
       ]
     },
     {
-      "regulationId": "PAUtUZ0B3BXzX1tXFWES",
-      "sources": [
-        {
-          "authority": "未成年人保护法（2024年修正）",
-          "title": "未成年人保护法（2024年修正）",
-          "url": "https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2023/art_54358c05e57642ab895176413f7cd4d7.html",
-          "articles": [
-            "第六十一条"
-          ],
-          "checkedAt": "2026-10-11"
-        },
-        {
-          "authority": "禁止使用童工规定",
-          "title": "禁止使用童工规定",
-          "url": "https://www.beijing.gov.cn/zhengce/zhengcefagui/qtwj/200210/t20021001_779887.html",
-          "articles": [
-            "第二条",
-            "第四条",
-            "第十三条",
-            "第十四条"
-          ],
-          "checkedAt": "2026-10-11",
-          "effectiveFrom": "2002-12-01"
-        },
-        {
-          "url": "https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2023/art_54358c05e57642ab895176413f7cd4d7.html",
-          "articles": "第六十一条",
-          "checkedAt": "2026-10-11"
-        }
-      ],
-      "notes": [
-        "原特种工艺普遍例外和统一审批缺少当前第六十一条依据；补全已满十六未满十八岗位场所保护，保持原企业主体和行业。"
-      ]
-    },
-    {
       "regulationId": "PQUtUZ0B3BXzX1tXFV0R",
       "sources": [
         {
@@ -4506,36 +4432,6 @@
       ],
       "notes": [
         "按第二十八条完整表达岗位和人员条件，去掉添加的通用100%单值。"
-      ]
-    },
-    {
-      "regulationId": "PgUtUZ0B3BXzX1tXFWIS",
-      "sources": [
-        {
-          "authority": "消费者权益保护法",
-          "title": "中华人民共和国消费者权益保护法（2013年修正）",
-          "url": "https://jjjcz.mee.gov.cn/djfg/gjflfg/fl/201310/t20131001_444478.html",
-          "articles": [
-            "第二条、第二十四条、第二十五条",
-            "第三十九条、第四十四条、第四十六条、第五十五条"
-          ],
-          "checkedAt": "2026-10-11",
-          "effectiveFrom": "2014-03-15"
-        },
-        {
-          "authority": "消费者权益保护法实施条例",
-          "title": "中华人民共和国消费者权益保护法实施条例",
-          "url": "https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2024/art_0aea188276a44f0baf940ab95ee00e0a.html",
-          "articles": [
-            "第十九条、第二十六条",
-            "第四十四条、第四十六条、第四十九条、第五十三条"
-          ],
-          "checkedAt": "2026-10-11",
-          "effectiveFrom": "2024-07-01"
-        }
-      ],
-      "notes": [
-        "第二十五条与实施条例第十九条补齐例外完好确认及质量责任区别；原行业范围不同保留，七只表达收货退货窗口。"
       ]
     },
     {
@@ -4823,24 +4719,6 @@
       ]
     },
     {
-      "regulationId": "TgUtUZ0B3BXzX1tXFWQT",
-      "sources": [
-        {
-          "title": "中华人民共和国反洗钱法（2024年修订）",
-          "url": "https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2025/art_cfcc31edf0a64744bb5d7ff1307c0356.html",
-          "articles": [
-            "第三十四条",
-            "第六十五条"
-          ],
-          "effectiveFrom": "2025-01-01",
-          "checkedAt": "2026-10-11"
-        }
-      ],
-      "notes": [
-        "原要求中五年与十五年并存；按官方公布的2024年修订第三十四条修正为十年，并保留两类资料的不同起算时点及该版本的适用时间。"
-      ]
-    },
-    {
       "regulationId": "TwUtUZ0B3BXzX1tXFV4R",
       "sources": [
         {
@@ -4910,27 +4788,6 @@
       ],
       "notes": [
         "第三、五、十二条保留正常劳动、三类排除、工时分支和本人原因例外。"
-      ]
-    },
-    {
-      "regulationId": "VwUtUZ0B3BXzX1tXFWQT",
-      "sources": [
-        {
-          "authority": "禁止使用童工规定",
-          "title": "禁止使用童工规定",
-          "url": "https://www.beijing.gov.cn/zhengce/zhengcefagui/qtwj/200210/t20021001_779887.html",
-          "articles": [
-            "第二条",
-            "第四条",
-            "第十三条",
-            "第十四条"
-          ],
-          "checkedAt": "2026-10-11",
-          "effectiveFrom": "2002-12-01"
-        }
-      ],
-      "notes": [
-        "原正文出自禁止使用童工规定第十三条，纠正法规出处并补健康义务教育，不添加统一审批条件。"
       ]
     },
     {
@@ -5076,50 +4933,6 @@
         }
       ],
       "notes": []
-    },
-    {
-      "regulationId": "_gUtUZ0B3BXzX1tXFWMT",
-      "sources": [
-        {
-          "authority": "生产经营单位安全培训规定（2015年修正）",
-          "title": "生产经营单位安全培训规定（2015年修正）",
-          "url": "https://www.mem.gov.cn/gk/zfxxgkpt/fdzdgknr/gz11/200601/t20060117_405583.shtml",
-          "articles": [
-            "第二条",
-            "第十一条",
-            "第十二条",
-            "第十三条",
-            "第十七条",
-            "第二十二条"
-          ],
-          "checkedAt": "2026-10-11"
-        },
-        {
-          "authority": "安全生产法（2021年修正）",
-          "title": "安全生产法（2021年修正）",
-          "url": "https://www.mem.gov.cn/fw/flfgbz/fg/202107/t20210716_416558.shtml",
-          "articles": [
-            "第四条",
-            "第二十二条",
-            "第二十四条",
-            "第二十五条",
-            "第二十七条",
-            "第二十八条",
-            "第二十九条",
-            "第三十六条",
-            "第四十一条",
-            "第四十五条",
-            "第四十六条",
-            "第八十一条",
-            "第八十二条",
-            "第八十三条"
-          ],
-          "checkedAt": "2026-10-11"
-        }
-      ],
-      "notes": [
-        "三级形式的直接来源是培训规定，限定加工制造等生产单位人员，不沿用错误安全生产法名称或扩至全部建筑人员。"
-      ]
     },
     {
       "regulationId": "_wUtUZ0B3BXzX1tXFV0R",
@@ -5751,34 +5564,6 @@
       ],
       "notes": [
         "为检查中的职业危害检测评价部分提供判定依据，比例仍为管理观察方法。"
-      ]
-    },
-    {
-      "regulationId": "c9970bed-a615-58de-9f1d-775f9c420629",
-      "sources": [
-        {
-          "authority": "劳动合同法（2012年修正）",
-          "title": "劳动合同法（2012年修正）",
-          "url": "https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2023/art_0abfdd261c03417b949df19d869add8d.html",
-          "articles": [
-            "第四条",
-            "第九条",
-            "第二十三条",
-            "第二十六至二十八条",
-            "第三十六至四十二条",
-            "第五十七至六十五条",
-            "第八十八条"
-          ],
-          "checkedAt": "2026-10-11"
-        },
-        {
-          "url": "https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2023/art_0abfdd261c03417b949df19d869add8d.html",
-          "articles": "第三十六至三十八条",
-          "checkedAt": "2026-10-11"
-        }
-      ],
-      "notes": [
-        "主动解除与协商解除区别于单位过错及非过错解除。"
       ]
     },
     {
@@ -6435,34 +6220,6 @@
       ]
     },
     {
-      "regulationId": "f3cd9508-b880-5353-891b-8c251a203c93",
-      "sources": [
-        {
-          "authority": "劳动合同法（2012年修正）",
-          "title": "劳动合同法（2012年修正）",
-          "url": "https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2023/art_0abfdd261c03417b949df19d869add8d.html",
-          "articles": [
-            "第四条",
-            "第九条",
-            "第二十三条",
-            "第二十六至二十八条",
-            "第三十六至四十二条",
-            "第五十七至六十五条",
-            "第八十八条"
-          ],
-          "checkedAt": "2026-10-11"
-        },
-        {
-          "url": "https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2023/art_0abfdd261c03417b949df19d869add8d.html",
-          "articles": "第九条、第三十八条第二款、第八十八条第一二项",
-          "checkedAt": "2026-10-11"
-        }
-      ],
-      "notes": [
-        "支持任务退出及证件行动限制核查，保留即时解除和刑事责任条件。"
-      ]
-    },
-    {
       "regulationId": "f4483c75-cdd4-5fab-85aa-71be7d983b74",
       "sources": [
         {
@@ -6588,50 +6345,6 @@
       ]
     },
     {
-      "regulationId": "fgUtUZ0B3BXzX1tXFVwQ",
-      "sources": [
-        {
-          "authority": "禁止使用童工规定",
-          "title": "禁止使用童工规定",
-          "url": "https://www.beijing.gov.cn/zhengce/zhengcefagui/qtwj/200210/t20021001_779887.html",
-          "articles": [
-            "第二条",
-            "第四条",
-            "第十三条",
-            "第十四条"
-          ],
-          "checkedAt": "2026-10-11",
-          "effectiveFrom": "2002-12-01"
-        },
-        {
-          "url": "https://www.beijing.gov.cn/zhengce/zhengcefagui/qtwj/200210/t20021001_779887.html",
-          "articles": "第二条、第四条、第十三条",
-          "checkedAt": "2026-10-11"
-        }
-      ],
-      "notes": [
-        "保留第四条核查保管义务与第十三条特定例外；十六岁不能脱离例外作为通用单值，相同主体地区行业正文归并。"
-      ]
-    },
-    {
-      "regulationId": "fgUtUZ0B3BXzX1tXFWES",
-      "sources": [
-        {
-          "authority": "国际劳工组织第105号废除强迫劳动公约",
-          "title": "国际劳工组织第105号废除强迫劳动公约",
-          "url": "https://normlex.ilo.org/dyn/nrmlx_en/f?p=NORMLEXPUB%3A12100%3A0%3A%3ANO%3A%3AP12100_INSTRUMENT_ID%3A312250",
-          "articles": [
-            "第一条",
-            "第二条"
-          ],
-          "checkedAt": "2026-10-11"
-        }
-      ],
-      "notes": [
-        "把无法识别的泛称具体化为已核对的105号公约，不混用29号或将批准国义务直接推广为全部企业义务。"
-      ]
-    },
-    {
       "regulationId": "fwUtUZ0B3BXzX1tXFWMT",
       "sources": [
         {
@@ -6748,32 +6461,6 @@
       ],
       "notes": [
         "第六十二条第二款是再派遣禁止，旧标题退回与正文不符。"
-      ]
-    },
-    {
-      "regulationId": "iAUtUZ0B3BXzX1tXFWMT",
-      "sources": [
-        {
-          "title": "中华人民共和国劳动法第四章",
-          "url": "https://rsj.sh.gov.cn/tgjfl_17254/20200617/t0035_1388230.html",
-          "articles": [
-            "第三十六条",
-            "第三十八条",
-            "第三十九条",
-            "第四十一条",
-            "第四十二条",
-            "第四十三条"
-          ],
-          "checkedAt": "2026-10-11"
-        },
-        {
-          "url": "https://rsj.sh.gov.cn/tgjfl_17254/20200617/t0035_1388230.html",
-          "articles": "第四十一条至第四十三条",
-          "checkedAt": "2026-10-11"
-        }
-      ],
-      "notes": [
-        "补足第四十二条的具体例外，分别保留原主体和行业；一日与月份及其他工时周期不合并成单值。"
       ]
     },
     {
@@ -7070,53 +6757,25 @@
       ]
     },
     {
-      "regulationId": "qAUtUZ0B3BXzX1tXFWES",
-      "sources": [
-        {
-          "title": "中华人民共和国劳动法第四章",
-          "url": "https://rsj.sh.gov.cn/tgjfl_17254/20200617/t0035_1388230.html",
-          "articles": [
-            "第三十六条",
-            "第三十八条",
-            "第三十九条",
-            "第四十一条",
-            "第四十二条",
-            "第四十三条"
-          ],
-          "checkedAt": "2026-10-11"
-        },
-        {
-          "title": "关于企业实行不定时工作制和综合计算工时工作制的审批办法",
-          "url": "https://rshj.yantai.gov.cn/art/2020/4/27/art_23397_2838247.html",
-          "articles": [
-            "第三条",
-            "第四条",
-            "第五条",
-            "第六条",
-            "第七条"
-          ],
-          "checkedAt": "2026-10-11"
-        },
-        {
-          "url": "https://rshj.yantai.gov.cn/art/2020/4/27/art_23397_2838247.html",
-          "articles": "第三条至第七条",
-          "checkedAt": "2026-10-11"
-        }
-      ],
-      "notes": [
-        "删除无明确出处的通用特殊工时标题，保留实际法规名称；批准条件、岗位及周期分开核对，原行业和主体不扩大。"
-      ]
-    },
-    {
       "regulationId": "qgUtUZ0B3BXzX1tXFWMT",
       "sources": [
         {
           "url": "https://fgk.chinatax.gov.cn/zcfgk/c100013/c5195227/content.html",
           "articles": "第二条、第四条、第二十八条",
           "checkedAt": "2026-10-11"
+        },
+        {
+          "title": "劳务派遣暂行规定",
+          "url": "https://fgk.chinatax.gov.cn/zcfgk/c100013/c5195227/content.html",
+          "articles": [
+            "第四条"
+          ],
+          "checkedAt": "2026-10-13"
         }
       ],
-      "notes": []
+      "notes": [
+        "比例主体为用工单位，补足分母，归并同一10%要求。"
+      ]
     },
     {
       "regulationId": "rgUtUZ0B3BXzX1tXFWES",
@@ -7201,42 +6860,6 @@
         }
       ],
       "notes": []
-    },
-    {
-      "regulationId": "tgUtUZ0B3BXzX1tXFWMT",
-      "sources": [
-        {
-          "authority": "住房公积金管理条例（2019年修订）",
-          "title": "住房公积金管理条例（2019年修订）",
-          "url": "https://xzfy.moj.gov.cn/c/2021-01-17/488809.shtml",
-          "articles": [
-            "第二条",
-            "第十六条",
-            "第十七条",
-            "第十八条",
-            "第十九条",
-            "第二十条"
-          ],
-          "checkedAt": "2026-10-11"
-        },
-        {
-          "authority": "关于改进住房公积金缴存机制进一步降低企业成本的通知（建金〔2018〕45号）",
-          "title": "关于改进住房公积金缴存机制进一步降低企业成本的通知（建金〔2018〕45号）",
-          "url": "https://gjj.beijing.gov.cn/web/zwgk61/_300587/_300688/362049/index.html",
-          "articles": [
-            "第三部分"
-          ],
-          "checkedAt": "2026-10-11"
-        },
-        {
-          "url": "https://gjj.beijing.gov.cn/web/zwgk61/_300587/_300688/362049/index.html",
-          "articles": "第三部分；住房公积金管理条例第十八条、第二十条",
-          "checkedAt": "2026-10-11"
-        }
-      ],
-      "notes": [
-        "区分条例下限、通知规定的地区上限程序及困难批准例外；上下限复合要求不存成5%单值。同主体同地区同业正文相同的记录归并，其他行业范围保留。"
-      ]
     },
     {
       "regulationId": "vAUtUZ0B3BXzX1tXFVsN",
@@ -7521,6 +7144,174 @@
       ],
       "notes": [
         "对应现专利法第十六条，保留可选性质，不把标记使用权误作普遍强制义务。"
+      ]
+    },
+    {
+      "regulationId": "pgUtUZ0B3BXzX1tXFWES",
+      "sources": [
+        {
+          "title": "中华人民共和国民法典",
+          "url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+          "articles": [
+            "第五百九十条"
+          ],
+          "checkedAt": "2026-10-13"
+        }
+      ],
+      "notes": [
+        "合同不可抗力通知事项按民法典现行条文表述。"
+      ]
+    },
+    {
+      "regulationId": "EAUtUZ0B3BXzX1tXFWQT",
+      "sources": [
+        {
+          "title": "中华人民共和国工会法",
+          "url": "https://www.szft.gov.cn/bmxx_qt/qzgh/zwxxgk/flfg_1/content/post_11540482.html",
+          "articles": [
+            "第三条",
+            "第四十三条"
+          ],
+          "checkedAt": "2026-10-13"
+        }
+      ],
+      "notes": [
+        "统一采用用人单位概括企业、事业单位、机关、社会组织，保留2%基数。"
+      ]
+    },
+    {
+      "regulationId": "PwUtUZ0B3BXzX1tXFWQT",
+      "sources": [
+        {
+          "title": "中华人民共和国劳动合同法",
+          "url": "https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2023/art_0abfdd261c03417b949df19d869add8d.html",
+          "articles": [
+            "第二十二条",
+            "第二十三条",
+            "第二十五条"
+          ],
+          "checkedAt": "2026-10-13"
+        }
+      ],
+      "notes": [
+        "保留专项培训及竞业限制两类例外。"
+      ]
+    },
+    {
+      "regulationId": "UwUtUZ0B3BXzX1tXFV0R",
+      "sources": [
+        {
+          "title": "关于进一步规范商业银行互联网贷款业务的通知",
+          "url": "https://www.mofcom.gov.cn/zcfb/zgdwjjmywg/art/2021/art_b3faa0277ac64fefa328864628d4292c.html",
+          "articles": [
+            "第二条"
+          ],
+          "checkedAt": "2026-10-13"
+        }
+      ],
+      "notes": [
+        "30%要求对应合作方出资，纠正误写为商业银行出资。"
+      ]
+    },
+    {
+      "regulationId": "9QUtUZ0B3BXzX1tXFVwQ",
+      "sources": [
+        {
+          "title": "中华人民共和国政府采购法",
+          "url": "https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2023/art_47b5807c40c040368eb5f13b489d6c43.html",
+          "articles": [
+            "第十九条",
+            "第二十条"
+          ],
+          "checkedAt": "2026-10-13"
+        }
+      ],
+      "notes": [
+        "取消旧版资格认定表述，保留采购人的委托及协议义务。"
+      ]
+    },
+    {
+      "regulationId": "NQUtUZ0B3BXzX1tXFVsM",
+      "sources": [
+        {
+          "title": "中华人民共和国反电信网络诈骗法",
+          "url": "https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2023/art_4d2f14016988480e979f4cd49251e07a.html",
+          "articles": [
+            "第九条",
+            "第十条",
+            "第十五条",
+            "第十六条",
+            "第二十一条",
+            "第二十二条"
+          ],
+          "checkedAt": "2026-10-13"
+        }
+      ],
+      "notes": [
+        "按金融、电信、互联网业务分别表述尽调、实名及异常账号处置，不把全部主体设为同一种尽调义务。"
+      ]
+    },
+    {
+      "regulationId": "WQUtUZ0B3BXzX1tXFVsN",
+      "sources": [
+        {
+          "title": "关于做好上市公司2025年年度报告披露工作的通知",
+          "url": "https://www.csrc.gov.cn/beijing/c103551/c7610839/content.shtml",
+          "articles": [],
+          "checkedAt": "2026-10-13"
+        }
+      ],
+      "notes": [
+        "具体修正触发幅度依交易所、板块及规则版本核对，不设全库统一50%。"
+      ]
+    },
+    {
+      "regulationId": "igUtUZ0B3BXzX1tXFWMT",
+      "sources": [
+        {
+          "title": "中华人民共和国反不正当竞争法（2025修订）",
+          "url": "https://www.csrc.gov.cn/beijing/c105536/c7582544/content.shtml",
+          "articles": [
+            "第八条"
+          ],
+          "checkedAt": "2026-10-13"
+        }
+      ],
+      "notes": [
+        "补齐三类贿赂对象列举。"
+      ]
+    },
+    {
+      "regulationId": "ywUtUZ0B3BXzX1tXFV8S",
+      "sources": [
+        {
+          "title": "关于调整保险资金权益类资产监管比例有关事项的通知",
+          "url": "https://policy.mofcom.gov.cn/claw/clawContent.shtml?id=102306",
+          "articles": [
+            "第二条",
+            "第五条"
+          ],
+          "checkedAt": "2026-10-13"
+        }
+      ],
+      "notes": [
+        "保留五个偿付能力档位，定量多门槛不填单值。"
+      ]
+    },
+    {
+      "regulationId": "TwUtUZ0B3BXzX1tXFVsN",
+      "sources": [
+        {
+          "title": "对外承包工程管理条例（2017）",
+          "url": "https://ao.mofcom.gov.cn/bszn/art/2020/art_1e4238def77b4082bfa1041b1eec914c.html",
+          "articles": [
+            "第十条"
+          ],
+          "checkedAt": "2026-10-13"
+        }
+      ],
+      "notes": [
+        "原摘录50%分包比例及核心部分禁止未见于对应条款，改为实际分包要求。"
       ]
     }
   ],
@@ -7972,11 +7763,6 @@
     },
     {
       "indicatorId": "45ca6126-1fcf-4332-8c40-2c1124fd6de9",
-      "regulationId": "c9970bed-a615-58de-9f1d-775f9c420629",
-      "basis": "第三十六至三十八条提供主动与协商解除具体事由。"
-    },
-    {
-      "indicatorId": "45ca6126-1fcf-4332-8c40-2c1124fd6de9",
       "regulationId": "d0d9a482-2860-5c6b-b86c-d7919b3a4833",
       "basis": "六类具体条件用于支持事由与证据对应。"
     },
@@ -8052,7 +7838,7 @@
     },
     {
       "indicatorId": "4ad95dd2-bcfb-4c74-bbe0-2832045c9f84",
-      "regulationId": "iAUtUZ0B3BXzX1tXFWMT",
+      "regulationId": "7wUtUZ0B3BXzX1tXFVoM",
       "basis": "延长时间正文有日月及紧急分支，支持已确认限值核对；保留原法规行业和主体，不扩张为所有人员所有制度同一限值。"
     },
     {
@@ -8251,11 +8037,6 @@
       "basis": "实际安全设备维护保养检测记录支持设备验证和检查观察。仅支持上述具体观察部分；原比例金额次数时长不作为统一法定阈值。"
     },
     {
-      "indicatorId": "6b077601-87c8-40ed-b6d6-4031d0283e12",
-      "regulationId": "f3cd9508-b880-5353-891b-8c251a203c93",
-      "basis": "第九及三十八八十八条支持自愿退出与限制事实，不用标签直接认定。"
-    },
-    {
       "indicatorId": "6b285e33-d083-4bcf-b002-10d535bb417b",
       "regulationId": "aAUtUZ0B3BXzX1tXFWAS",
       "basis": "支持津贴支付主体和核定基数两个分支，转付节点等尚需具体地区依据。"
@@ -8364,11 +8145,6 @@
       "indicatorId": "77ef11a4-0d57-4b8a-b52c-c2824a00c702",
       "regulationId": "70d937c8-dfec-54a4-9e0e-da8ee49a8f17",
       "basis": "实际作为用人单位的书面合同资料支持确认相应签订义务。仅支持上述具体观察部分；原比例金额次数时长不作为统一法定阈值。"
-    },
-    {
-      "indicatorId": "796c7e90-ad40-4b69-bc25-4c3e87967d84",
-      "regulationId": "f3cd9508-b880-5353-891b-8c251a203c93",
-      "basis": "中国法提供明确的一地依据，国际文件与当地法律不混同；第105号条款仍按批准国义务单独保存。"
     },
     {
       "indicatorId": "79a2f228-1024-497c-b120-8671e3a59771",
@@ -8754,16 +8530,6 @@
       "indicatorId": "9cac06e6-ab5b-4c37-a8ed-84b3dfe344c8",
       "regulationId": "9eb9ea58-f3aa-5b11-8d3f-0c2858aeb445",
       "basis": "招聘如实告知义务支持说明与实际岗位待遇对应；不以薪酬支付记录代替招聘过程资料。"
-    },
-    {
-      "indicatorId": "9cb22352-91ef-4c32-be3a-4f7d1c5cf734",
-      "regulationId": "PAUtUZ0B3BXzX1tXFWES",
-      "basis": "补充已满十六周岁人员场所和岗位安排边界，仅按原企业主体适用。"
-    },
-    {
-      "indicatorId": "9cb22352-91ef-4c32-be3a-4f7d1c5cf734",
-      "regulationId": "fgUtUZ0B3BXzX1tXFVwQ",
-      "basis": "支持招用年龄、核查保管与特殊情形；未成年工不等同童工。"
     },
     {
       "indicatorId": "9d3b123f-3a8c-4392-b5d7-999bb9b365bf",
@@ -9548,33 +9314,13 @@
   ],
   "pendingDirectionReview": [
     {
-      "regulationId": "1wUtUZ0B3BXzX1tXFWMT",
-      "name": "防止强迫维吾尔人劳动法(UFLPA)",
-      "basis": "涉及推定、范围边界或授权处置等语境，不能仅凭缺少两个关键词改为必要或可选。本次保留原分类，具体条款方向仍需后续法条及业务适用性核对。"
-    },
-    {
-      "regulationId": "2QUtUZ0B3BXzX1tXFWIT",
-      "name": "美国涉疆法案-可反驳推定",
-      "basis": "涉及推定、范围边界或授权处置等语境，不能仅凭缺少两个关键词改为必要或可选。本次保留原分类，具体条款方向仍需后续法条及业务适用性核对。"
-    },
-    {
       "regulationId": "9QUtUZ0B3BXzX1tXFWMT",
-      "name": "反倾销条例-倾销幅度",
+      "name": "反倾销条例-反倾销税征收条件",
       "basis": "涉及推定、范围边界或授权处置等语境，不能仅凭缺少两个关键词改为必要或可选。本次保留原分类，具体条款方向仍需后续法条及业务适用性核对。"
     },
     {
       "regulationId": "CgUtUZ0B3BXzX1tXFVwQ",
       "name": "证券法-短线交易",
-      "basis": "涉及推定、范围边界或授权处置等语境，不能仅凭缺少两个关键词改为必要或可选。本次保留原分类，具体条款方向仍需后续法条及业务适用性核对。"
-    },
-    {
-      "regulationId": "_QUtUZ0B3BXzX1tXFV4R",
-      "name": "禁止使用童工规定-定义",
-      "basis": "涉及推定、范围边界或授权处置等语境，不能仅凭缺少两个关键词改为必要或可选。本次保留原分类，具体条款方向仍需后续法条及业务适用性核对。"
-    },
-    {
-      "regulationId": "eAUtUZ0B3BXzX1tXFV0R",
-      "name": "禁止使用童工规定-法律责任",
       "basis": "涉及推定、范围边界或授权处置等语境，不能仅凭缺少两个关键词改为必要或可选。本次保留原分类，具体条款方向仍需后续法条及业务适用性核对。"
     },
     {
@@ -9590,11 +9336,6 @@
     {
       "regulationId": "wQUtUZ0B3BXzX1tXFWMT",
       "name": "企业所得税法-特别纳税调整",
-      "basis": "涉及推定、范围边界或授权处置等语境，不能仅凭缺少两个关键词改为必要或可选。本次保留原分类，具体条款方向仍需后续法条及业务适用性核对。"
-    },
-    {
-      "regulationId": "yQUtUZ0B3BXzX1tXFV0R",
-      "name": "禁止使用童工规定-吊销证照",
       "basis": "涉及推定、范围边界或授权处置等语境，不能仅凭缺少两个关键词改为必要或可选。本次保留原分类，具体条款方向仍需后续法条及业务适用性核对。"
     }
   ]

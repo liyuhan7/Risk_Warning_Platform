@@ -167,6 +167,8 @@
           </section>
         </div>
       </template>
+      <RequirementScores v-if="data.run?.analysisMode === 'REASONING_RULES_V2' && data.run.analysisRunId"
+        :assessment-id="assessmentId" :project-id="projectId" :analysis-run-id="data.run.analysisRunId" />
       <el-alert v-if="pollLimitReached" title="自动刷新已达 20 次，请手动刷新。" type="info" :closable="false" />
     </template>
     <EvidenceDrawer v-model:open="drawerOpen" :ids="evidenceIds"
@@ -179,6 +181,7 @@ import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import RetrievalAuditPanel from './RetrievalAuditPanel.vue';
 import EvidenceDrawer from './EvidenceDrawer.vue';
+import RequirementScores from './RequirementScores.vue';
 import { label } from '@/types/analysis';
 import type { AnalysisOverviewVO, BehaviorAnalysisGroupVO } from '@/types/analysis';
 

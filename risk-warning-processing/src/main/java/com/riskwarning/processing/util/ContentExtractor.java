@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -15,9 +16,29 @@ public class ContentExtractor {
 
     // 最小片段长度（字符数）
     private static final int MIN_SEGMENT_LENGTH = 10;
-    
-    // 最大片段长度（字符数）
+
+    // 最大片段长度（字符数）。超过后仍按整句装箱，不得截断句中文字
     private static final int MAX_SEGMENT_LENGTH = 500;
+
+    /**
+     * 空行才是语义段落边界。
+     * PDF/Word 抽取出的版式换行是单换行，属于段落内折行，不能当作段落或句子边界，
+     * 否则会在词中间切开（如“但人事”+“部书面确认”）。
+     */
+    private static final Pattern PARAGRAPH_SEPARATOR =
+            Pattern.compile("(?:\\r?\\n[ \\t\\u3000]*){2,}");
+
+    /** 段落内的折行，连同两侧空白一并归一化。 */
+    private static final Pattern SOFT_LINE_BREAK =
+            Pattern.compile("[ \\t\\u3000]*\\r?\\n[ \\t\\u3000]*");
+
+    /** 句末标点保留在句子内，切分后不丢句读。 */
+    private static final Pattern SENTENCE =
+            Pattern.compile("[^。！？；!?;]+[。！？；!?;]*");
+
+    /** PDF 页码页脚，形如“1 / 8”；仅当页码与总页数吻合时剥离，避免误删正文分数。 */
+    private static final Pattern PAGE_MARKER_TAIL =
+            Pattern.compile("\\s*(\\d+)\\s*/\\s*(\\d+)\\s*$");
 
     /**
      * 中文字符检测。
@@ -38,7 +59,7 @@ public class ContentExtractor {
         
         // 按页处理
         for (FileScanner.PageContent page : document.getPages()) {
-            List<TextSegment> pageSegments = extractFromPage(page);
+            List<TextSegment> pageSegments = extractFromPage(page, document.getTotalPages());
             allSegments.addAll(pageSegments);
         }
         
@@ -46,60 +67,115 @@ public class ContentExtractor {
     }
 
 
-    private List<TextSegment> extractFromPage(FileScanner.PageContent page) {
+    private List<TextSegment> extractFromPage(FileScanner.PageContent page, int totalPages) {
         String text = page.getText();
         if (text == null || text.trim().isEmpty()) {
             return new ArrayList<>();
         }
-        
-        // 分段处理
-        List<TextSegment> segments = splitIntoSegments(text, page.getPageNumber());
+
+        // 分段处理；页脚页码先剥离，避免被并进最后一条证据
+        String content = stripPageMarker(text.trim(), page.getPageNumber(), totalPages);
+        List<TextSegment> segments = splitIntoSegments(content, page.getPageNumber());
         
         // 过滤无意义内容
         return segments.stream()
                 .filter(this::isMeaningful)
                 .collect(Collectors.toList());
     }
+
+    /**
+     * 剥离页尾页码。只在页码与当前页一致、且与文档总页数吻合时移除，
+     * 防止把正文中形如“1 / 8”的分数误当页脚。
+     */
+    private String stripPageMarker(String text, int pageNumber, int totalPages) {
+        Matcher matcher = PAGE_MARKER_TAIL.matcher(text);
+        if (!matcher.find()) {
+            return text;
+        }
+        int current = Integer.parseInt(matcher.group(1));
+        int total = Integer.parseInt(matcher.group(2));
+        if (current != pageNumber || totalPages > 0 && total != totalPages) {
+            return text;
+        }
+        return text.substring(0, matcher.start()).trim();
+    }
     
 
+    /**
+     * 按“段落 → 句子”两级切分：先以空行确定段落，段落内合并版式折行；
+     * 段落不超过上限时整体成为一个片段，超过上限时才按整句装箱，
+     * 保证片段边界始终落在句末标点上，不会出现半句或半个词。
+     */
     private List<TextSegment> splitIntoSegments(String text, int pageNumber) {
         List<TextSegment> segments = new ArrayList<>();
-        
-        // 先按段落分割（双换行）
-        String[] paragraphs = text.split("\n\n+");
-        
-        for (String paragraph : paragraphs) {
-            paragraph = paragraph.trim();
-            if (paragraph.isEmpty()) {
+        for (String paragraph : PARAGRAPH_SEPARATOR.split(text)) {
+            String normalized = joinSoftLineBreaks(paragraph.trim());
+            if (normalized.isEmpty()) {
                 continue;
             }
-            
-            // 如果段落较长，按句子分割
-            if (paragraph.length() > MAX_SEGMENT_LENGTH) {
-                String[] sentences = splitIntoSentences(paragraph);
-                for (String sentence : sentences) {
-                    sentence = sentence.trim();
-                    if (sentence.length() >= MIN_SEGMENT_LENGTH) {
-                        segments.add(createSegment(sentence, pageNumber));
-                    }
-                }
+            if (normalized.length() <= MAX_SEGMENT_LENGTH) {
+                segments.add(createSegment(normalized, pageNumber));
             } else {
-                // 段落长度合适，直接作为一个片段
-                if (paragraph.length() >= MIN_SEGMENT_LENGTH) {
-                    segments.add(createSegment(paragraph, pageNumber));
-                }
+                segments.addAll(packSentences(normalized, pageNumber));
             }
         }
-        
         return segments;
     }
-    
 
-    private String[] splitIntoSentences(String text) {
-        // 按句号、问号、感叹号、分号分割
-        return text.split("[。！？；\n]");
+    /**
+     * 合并段落内的折行。中文与中文直接相连，避免出现“人事 部”这类被空格污染的词；
+     * 只有两侧都是西文字母数字时才补一个空格，防止西文单词粘连。
+     */
+    private String joinSoftLineBreaks(String text) {
+        Matcher matcher = SOFT_LINE_BREAK.matcher(text);
+        StringBuffer joined = new StringBuffer();
+        int lastEnd = 0;
+        while (matcher.find()) {
+            joined.append(text, lastEnd, matcher.start());
+            joined.append(needsSpace(joined, text, matcher.end()) ? " " : "");
+            lastEnd = matcher.end();
+        }
+        joined.append(text.substring(lastEnd));
+        return joined.toString().trim();
     }
-    
+
+    private boolean needsSpace(StringBuffer joined, String text, int nextIndex) {
+        if (joined.length() == 0 || nextIndex >= text.length()) {
+            return false;
+        }
+        return isAsciiWord(joined.charAt(joined.length() - 1)) && isAsciiWord(text.charAt(nextIndex));
+    }
+
+    private boolean isAsciiWord(char value) {
+        return value < 128 && Character.isLetterOrDigit(value);
+    }
+
+    /**
+     * 超长段落按整句装箱：句子是原子单位，不得从中截断；
+     * 单句超过上限时独占一个片段，由下游按长度校验，禁止静默截断。
+     */
+    private List<TextSegment> packSentences(String text, int pageNumber) {
+        List<TextSegment> segments = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        Matcher matcher = SENTENCE.matcher(text);
+        while (matcher.find()) {
+            String sentence = matcher.group();
+            if (sentence.trim().isEmpty()) {
+                continue;
+            }
+            if (current.length() > 0
+                    && current.length() + sentence.length() > MAX_SEGMENT_LENGTH) {
+                segments.add(createSegment(current.toString().trim(), pageNumber));
+                current.setLength(0);
+            }
+            current.append(sentence);
+        }
+        if (current.length() > 0) {
+            segments.add(createSegment(current.toString().trim(), pageNumber));
+        }
+        return segments;
+    }
+
 
     private TextSegment createSegment(String text, int pageNumber) {
         TextSegment segment = new TextSegment();

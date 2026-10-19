@@ -19,6 +19,8 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class ComplianceAnalysisOrchestrator {
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.riskwarning.processing.service.scoring.ScoringOrchestrator scoring;
     private final AnalysisRunRepository runs;
     private final BehaviorDocumentRepository behaviors;
     private final AnalysisRunIdentityService identity;
@@ -60,6 +62,10 @@ public class ComplianceAnalysisOrchestrator {
                 preparation.prepare(message, scope, true); return;
             }
             throw failure;
+        }
+        if (scoring != null) {
+            scoring.process(message, scope, scoped);
+            return;
         }
         Map<String, JsonNode> ruleSources;
         try {

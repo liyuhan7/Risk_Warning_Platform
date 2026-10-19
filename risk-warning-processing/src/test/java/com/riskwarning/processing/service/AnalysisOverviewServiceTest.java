@@ -2,9 +2,11 @@ package com.riskwarning.processing.service;
 
 import com.riskwarning.common.dto.analysis.AnalysisScope;
 import com.riskwarning.common.dto.retrieval.*;
+import com.riskwarning.common.dto.scoring.ScoringDecision;
 import com.riskwarning.common.enums.analysis.*;
 import com.riskwarning.common.po.analysis.*;
 import com.riskwarning.common.po.behavior.Behavior;
+import com.riskwarning.common.po.indicator.IndicatorResultDetail;
 import com.riskwarning.common.po.report.Assessment;
 import com.riskwarning.processing.controller.AnalysisOverviewController;
 import com.riskwarning.processing.dto.analysis.*;
@@ -295,6 +297,41 @@ class AnalysisOverviewServiceTest {
         conclusion(ComplianceStatus.NON_COMPLIANT);
         assertEquals("REASONING_RULES_V1", service.overview(86L, 7L).getRun().getAnalysisMode());
     }
+    @Test void v2PreparedSummaryAndScoringDecisionAreAccepted() {
+        // 1.2 摘要带分析模式与版本字段，审计只写 scoringDecision，概览必须能读而不报错。
+        reasoningRun();
+        when(ruleAudits.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.singletonList(
+                RuleEvaluationAudit.builder().projectId(7L).assessmentId(86L).analysisRunId("latest")
+                        .indicatorId("i50").inputHash("hash-1").status(RuleEvaluationStatus.DECIDED).conflict(false)
+                        .calculationDetails(IndicatorResultDetail.builder().schemaVersion("1.2")
+                                .analysisMode("REASONING_RULES_V2").scoringDecision(scoringDecision("i50", "hash-1")).build())
+                        .build()));
+        com.fasterxml.jackson.databind.node.ObjectNode summary =
+                new com.fasterxml.jackson.databind.ObjectMapper().createObjectNode();
+        summary.put("schemaVersion", "1.2"); summary.put("analysisMode", "REASONING_RULES_V2");
+        summary.put("behaviorCount", 1); summary.put("decisionCount", 1); summary.put("completionKind", "FULL");
+        summary.put("registryVersion", "labor-reviewed-test-2026.10-v1"); summary.put("datasetVersion", "dataset-1");
+        run.prepareReport(summary);
+        run.succeed(start.plusSeconds(1));
+
+        AnalysisOverviewVO vo = service.overview(86L, 7L);
+
+        assertEquals("REASONING_RULES_V2", vo.getRun().getAnalysisMode());
+        assertEquals(1, vo.getSummary().getDecisionCount());
+    }
+
+    @Test void v2AuditWithMismatchedDecisionIdentityIsRejected() {
+        reasoningRun();
+        when(ruleAudits.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.singletonList(
+                RuleEvaluationAudit.builder().projectId(7L).assessmentId(86L).analysisRunId("latest")
+                        .indicatorId("i50").inputHash("hash-1").status(RuleEvaluationStatus.DECIDED)
+                        .calculationDetails(IndicatorResultDetail.builder().schemaVersion("1.2")
+                                .scoringDecision(scoringDecision("other", "hash-1")).build())
+                        .build()));
+
+        assertThrows(IllegalStateException.class, () -> service.overview(86L, 7L));
+    }
+
     @Test void controllerErrors() {
         AnalysisOverviewController controller = new AnalysisOverviewController(service);
         assertThrows(IllegalArgumentException.class, () -> controller.overview(86L, null));
@@ -307,6 +344,12 @@ class AnalysisOverviewServiceTest {
     private void audit(RetrievalAuditStatus retrieval, AnalysisAuditStatus analysis, List<RetrievalCandidateSnapshot> candidates) {
         when(audits.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.singletonList(
                 RetrievalAudit.builder().behaviorId("b").retrievalStatus(retrieval).analysisStatus(analysis).candidates(candidates).build()));
+    }
+    private ScoringDecision scoringDecision(String indicatorId, String inputHash) {
+        ScoringDecision decision = new ScoringDecision();
+        decision.setIndicatorId(indicatorId); decision.setInputHash(inputHash);
+        decision.setCalculatedScore(java.math.BigDecimal.TEN);
+        return decision;
     }
     private void conclusion(ComplianceStatus status) {
         when(results.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.singletonList(

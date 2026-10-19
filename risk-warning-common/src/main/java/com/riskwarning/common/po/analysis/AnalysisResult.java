@@ -10,7 +10,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/** 合规分析结果，兼容 1.0 与 1.1；PostgreSQL 为权威存储。 */
+/** 合规分析结果，兼容 1.0、1.1 与要求级 1.2；PostgreSQL 为权威存储。 */
 @Data
 @Builder
 @NoArgsConstructor
@@ -63,6 +63,9 @@ public class AnalysisResult {
     private Double observedValue;
     @Column(name = "observed_unit")
     private String observedUnit;
+    @Type(type = "jsonb")
+    @Column(name = "requirement_findings", columnDefinition = "jsonb")
+    private List<com.riskwarning.common.dto.scoring.RequirementFinding> requirementFindings;
     @Column(nullable = false)
     private Double confidence;
     @Column(nullable = false, columnDefinition = "TEXT")

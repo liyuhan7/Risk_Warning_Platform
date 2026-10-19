@@ -2,6 +2,7 @@ package com.riskwarning.processing.service;
 
 import com.riskwarning.common.po.behavior.Behavior;
 import com.riskwarning.processing.client.ClassifierClient;
+import com.riskwarning.processing.config.AnalysisProcessingProperties;
 import com.riskwarning.processing.repository.BehaviorDocumentRepository;
 import org.junit.jupiter.api.Test;
 import java.util.*;
@@ -13,7 +14,8 @@ import static org.mockito.Mockito.*;
 class StructuredBehaviorWriterTest {
     private final BehaviorDocumentRepository repository = mock(BehaviorDocumentRepository.class);
     private final ClassifierClient classifier = mock(ClassifierClient.class);
-    private final StructuredBehaviorWriter writer = new StructuredBehaviorWriter(repository, classifier);
+    private final AnalysisProcessingProperties properties = new AnalysisProcessingProperties();
+    private final StructuredBehaviorWriter writer = new StructuredBehaviorWriter(repository, classifier, properties);
 
     @Test void classifiedFactsWithoutDescriptionVectorsAreWritten() {
         Behavior behavior = fact("stable-id");
@@ -60,6 +62,78 @@ class StructuredBehaviorWriterTest {
     @Test void emptyBatchHasNoExternalCalls() {
         writer.enrichAndWrite(Collections.emptyList());
         verifyNoInteractions(classifier, repository);
+    }
+
+    @Test void largeFileIsClassifiedInBoundedBatchesWithoutChangingOrder() {
+        List<Integer> batchSizes = new ArrayList<>();
+        when(classifier.classifyBatch(any())).thenAnswer(invocation -> {
+            Map<String, Object> request = invocation.getArgument(0);
+            List<?> items = (List<?>) request.get("items");
+            batchSizes.add(items.size());
+            if (items.size() > 16) throw new IllegalStateException("分类请求超过可处理批量");
+            return classificationFor(request);
+        });
+        List<Behavior> facts = facts(35);
+
+        writer.enrichAndWrite(facts);
+
+        assertEquals(Arrays.asList(16, 16, 3), batchSizes);
+        for (int i = 0; i < facts.size(); i++) {
+            assertEquals(Collections.singletonList("事实-" + i), facts.get(i).getTags());
+        }
+        verify(repository, times(1)).writeAll(facts);
+    }
+
+    @Test void laterClassificationBatchFailurePreventsAllWriting() {
+        List<Integer> batchSizes = new ArrayList<>();
+        when(classifier.classifyBatch(any())).thenAnswer(invocation -> {
+            Map<String, Object> request = invocation.getArgument(0);
+            batchSizes.add(((List<?>) request.get("items")).size());
+            if (batchSizes.size() == 2) throw new IllegalStateException("第二批分类超时");
+            return classificationFor(request);
+        });
+
+        assertThrows(IllegalStateException.class, () -> writer.enrichAndWrite(facts(35)));
+
+        assertEquals(Arrays.asList(16, 16), batchSizes);
+        verifyNoInteractions(repository);
+    }
+
+    @Test void configuredBatchSizeIsApplied() {
+        properties.setBatchSize(3);
+        List<Integer> sizes = new ArrayList<>();
+        when(classifier.classifyBatch(any())).thenAnswer(invocation -> {
+            Map<String, Object> request = invocation.getArgument(0);
+            sizes.add(((List<?>) request.get("items")).size());
+            return classificationFor(request);
+        });
+        List<Behavior> facts = facts(7);
+
+        writer.enrichAndWrite(facts);
+
+        assertEquals(Arrays.asList(3, 3, 1), sizes);
+        verify(repository).writeAll(facts);
+    }
+
+    private List<Behavior> facts(int count) {
+        List<Behavior> facts = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            facts.add(Behavior.builder().id("b-" + i).description("事实-" + i).build());
+        }
+        return facts;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> classificationFor(Map<String, Object> request) {
+        List<Map<String, Object>> results = new ArrayList<>();
+        for (Map<String, String> input : (List<Map<String, String>>) request.get("items")) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("tags", Collections.singletonList(input.get("text")));
+            item.put("type", "定性");
+            item.put("dimension", "劳务");
+            results.add(item);
+        }
+        return Collections.singletonMap("results", results);
     }
 
     private Behavior fact(String id) {

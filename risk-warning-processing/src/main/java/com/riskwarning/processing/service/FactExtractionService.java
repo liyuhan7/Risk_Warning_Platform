@@ -19,8 +19,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,7 +30,12 @@ import java.util.Set;
 public class FactExtractionService {
 
     static final int MAX_EVIDENCE_PER_BATCH = 40;
-    static final int MAX_TEXT_CODE_POINTS_PER_BATCH = 20000;
+    /**
+     * 单批证据正文上限（码点）。该值直接决定模型输出长度：
+     * 实测 7008 字证据需要约 9800 输出 token，超过模型 8192 上限会导致响应被截断、
+     * JSON 无法闭合而报 INVALID_JSON。4000 字约需 5600 输出 token，留有安全余量。
+     */
+    static final int MAX_TEXT_CODE_POINTS_PER_BATCH = 4000;
     private static final int MODEL_VALIDATION_ATTEMPTS = 2;
 
     private final Optional<AiChatProvider> provider;
@@ -48,7 +54,7 @@ public class FactExtractionService {
     }
 
     /**
-     * 稳定分批调用 Provider。Provider 失败直接上抛；模型响应连续两次不合法时，
+     * 稳定分批调用 Provider。首次校验失败后携带字段反馈修正；Provider 失败直接上抛；模型响应连续两次不合法时，
      * 携带失败明细抛出 FactExtractionException，禁止返回部分成功结果。
      */
     public FactExtractionResult extract(AnalysisScope scope, List<EvidenceChunk> evidenceChunks) {
@@ -61,19 +67,24 @@ public class FactExtractionService {
 
         for (int batchIndex = 0; batchIndex < batches.size(); batchIndex++) {
             List<EvidenceChunk> batch = batches.get(batchIndex);
-            Set<String> allowedEvidenceIds = new HashSet<>();
-            for (EvidenceChunk chunk : batch) {
-                allowedEvidenceIds.add(chunk.getId());
+            Map<String, String> originalIdByReference = new LinkedHashMap<>();
+            for (int index = 0; index < batch.size(); index++) {
+                originalIdByReference.put(FactExtractionPromptRenderer.referenceId(index), batch.get(index).getId());
             }
+            Set<String> allowedEvidenceIds = originalIdByReference.keySet();
             String prompt = promptRenderer.render(scope, batch);
+            String attemptPrompt = prompt;
             FactExtractionValidationResult validation = null;
             String rawResponse = null;
             for (int attempt = 1; attempt <= MODEL_VALIDATION_ATTEMPTS; attempt++) {
-                rawResponse = provider().chat(prompt);
+                rawResponse = provider().chat(attemptPrompt);
                 providerCallCount++;
                 validation = responseValidator.validate(rawResponse, allowedEvidenceIds);
                 if (validation.isValid()) {
                     break;
+                }
+                if (attempt < MODEL_VALIDATION_ATTEMPTS) {
+                    attemptPrompt = promptRenderer.renderRetry(prompt, rawResponse, validation, allowedEvidenceIds);
                 }
             }
             if (validation == null || !validation.isValid()) {
@@ -85,10 +96,18 @@ public class FactExtractionService {
                         metadata(modelId, batches.size(), providerCallCount, startedAt));
                 throw new FactExtractionException("事实抽取第 " + (batchIndex + 1)
                         + " 批响应连续两次未通过契约校验，错误码："
-                        + failures.get(failures.size() - 1).getErrorCodes(), failedResult);
+                        + failures.get(failures.size() - 1).getErrorCodes()
+                        + "，字段明细：" + (validation == null
+                                ? Collections.singletonList("未收到模型响应") : validation.errorDetails()), failedResult);
             }
             Long sourceDocumentId = batch.get(0).getSourceDocumentId();
             for (ExtractedFact fact : validation.getResponse().getFacts()) {
+                // 模型只处理短编号，持久化事实仍引用当前批次对应的真实证据身份。
+                List<String> originalEvidenceIds = new ArrayList<>();
+                for (String referenceId : fact.getEvidenceIds()) {
+                    originalEvidenceIds.add(originalIdByReference.get(referenceId));
+                }
+                fact.setEvidenceIds(originalEvidenceIds);
                 behaviors.add(behaviorAssembler.assemble(scope, sourceDocumentId, fact,
                         modelId, LocalDateTime.now()));
             }
@@ -135,7 +154,8 @@ public class FactExtractionService {
         for (EvidenceChunk chunk : sorted) {
             int textCodePoints = chunk.getText().codePointCount(0, chunk.getText().length());
             if (textCodePoints > MAX_TEXT_CODE_POINTS_PER_BATCH) {
-                throw new IllegalArgumentException("单条 EvidenceChunk 超过 20000 字符，禁止静默截断");
+                throw new IllegalArgumentException("单条 EvidenceChunk 超过 "
+                        + MAX_TEXT_CODE_POINTS_PER_BATCH + " 字符，禁止静默截断");
             }
             if (!current.isEmpty() && (current.size() == MAX_EVIDENCE_PER_BATCH
                     || currentCodePoints + textCodePoints > MAX_TEXT_CODE_POINTS_PER_BATCH)) {

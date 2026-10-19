@@ -1,0 +1,45 @@
+{
+  "id": "4a469621-daba-4ef1-bc0e-5c7983ebc010",
+  "name": "用户隐私投诉响应时间（天）",
+  "description": "",
+  "type": "",
+  "indicatorLevel": 3,
+  "parentIndicatorId": "36c53e49-284c-45e0-bfd6-db0c2055f8b6",
+  "dimension": "产品合规风险",
+  "region": "MULTI",
+  "tags": [
+    "客户关系管理",
+    "风险管理",
+    "内部举报处理"
+  ],
+  "maxScore": 1.0,
+  "calculationRule": {
+    "ruleType": "RANGE",
+    "binaryRule": null,
+    "rangeRule": {
+      "minValue": 0.0,
+      "maxValue": 3.0,
+      "calculationMethod": "x <= 1 ? 1.0 : x <= 2 ? 0.7 : x <= 3 ? 0.3 : 0",
+      "maxScore": 1.0,
+      "outOfMinScore": 0.0,
+      "outOfMaxScore": 0.0
+    }
+  },
+  "riskRule": {
+    "description": "风险生成规则",
+    "staticThreshold": {
+      "operator": "<",
+      "thresholdValue": 0.5,
+      "riskLevel": "MEDIUM_RISK"
+    },
+    "adjustmentFactor": {
+      "enabled": true,
+      "requiredLowCount": 2,
+      "riskLevelIncrease": "HIGH_RISK"
+    }
+  },
+  "complianceDomain": [
+    "互联网",
+    "数据服务"
+  ]
+}

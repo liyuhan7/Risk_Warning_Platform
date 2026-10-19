@@ -11,9 +11,20 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.*;
 import static com.riskwarning.processing.rule.RuleTestData.*;
 
-/** 仓库既有指标的域内计分回归；核验标识仅用于工程测试，不启用生产规则。 */
+/** 历史规则兼容回归；旧数据样本固定于测试资源，不对当前指标恢复过时阈值。 */
 class KnownRangeIndicatorTest {
     private static final String ID = "4a469621-daba-4ef1-bc0e-5c7983ebc010";
+
+    @Test void currentIndicatorDoesNotInheritTheHistoricalScoringParameters() throws Exception {
+        Path root = Paths.get("").toAbsolutePath();
+        while (root != null && !Files.exists(root.resolve("documents/data/indicator.json"))) root = root.getParent();
+        assertNotNull(root);
+        JsonNode indicator = null;
+        for (JsonNode row : M.readTree(root.resolve("documents/data/indicator.json").toFile()))
+            if (ID.equals(row.path("id").asText())) indicator = row;
+        assertNotNull(indicator);
+        assertFalse(indicator.has("maxScore")); assertFalse(indicator.has("calculationRule")); assertFalse(indicator.has("riskRule"));
+    }
 
     @ParameterizedTest
     @CsvSource({"1,1", "2,0.7", "3,0.3"})
@@ -55,13 +66,11 @@ class KnownRangeIndicatorTest {
     }
 
     private static ObjectNode registeredRule() throws Exception {
-        Path root = Paths.get("").toAbsolutePath();
-        while (root != null && !Files.exists(root.resolve("documents/data/indicator.json"))) root = root.getParent();
-        assertNotNull(root, "必须使用当前仓库真实指标来源");
-        JsonNode rows = M.readTree(root.resolve("documents/data/indicator.json").toFile());
-        JsonNode indicator = null;
-        for (JsonNode row : rows) if (ID.equals(row.path("id").asText())) indicator = row;
-        assertNotNull(indicator);
+        JsonNode indicator;
+        // 来源提交 0fcc2e8；只验证历史 v1 计算契约，不是当前业务的法规依据。
+        try (java.io.InputStream input = KnownRangeIndicatorTest.class.getResourceAsStream("/rules/legacy-complaint-indicator.json")) {
+            assertNotNull(input); indicator = M.readTree(input);
+        }
         assertEquals(1.0, indicator.path("maxScore").asDouble());
         assertEquals("RANGE", indicator.path("calculationRule").path("ruleType").asText());
         assertEquals(0.0, indicator.path("calculationRule").path("rangeRule").path("minValue").asDouble());

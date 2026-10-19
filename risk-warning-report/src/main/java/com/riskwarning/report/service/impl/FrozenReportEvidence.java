@@ -14,6 +14,7 @@ final class FrozenReportEvidence {
     private FrozenReportEvidence() { }
 
     static List<RelatedIndicator> project(IndicatorResult indicator) {
+        if (RequirementReportProjection.isV2(indicator)) return RequirementReportProjection.project(indicator);
         List<AnalysisTrace> traces = indicator.getCalculationDetails().getTraces();
         require(traces != null && !traces.isEmpty(), "报告缺少事实追踪");
         Map<String, RuleInput> inputs = new HashMap<>();

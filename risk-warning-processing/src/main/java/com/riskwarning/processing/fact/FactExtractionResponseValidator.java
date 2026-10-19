@@ -152,7 +152,9 @@ public class FactExtractionResponseValidator {
             if (!behaviorDate.isTextual()) {
                 result.addError(BAD_TYPE, base + ".behaviorDate", "behaviorDate 必须是字符串");
             } else if (!behaviorDatePattern.matcher(behaviorDate.asText()).matches()) {
-                result.addError(BAD_FORMAT, base + ".behaviorDate", "日期格式不符合契约");
+                result.addError(BAD_FORMAT, base + ".behaviorDate",
+                        "日期只能使用 yyyy-MM-dd 或 yyyy-MM-ddTHH:mm:ss；"
+                                + "只有年月、日期区间或模糊时间时，保留在 description 并省略 behaviorDate，不得补造日期");
             }
         }
 

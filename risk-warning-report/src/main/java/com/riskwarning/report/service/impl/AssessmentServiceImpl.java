@@ -122,6 +122,9 @@ public class AssessmentServiceImpl implements AssessmentService {
         }
 
         double finalAvgScore = indicatorResults.isEmpty() ? 0.0 : totalScore / indicatorResults.size();
+        boolean requirementsV2 = !indicatorResults.isEmpty() && RequirementReportProjection.isV2(indicatorResults.get(0));
+        ReportAggregationProfile profile = requirementsV2 ? ReportAggregationProfile.firstVersion() : null;
+        if (requirementsV2) finalAvgScore = RequirementReportProjection.overallScore(indicatorResults, profile);
         assessment.setOverallScore(finalAvgScore);
         assessment.setOverallRiskLevel(RiskLevelEnum.getByRiskCount(lowRiskCount, mediumRiskCount, highRiskCount));
 
@@ -131,6 +134,13 @@ public class AssessmentServiceImpl implements AssessmentService {
                 reportService.assembleGeneral(assessment, risks),
                 reportService.assembleIndicatorResult(assessment, analysisRunId)
         )));
+        if (requirementsV2) {
+            com.alibaba.fastjson2.JSONObject details = JSON.parseObject(assessment.getDetails());
+            details.put("aggregationProfileVersion", profile.getProfileVersion());
+            details.put("aggregationProfile", profile);
+            details.put("dimensionScores", RequirementReportProjection.dimensionScores(indicatorResults));
+            assessment.setDetails(details.toJSONString());
+        }
         assessmentRepository.save(assessment);
     }
 

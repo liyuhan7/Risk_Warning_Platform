@@ -2,8 +2,10 @@ package com.riskwarning.processing.service;
 
 import com.riskwarning.common.po.analysis.*;
 import com.riskwarning.common.po.behavior.Behavior;
+import com.riskwarning.common.po.indicator.IndicatorResultDetail;
 import com.riskwarning.common.po.report.Assessment;
 import com.riskwarning.common.dto.retrieval.*;
+import com.riskwarning.common.dto.scoring.ScoringDecision;
 import com.riskwarning.processing.dto.analysis.*;
 import com.riskwarning.processing.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +64,8 @@ public class AnalysisOverviewService {
         List<RetrievalAudit> auditRows = audits.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId());
         List<AnalysisResult> resultRows = results.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId());
         vo.getRun().setAnalysisMode("REASONING_RULES_V1");
+        if (run.getAnalysisSummary() != null && "1.2".equals(run.getAnalysisSummary().path("schemaVersion").asText()))
+            vo.getRun().setAnalysisMode("REASONING_RULES_V2");
         Map<String, Behavior> descriptions = new HashMap<>();
         // ES 不可用只影响行为描述，PostgreSQL 的审计与结论仍可回放。
         try {
@@ -114,7 +118,7 @@ public class AnalysisOverviewService {
         }
         String status = run.getStatus().name();
         if (run.getExecutionMode() == com.riskwarning.common.enums.AnalysisExecutionMode.REASONING) {
-            vo.getRun().setAnalysisMode("REASONING_RULES_V1");
+            // 分析模式已按摘要 schemaVersion 判定，此处不得覆盖，否则 1.2 运行会显示为 V1。
             summary.setBehaviorCount(run.getExpectedBehaviorIds() == null ? 0 : run.getExpectedBehaviorIds().size());
             summary.setDecisionCount(0);
             Set<String> reviewed = new HashSet<>();
@@ -123,14 +127,24 @@ public class AnalysisOverviewService {
             Set<String> seen = new HashSet<>();
             for (RuleEvaluationAudit row : ruleAudits.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId())) {
                 if (!projectId.equals(row.getProjectId()) || !assessmentId.equals(row.getAssessmentId())
-                        || !run.getAnalysisRunId().equals(row.getAnalysisRunId()) || !seen.add(row.getIndicatorId())
-                        || row.getCalculationDetails() == null || row.getCalculationDetails().getRuleCalculation() == null)
+                        || !run.getAnalysisRunId().equals(row.getAnalysisRunId()) || !seen.add(row.getIndicatorId()))
                     throw new IllegalStateException("概览规则审计作用域或详情不一致");
-                com.riskwarning.processing.rule.RuleEvaluationContracts.validate(row.getCalculationDetails().getRuleCalculation().getFinalDecision());
-                com.riskwarning.common.dto.analysis.RuleEvaluationResult decision = row.getCalculationDetails().getRuleCalculation().getFinalDecision();
-                if (!row.getIndicatorId().equals(decision.getIndicatorId()) || row.getStatus() != decision.getStatus()
-                        || !Objects.equals(row.getInputHash(), decision.getInputHash()))
-                    throw new IllegalStateException("概览规则审计与最终决定不一致");
+                IndicatorResultDetail detail = row.getCalculationDetails();
+                // 1.2 逐要求评分只写 scoringDecision；1.1 及更早版本才写 ruleCalculation。
+                if (detail != null && detail.getScoringDecision() != null) {
+                    ScoringDecision scored = detail.getScoringDecision();
+                    if (!row.getIndicatorId().equals(scored.getIndicatorId())
+                            || !Objects.equals(row.getInputHash(), scored.getInputHash()))
+                        throw new IllegalStateException("概览规则审计与最终决定不一致");
+                } else {
+                    if (detail == null || detail.getRuleCalculation() == null)
+                        throw new IllegalStateException("概览规则审计作用域或详情不一致");
+                    com.riskwarning.processing.rule.RuleEvaluationContracts.validate(detail.getRuleCalculation().getFinalDecision());
+                    com.riskwarning.common.dto.analysis.RuleEvaluationResult decision = detail.getRuleCalculation().getFinalDecision();
+                    if (!row.getIndicatorId().equals(decision.getIndicatorId()) || row.getStatus() != decision.getStatus()
+                            || !Objects.equals(row.getInputHash(), decision.getInputHash()))
+                        throw new IllegalStateException("概览规则审计与最终决定不一致");
+                }
                 if (row.getStatus() == com.riskwarning.common.enums.analysis.RuleEvaluationStatus.DECIDED
                         || row.getStatus() == com.riskwarning.common.enums.analysis.RuleEvaluationStatus.DECIDED_WITH_CONFLICT)
                     summary.setDecisionCount(summary.getDecisionCount() + 1);

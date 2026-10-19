@@ -25,4 +25,7 @@ public class IndicatorResultDetail {
     private List<AnalysisTrace> traces;
     /** 1.1/Reasoning 必填；1.0 保留原有字段和默认版本。 */
     private com.riskwarning.common.dto.analysis.RuleCalculationDetail ruleCalculation;
+    /** 1.2 的逐要求决定；旧版本保持为空。 */
+    private com.riskwarning.common.dto.scoring.ScoringDecision scoringDecision;
+    private com.riskwarning.common.dto.scoring.ScoringSourceBundle scoringSource;
 }

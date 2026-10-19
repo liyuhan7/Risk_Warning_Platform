@@ -32,6 +32,14 @@ public class FactExtractionValidationResult {
                 .sorted().collect(Collectors.toList());
     }
 
+    /** 返回可定位到响应字段的诊断，不包含证据正文或模型响应原文。 */
+    public List<String> errorDetails() {
+        return errors.stream().map(error ->
+                (error.getField() == null ? "response" : error.getField())
+                        + ": " + error.getCode() + " - " + error.getDetail())
+                .collect(Collectors.toList());
+    }
+
     public List<FactValidationError> immutableErrors() {
         return Collections.unmodifiableList(errors);
     }

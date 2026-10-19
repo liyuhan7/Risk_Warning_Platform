@@ -6,6 +6,7 @@ import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.riskwarning.common.po.behavior.Behavior;
 import com.riskwarning.processing.client.ClassifierClient;
+import com.riskwarning.processing.config.AnalysisProcessingProperties;
 import com.riskwarning.processing.repository.ElasticsearchBehaviorDocumentRepository;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
@@ -45,7 +46,8 @@ class StructuredBehaviorPersistenceIntegrationTest {
             ClassifierClient classifier = mock(ClassifierClient.class);
             when(classifier.classifyBatch(any())).thenReturn(classification());
             ElasticsearchBehaviorDocumentRepository repository = new ElasticsearchBehaviorDocumentRepository(es);
-            StructuredBehaviorWriter writer = new StructuredBehaviorWriter(repository, classifier);
+            StructuredBehaviorWriter writer = new StructuredBehaviorWriter(repository, classifier,
+                    new AnalysisProcessingProperties());
             Behavior fact = fact("fact");
             writer.enrichAndWrite(Collections.singletonList(fact));
             writer.enrichAndWrite(Collections.singletonList(fact));

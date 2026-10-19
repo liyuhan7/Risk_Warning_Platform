@@ -15,6 +15,10 @@ final class ReasoningReportProjection {
     private ReasoningReportProjection() { }
 
     static void validate(AnalysisRun run, List<IndicatorResult> results) {
+        if (run.getAnalysisSummary() != null && "REASONING_RULES_V2".equals(run.getAnalysisSummary().path("analysisMode").asText())) {
+            RequirementReportProjection.validate(run, results);
+            return;
+        }
         require(run.getStatus() == AnalysisRunStatus.RUNNING && run.getAnalysisSummary() != null
                 && run.getExpectedBehaviorIds() != null, "合规报告要求已准备的运行");
         String kind = run.getAnalysisSummary().path("completionKind").asText();

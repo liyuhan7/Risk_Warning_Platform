@@ -82,7 +82,7 @@ public class AnalysisContextService {
         }
         return AnalysisContextVO.builder().contextVersion(CONTEXT_VERSION).assessmentId(assessmentId)
                 .projectId(projectId).analysisRunId(run.getAnalysisRunId()).runStatus(run.getStatus().name())
-                .analysisMode("REASONING_RULES_V1").generatedAt(time(LocalDateTime.now()))
+                .analysisMode(run.getAnalysisSummary() != null && "1.2".equals(run.getAnalysisSummary().path("schemaVersion").asText()) ? "REASONING_RULES_V2" : "REASONING_RULES_V1").generatedAt(time(LocalDateTime.now()))
                 .behaviorCount(items.size()).readyForAnalysisCount(ready).blockedCount(items.size() - ready)
                 .blockedReasons(blockedReasons).items(items).build();
     }

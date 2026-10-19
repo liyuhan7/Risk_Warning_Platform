@@ -1,6 +1,11 @@
 server:
   port: 8089
 
+knowledge:
+  dataset:
+    enabled: ${SCORING_DATASET_ENABLED:false}
+    directory: ${SCORING_DATASET_DIRECTORY:documents/data}
+
 assessment:
   reliability:
     enabled: false

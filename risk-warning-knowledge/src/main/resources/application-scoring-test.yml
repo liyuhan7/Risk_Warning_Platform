@@ -1,0 +1,5 @@
+# 与 processing 的 scoring-test profile 配合发布本次评分所需的完整法规依据。
+knowledge:
+  dataset:
+    enabled: ${SCORING_DATASET_ENABLED:true}
+    directory: ${SCORING_DATASET_DIRECTORY:documents/data}

@@ -243,12 +243,13 @@ COMMENT ON COLUMN public.t_indicator_result.risk_triggered IS '是否触发了�
 -- P2 合规分析权威结果
 CREATE TABLE IF NOT EXISTS public.t_analysis_result (
     id VARCHAR(64) PRIMARY KEY,
-    schema_version VARCHAR(8) NOT NULL CONSTRAINT ck_analysis_result_schema_version CHECK (schema_version IN ('1.0', '1.1')),
+    schema_version VARCHAR(8) NOT NULL CONSTRAINT ck_analysis_result_schema_version CHECK (schema_version IN ('1.0', '1.1', '1.2')),
     analysis_run_id VARCHAR(64) NOT NULL REFERENCES public.t_analysis_run(analysis_run_id),
     assessment_id BIGINT NOT NULL REFERENCES public.t_assessment_result(id) ON DELETE CASCADE,
     behavior_id VARCHAR(128) NOT NULL,
     evidence_ids JSONB NOT NULL CHECK (jsonb_typeof(evidence_ids) = 'array'),
     indicator_id VARCHAR(128) NOT NULL,
+    requirement_findings JSONB,
     regulation_ids JSONB CHECK (regulation_ids IS NULL OR jsonb_typeof(regulation_ids) = 'array'),
     applicable VARCHAR(32) NOT NULL CHECK (applicable IN ('APPLICABLE', 'NOT_APPLICABLE', 'UNKNOWN')),
     requirement TEXT,
@@ -281,8 +282,8 @@ CREATE TABLE IF NOT EXISTS public.t_analysis_result (
         schema_version = '1.0' OR applicable <> 'UNKNOWN'
         OR compliance_status IN ('INSUFFICIENT_EVIDENCE', 'NEEDS_REVIEW')),
     CONSTRAINT ck_analysis_result_gap CHECK (
-        (compliance_status <> 'NON_COMPLIANT' OR gap_type IS NOT NULL)
-        AND (gap_value IS NULL OR gap_unit IS NOT NULL))
+        schema_version = '1.2' OR ((compliance_status <> 'NON_COMPLIANT' OR gap_type IS NOT NULL)
+        AND (gap_value IS NULL OR gap_unit IS NOT NULL)))
 );
 
 -- 模型调用审计不保存完整 Prompt，重试序号按 Run/Behavior 分配。
@@ -543,3 +544,56 @@ CREATE TABLE IF NOT EXISTS public.t_durable_work (
 );
 CREATE INDEX IF NOT EXISTS ix_durable_work_claim
 ON public.t_durable_work(namespace, kind, state, available_at, lease_until);
+
+-- 行为要求评分及本次使用的依据与规则。
+CREATE TABLE IF NOT EXISTS public.t_scoring_run_snapshot (
+    analysis_run_id VARCHAR(64) PRIMARY KEY,
+    project_id BIGINT NOT NULL,
+    assessment_id BIGINT NOT NULL,
+    registry_version TEXT NOT NULL,
+    dataset_version VARCHAR(64) NOT NULL,
+    snapshot_hash VARCHAR(64) NOT NULL,
+    source_bundles JSONB NOT NULL,
+    rule_definitions JSONB NOT NULL,
+    indicator_behaviors JSONB NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT fk_scoring_snapshot_scope FOREIGN KEY (analysis_run_id, assessment_id, project_id)
+        REFERENCES public.t_analysis_run(analysis_run_id, assessment_id, project_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.t_requirement_evaluation (
+    id VARCHAR(64) PRIMARY KEY,
+    project_id BIGINT NOT NULL,
+    assessment_id BIGINT NOT NULL,
+    analysis_run_id VARCHAR(64) NOT NULL,
+    indicator_id VARCHAR(128) NOT NULL,
+    requirement_id VARCHAR(128) NOT NULL,
+    behavior_id VARCHAR(128) NOT NULL,
+    regulation_id VARCHAR(128) NOT NULL,
+    judgment VARCHAR(32) NOT NULL,
+    satisfaction NUMERIC,
+    earned NUMERIC,
+    maximum_score NUMERIC,
+    observed_value NUMERIC,
+    observed_unit TEXT,
+    condition_met BOOLEAN,
+    gap_type VARCHAR(32),
+    gap_value NUMERIC,
+    gap_unit TEXT,
+    violation_degree TEXT,
+    input_hash VARCHAR(64) NOT NULL,
+    source_bundle_hash VARCHAR(64) NOT NULL,
+    registry_version TEXT NOT NULL,
+    rule_version TEXT NOT NULL,
+    evidence_ids JSONB NOT NULL,
+    conflict BOOLEAN NOT NULL,
+    reason TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT uq_requirement_evaluation UNIQUE (analysis_run_id, indicator_id, requirement_id, behavior_id),
+    CONSTRAINT fk_requirement_evaluation_scope FOREIGN KEY (analysis_run_id, assessment_id, project_id)
+        REFERENCES public.t_analysis_run(analysis_run_id, assessment_id, project_id),
+    CONSTRAINT ck_requirement_satisfaction CHECK (satisfaction IS NULL OR satisfaction BETWEEN 0 AND 1),
+    CONSTRAINT ck_requirement_score CHECK (earned IS NULL OR (maximum_score IS NOT NULL AND earned BETWEEN 0 AND maximum_score))
+);
+CREATE INDEX IF NOT EXISTS idx_requirement_evaluation_behavior ON public.t_requirement_evaluation(analysis_run_id, behavior_id);
+CREATE INDEX IF NOT EXISTS idx_requirement_evaluation_regulation ON public.t_requirement_evaluation(analysis_run_id, regulation_id);

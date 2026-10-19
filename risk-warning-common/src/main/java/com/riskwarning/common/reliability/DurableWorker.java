@@ -7,6 +7,7 @@ import com.riskwarning.common.observability.AssessmentFlowMdc;
 import com.riskwarning.common.observability.AssessmentFlowStage;
 import com.riskwarning.common.observability.AssessmentFlowStatus;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.SmartLifecycle;
 
 import java.util.Collections;
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 /** 事务外执行 Handler，并用独立短事务维持 lease。 */
 @Slf4j
-public class DurableWorker implements SmartLifecycle {
+public class DurableWorker implements SmartLifecycle, DisposableBean {
 
     private final DurableWorkStore store;
     private final Map<String, DurableWorkHandler> handlers;
@@ -69,6 +70,9 @@ public class DurableWorker implements SmartLifecycle {
                     sleep(properties.getPollInterval().toMillis());
                 }
             } catch (RuntimeException failure) {
+                if (!running || Thread.currentThread().isInterrupted()) {
+                    return;
+                }
                 // 领取或调度异常不得终止常驻线程；短暂退避后继续轮询。
                 log.error("Durable Worker 轮询异常，将继续重试: workerId={}", workerId, failure);
                 sleep(properties.getPollInterval().toMillis());
@@ -79,7 +83,13 @@ public class DurableWorker implements SmartLifecycle {
     private boolean pollOnce() {
         boolean claimedAny = false;
         for (DurableWorkHandler handler : handlers.values()) {
+            if (!running || Thread.currentThread().isInterrupted()) {
+                break;
+            }
             DurableWork work = store.claim(handler.kind(), workerId);
+            if (!running || Thread.currentThread().isInterrupted()) {
+                break;
+            }
             if (work != null) {
                 claimedAny = true;
                 logClaimed(handler, work);
@@ -243,6 +253,12 @@ public class DurableWorker implements SmartLifecycle {
         running = false;
         workers.shutdownNow();
         heartbeats.shutdownNow();
+    }
+
+    /** 启动失败时 Spring 可能直接销毁组件，仍须停止自建轮询与续租线程。 */
+    @Override
+    public void destroy() {
+        stop();
     }
 
     @Override public boolean isRunning() { return running; }

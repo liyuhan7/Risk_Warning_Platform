@@ -8,10 +8,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
+import org.springframework.context.SmartLifecycle;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -264,6 +269,67 @@ class DurableWorkerTest {
 
         verify(store, timeout(1000).times(2)).complete(any());
         verify(store, never()).retry(any(), any());
+    }
+
+    @Test
+    void startupFailureDestroysStartedWorkerBeforeResourcesAreReleased() throws Exception {
+        worker.stop();
+        worker = new DurableWorker(store, Collections.singletonList(handler(0, false, null)),
+                properties, flowLogger);
+        GenericApplicationContext context = new GenericApplicationContext();
+        context.registerBean("durableWorker", DurableWorker.class, () -> worker);
+        context.registerBean("laterLifecycle", SmartLifecycle.class, () -> new SmartLifecycle() {
+            @Override public void start() { throw new IllegalStateException("后续组件启动失败"); }
+            @Override public void stop() { }
+            @Override public boolean isRunning() { return false; }
+            @Override public int getPhase() { return Integer.MAX_VALUE; }
+        });
+        try {
+            assertThrows(RuntimeException.class, context::refresh);
+
+            assertFalse(worker.isRunning(), "启动失败销毁组件后，不得保留轮询线程");
+            ExecutorService executor = (ExecutorService) ReflectionTestUtils.getField(worker, "workers");
+            assertTrue(executor.awaitTermination(1, TimeUnit.SECONDS));
+        } finally {
+            context.close();
+        }
+    }
+
+    @Test
+    void normalContextCloseStopsWorkerAndRepeatedCleanupIsSafe() throws Exception {
+        GenericApplicationContext context = new GenericApplicationContext();
+        context.registerBean("durableWorker", DurableWorker.class, () -> worker);
+        try {
+            context.refresh();
+            assertTrue(worker.isRunning());
+        } finally {
+            context.close();
+        }
+
+        assertFalse(worker.isRunning());
+        ExecutorService executor = (ExecutorService) ReflectionTestUtils.getField(worker, "workers");
+        assertTrue(executor.awaitTermination(1, TimeUnit.SECONDS));
+        worker.destroy();
+    }
+
+    @Test
+    void stopDuringPollingPreventsClaimingAnotherHandler() throws Exception {
+        worker.stop();
+        DurableWorkHandler first = handler(0, false, null);
+        DurableWorkHandler second = new DurableWorkHandler() {
+            @Override public String kind() { return "SECOND"; }
+            @Override public void execute(DurableWorkContext context, String payload) { }
+        };
+        worker = new DurableWorker(store, java.util.Arrays.asList(first, second), properties, flowLogger);
+        when(store.claim(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString()))
+                .thenAnswer(invocation -> { worker.stop(); return null; });
+
+        worker.start();
+
+        ExecutorService executor = (ExecutorService) ReflectionTestUtils.getField(worker, "workers");
+        assertTrue(executor.awaitTermination(1, TimeUnit.SECONDS));
+        verify(store, org.mockito.Mockito.times(1)).claim(
+                org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString());
     }
 
     @Test

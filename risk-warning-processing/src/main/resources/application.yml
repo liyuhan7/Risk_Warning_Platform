@@ -25,6 +25,11 @@ analysis:
     v2-location: ${SCORING_V2_REGISTRY:classpath:rules/verified-rules-v2.json}
     allow-test-registry: ${SCORING_ALLOW_TEST_REGISTRY:false}
     evaluation-index: ${SCORING_EVALUATION_INDEX:t_requirement_evaluation}
+    fact-mode: ${SCORING_FACT_MODE:INDICATOR}
+    fact-catalog: ${SCORING_FACT_CATALOG:classpath:rules/labor-fact-bindings-v1.json}
+    fact-max-questions: ${SCORING_FACT_MAX_QUESTIONS:16}
+    fact-max-input-code-points: ${SCORING_FACT_MAX_INPUT_CODE_POINTS:12000}
+    fact-concurrency: ${SCORING_FACT_CONCURRENCY:3}
   processing:
     batch-size: 16
 

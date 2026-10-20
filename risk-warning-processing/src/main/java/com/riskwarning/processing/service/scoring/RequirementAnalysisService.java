@@ -118,7 +118,7 @@ public class RequirementAnalysisService {
         Set<String> expected = rule.getRequirements().stream().filter(r -> Boolean.TRUE.equals(r.getExpressible())).map(Requirement::getRequirementId).collect(Collectors.toSet());
         Set<String> seen = new HashSet<>(); List<RequirementFinding> out = new ArrayList<>();
         for (JsonNode row : root.path("requirementFindings")) {
-            if (row.has("indicatorId") || row.has("behaviorId")) throw new IllegalArgumentException("模型不能绑定运行身份");
+            if (row.has("indicatorId") || row.has("behaviorId") || row.has("judgmentSource")) throw new IllegalArgumentException("模型不能绑定运行身份或判断来源");
             RequirementFinding finding = mapper.treeToValue(row, RequirementFinding.class);
             if (!expected.contains(finding.getRequirementId()) || !seen.add(finding.getRequirementId()) || finding.getApplicability() == null
                     || finding.getComplianceStatus() == null || finding.getReasoning() == null || finding.getConfidence() == null)

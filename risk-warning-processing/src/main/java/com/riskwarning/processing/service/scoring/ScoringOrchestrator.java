@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "analysis.rules", name = "v2-enabled", havingValue = "true")
 public class ScoringOrchestrator {
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.riskwarning.processing.service.scoring.fact.BehaviorFactAnalysisService factAnalysis;
     private final ScoringDatasetClient datasets;
     private final ScoringRuleRegistry registry;
     private final RequirementScoringEngine engine;
@@ -46,13 +48,22 @@ public class ScoringOrchestrator {
                 throw new IllegalStateException("本次运行登记的规则版本已变化，不能换用新规则续算");
             registry.require(rule.getKey(), snapshot.getSourceBundles().get(rule.getKey()));
         }
-        for (Behavior behavior : behaviors) {
+        boolean behaviorMode = snapshot.getFactExtractionPlan() != null && "BEHAVIOR".equals(snapshot.getFactExtractionPlan().getMode());
+        if (behaviorMode && factAnalysis == null) throw new IllegalStateException("按行为事实分析组件不可用");
+        final ScoringRunSnapshot frozen = snapshot;
+        List<Runnable> factJobs = new ArrayList<>();
+        List<Behavior> orderedBehaviors = new ArrayList<>(behaviors); orderedBehaviors.sort(Comparator.comparing(Behavior::getId));
+        for (Behavior behavior : orderedBehaviors) {
             BehaviorAnalysisContextVO item = items.get(behavior.getId());
             List<String> targets = new ArrayList<>();
             for (Map.Entry<String, List<String>> pair : snapshot.getIndicatorBehaviors().entrySet())
                 if (pair.getValue().contains(behavior.getId())) targets.add(pair.getKey());
             if (item == null || !"SUCCESS".equals(item.getRetrievalStatus()) || !item.isEvidenceComplete() || !item.isSnapshotAvailable()) {
                 writer.behaviorComplete(scope, behavior.getId(), AnalysisAuditStatus.INSUFFICIENT_EVIDENCE, "本次行为没有完整检索或原文证据");
+                continue;
+            }
+            if (behaviorMode && !targets.isEmpty()) {
+                factJobs.add(() -> factAnalysis.process(scope, frozen, item, targets));
                 continue;
             }
             for (String indicator : targets) {
@@ -62,6 +73,7 @@ public class ScoringOrchestrator {
             writer.behaviorComplete(scope, behavior.getId(), targets.isEmpty() ? AnalysisAuditStatus.NEEDS_REVIEW : AnalysisAuditStatus.ANALYZED,
                     targets.isEmpty() ? "本次候选没有已核验启用的要求规则" : null);
         }
+        if (behaviorMode) factAnalysis.execute(factJobs);
         List<AnalysisResult> all = results.findByAssessmentIdAndAnalysisRunId(scope.getAssessmentId(), scope.getAnalysisRunId());
         Map<String, Behavior> byId = behaviors.stream().collect(Collectors.toMap(Behavior::getId, behavior -> behavior));
         Map<String, RetrievalAudit> audits = retrievals.findByAssessmentIdAndAnalysisRunId(scope.getAssessmentId(), scope.getAnalysisRunId()).stream()
@@ -112,6 +124,10 @@ public class ScoringOrchestrator {
         snapshot.setProjectId(scope.getProjectId()); snapshot.setAssessmentId(scope.getAssessmentId()); snapshot.setRegistryVersion(registry.version());
         snapshot.setDatasetVersion(version); snapshot.setSnapshotHash(ScoringJson.hash(identity)); snapshot.setSourceBundles(bundles);
         snapshot.setRuleDefinitions(rules); snapshot.setIndicatorBehaviors(selection); snapshot.setCreatedAt(LocalDateTime.now());
+        if (factAnalysis != null) {
+            snapshot.setFactExtractionPlan(factAnalysis.prepare(snapshot, contexts));
+            identity.put("factExtractionPlan", snapshot.getFactExtractionPlan()); snapshot.setSnapshotHash(ScoringJson.hash(identity));
+        }
         return snapshot;
     }
 }

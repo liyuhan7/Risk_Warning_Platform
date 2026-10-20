@@ -24,6 +24,7 @@ public class ScoringRuleRegistry {
     private final ObjectMapper mapper = new ObjectMapper().enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
             .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS).disable(MapperFeature.ALLOW_COERCION_OF_SCALARS);
     private final ScoringRuleSet document;
+    private String contentHash;
 
     /**
      * 存在静态工厂用的私有构造函数，必须显式标注注入构造函数，
@@ -33,7 +34,7 @@ public class ScoringRuleRegistry {
     public ScoringRuleRegistry(@Value("${analysis.rules.v2-location:classpath:rules/verified-rules-v2.json}") String location,
                                @Value("${analysis.rules.allow-test-registry:false}") boolean allowTest) {
         try (InputStream input = new DefaultResourceLoader().getResource(location).getInputStream()) {
-            document = parse(mapper.readTree(input).toString(), allowTest);
+            document = parse(org.springframework.util.StreamUtils.copyToString(input, java.nio.charset.StandardCharsets.UTF_8), allowTest);
         } catch (RuleContractException failure) { throw failure; }
         catch (Exception failure) { throw error("REGISTRY_UNAVAILABLE", "v2 规则资源不可用"); }
     }
@@ -45,6 +46,7 @@ public class ScoringRuleRegistry {
     }
 
     public String version() { return document.getRegistryVersion(); }
+    public String contentHash() { return contentHash; }
     public boolean isEnabled(String id) {
         IndicatorRule rule = document.getRules().get(id);
         return rule != null && Boolean.TRUE.equals(rule.getEnabled());
@@ -94,6 +96,7 @@ public class ScoringRuleRegistry {
         ScoringRuleSet rules;
         try {
             JsonNode tree = mapper.readTree(json);
+            contentHash = ScoringJson.sha256(json.replace("\r\n", "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
             validateRiskNames(tree);
             rules = mapper.treeToValue(tree, ScoringRuleSet.class);
         }

@@ -556,6 +556,7 @@ CREATE TABLE IF NOT EXISTS public.t_scoring_run_snapshot (
     source_bundles JSONB NOT NULL,
     rule_definitions JSONB NOT NULL,
     indicator_behaviors JSONB NOT NULL,
+    fact_extraction_plan JSONB,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT fk_scoring_snapshot_scope FOREIGN KEY (analysis_run_id, assessment_id, project_id)
         REFERENCES public.t_analysis_run(analysis_run_id, assessment_id, project_id)

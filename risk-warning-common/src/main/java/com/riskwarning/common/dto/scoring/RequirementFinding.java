@@ -15,6 +15,9 @@ public class RequirementFinding {
     private String behaviorId;
     private Applicability applicability;
     private ComplianceStatus complianceStatus;
+    /** FACTS_DERIVED 由程序推导，空值保留历史模型结论的语义。 */
+    @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+    private String judgmentSource;
     private List<String> evidenceIds;
     private Map<String, ConditionValue> conditionValues;
     private BigDecimal confidence;
@@ -22,6 +25,9 @@ public class RequirementFinding {
 
     @Data
     public static class ConditionValue {
+        /** KNOWN、NOT_STATED 或 UNCERTAIN；历史数据可为空。 */
+        @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+        private String factStatus;
         private Boolean conditionMet;
         private BigDecimal observedValue;
         private String observedUnit;

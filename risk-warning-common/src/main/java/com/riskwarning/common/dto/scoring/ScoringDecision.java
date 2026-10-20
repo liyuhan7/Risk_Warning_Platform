@@ -32,6 +32,9 @@ public class ScoringDecision {
         private String requirementId;
         private String regulationId;
         private Judgment judgment;
+        /** FACTS_DERIVED 不表示曾执行模型与规则的独立结论比较。 */
+        @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+        private String judgmentSource;
         private BigDecimal satisfaction;
         private BigDecimal observedValue;
         private String observedUnit;

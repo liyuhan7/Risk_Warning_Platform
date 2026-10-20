@@ -2,6 +2,7 @@ package com.riskwarning.common.po.analysis;
 
 import com.riskwarning.common.dto.scoring.ScoringRuleSet.IndicatorRule;
 import com.riskwarning.common.dto.scoring.ScoringSourceBundle;
+import com.riskwarning.common.dto.scoring.FactExtractionPlan;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Data;
 import org.hibernate.annotations.Type;
@@ -34,6 +35,9 @@ public class ScoringRunSnapshot {
     private Map<String, IndicatorRule> ruleDefinitions;
     @Type(type = "jsonb") @Column(name = "indicator_behaviors", nullable = false, columnDefinition = "jsonb")
     private Map<String, List<String>> indicatorBehaviors;
+    /** 冻结模式、问题、绑定及请求边界，历史运行为空。 */
+    @Type(type = "jsonb") @Column(name = "fact_extraction_plan", columnDefinition = "jsonb")
+    private FactExtractionPlan factExtractionPlan;
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

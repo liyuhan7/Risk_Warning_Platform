@@ -4,3 +4,4 @@ analysis:
     v2-enabled: ${SCORING_V2_ENABLED:true}
     v2-location: ${SCORING_V2_REGISTRY:classpath:rules/labor-reviewed-test-v2.json}
     allow-test-registry: ${SCORING_ALLOW_TEST_REGISTRY:true}
+    fact-mode: ${SCORING_FACT_MODE:BEHAVIOR}

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class BehaviorFactProperties {
     public enum Mode { INDICATOR, BEHAVIOR }
     private Mode factMode = Mode.INDICATOR;
-    private String factCatalog = "classpath:rules/labor-fact-bindings-v1.json";
+    private String factCatalog = "classpath:rules/business-fact-bindings-v1.json";
     private int factMaxQuestions = 16;
     private int factMaxInputCodePoints = 12000;
     private int factConcurrency = 3;

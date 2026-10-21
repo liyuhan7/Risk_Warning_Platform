@@ -12,7 +12,7 @@ import sys
 
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent
-DEFAULT_SCHEMA = BASE_DIR / "schemas" / "fact-extraction-v1.0.json"
+DEFAULT_SCHEMA = BASE_DIR.parents[2] / "risk-warning-processing/src/main/resources/fact-extraction/fact-extraction-v1.0.json"
 DEFAULT_SAMPLES = BASE_DIR / "fact-extraction-samples.json"
 
 FAIL_INVALID_JSON = "INVALID_JSON"

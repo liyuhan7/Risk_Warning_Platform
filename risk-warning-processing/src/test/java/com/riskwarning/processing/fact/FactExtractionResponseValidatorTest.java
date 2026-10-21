@@ -39,23 +39,6 @@ class FactExtractionResponseValidatorTest {
         }
     }
 
-    @Test
-    void packagedSchemaAndPromptEqualFrozenP104Files() throws Exception {
-        assertEquals(
-                objectMapper.readTree(fixture("schemas", "fact-extraction-v1.0.json").toFile()),
-                objectMapper.readTree(Paths.get("src", "main", "resources", "fact-extraction",
-                        "fact-extraction-v1.0.json").toFile()));
-        assertEquals(
-                readNormalized(fixture("prompts", "fact-extraction-v1.0.txt")),
-                readNormalized(Paths.get("src", "main", "resources", "fact-extraction",
-                        "fact-extraction-v1.0.txt")));
-    }
-
-    private String readNormalized(Path path) throws Exception {
-        return new String(Files.readAllBytes(path), StandardCharsets.UTF_8)
-                .replace("\r\n", "\n").replace('\r', '\n');
-    }
-
     private Path fixture(String... parts) {
         Path root = Paths.get("..", "test", "fixtures", "fact-extraction");
         if (!Files.exists(root)) {

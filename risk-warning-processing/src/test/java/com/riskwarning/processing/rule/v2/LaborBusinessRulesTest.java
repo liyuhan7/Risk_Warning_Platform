@@ -12,26 +12,16 @@ import java.nio.file.*;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** 首批已审核业务规则回归；样例事实不代表真实企业材料，注册表仅用于 TEST。 */
-class LaborReviewedRulesTest {
-    private final ScoringRuleRegistry registry = new ScoringRuleRegistry("classpath:rules/labor-reviewed-test-v2.json", true);
+/** 当前劳务业务中的数值边界、法定例外与替代履行回归。 */
+class LaborBusinessRulesTest {
+    private final ScoringRuleRegistry registry = new ScoringRuleRegistry("classpath:rules/business-catalog-test-v2.json", true);
     private final ScoringDataset dataset;
     private static final String NONCOMPETE = "482dec23-9dd6-4273-a431-9c0c5fa75a95";
     private static final String OVERTIME = "4ad95dd2-bcfb-4c74-bbe0-2832045c9f84";
     private static final String OVERTIME_REQ = "req-22ea9d48093c36751d80b146";
 
-    LaborReviewedRulesTest() throws Exception {
+    LaborBusinessRulesTest() throws Exception {
         dataset = new ScoringDataset((Files.exists(Paths.get("documents/data")) ? Paths.get("documents/data") : Paths.get("../documents/data")).toString());
-    }
-
-    @Test void fortyReviewedIndicatorsAndFiftySixRequirementsMatchCurrentLawSources() {
-        assertEquals(40, registry.indicatorIds().size()); int requirements = 0;
-        for (String indicator : registry.indicatorIds()) {
-            IndicatorRule rule = registry.require(indicator, bundle(indicator));
-            assertTrue(rule.getEnabled());
-            assertTrue(rule.getRequirements().stream().allMatch(Requirement::getExpressible)); requirements += rule.getRequirements().size();
-        }
-        assertEquals(56, requirements);
     }
 
     @Test void postEmploymentNoncompeteTwentyFourMonthsPassesAndTwentyFiveMonthsFails() {

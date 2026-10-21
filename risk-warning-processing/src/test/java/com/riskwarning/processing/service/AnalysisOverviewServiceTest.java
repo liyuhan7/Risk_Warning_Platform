@@ -3,6 +3,7 @@ package com.riskwarning.processing.service;
 import com.riskwarning.common.dto.analysis.AnalysisScope;
 import com.riskwarning.common.dto.retrieval.*;
 import com.riskwarning.common.dto.scoring.ScoringDecision;
+import com.riskwarning.common.dto.scoring.ScoringSourceBundle;
 import com.riskwarning.common.enums.analysis.*;
 import com.riskwarning.common.po.analysis.*;
 import com.riskwarning.common.po.behavior.Behavior;
@@ -26,9 +27,10 @@ class AnalysisOverviewServiceTest {
     private final RetrievalAuditRepository audits = mock(RetrievalAuditRepository.class);
     private final BehaviorDocumentRepository behaviors = mock(BehaviorDocumentRepository.class);
     private final RuleEvaluationAuditRepository ruleAudits = mock(RuleEvaluationAuditRepository.class);
+    private final ScoringRunSnapshotRepository snapshots = mock(ScoringRunSnapshotRepository.class);
     private final AnalysisRunSelector runSelector = new AnalysisRunSelector(runs);
     private final AnalysisOverviewService service = new AnalysisOverviewService(
-            assessments, projects, runSelector, results, audits, behaviors, ruleAudits);
+            assessments, projects, runSelector, results, audits, behaviors, ruleAudits, snapshots);
     private final LocalDateTime start = LocalDateTime.of(2026, 9, 18, 10, 0);
     private AnalysisRun run;
 
@@ -41,6 +43,7 @@ class AnalysisOverviewServiceTest {
         when(results.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.emptyList());
         when(audits.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.emptyList());
         when(behaviors.findByScope(7L, 86L, "latest")).thenReturn(Collections.emptyList());
+        when(snapshots.findById("latest")).thenReturn(Optional.empty());
     }
 
     @Test void notStartedDoesNotReadArtifacts() {
@@ -208,6 +211,62 @@ class AnalysisOverviewServiceTest {
         assertEquals(51, group.getRetrievalAudit().getCandidateTotal()); assertEquals(50, group.getRetrievalAudit().getCandidates().size());
         assertEquals("指标50", group.getConclusions().get(0).getIndicatorName());
     }
+    @Test void regulationNameFallsBackToRunSnapshot() {
+        // 法规来自完整来源包但未进入检索候选时，名称仍应解析，不能把标识符展示给用户。
+        reasoningRun();
+        when(results.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.singletonList(
+                AnalysisResult.builder().id("result").behaviorId("b").indicatorId("i50")
+                        .applicable(Applicability.APPLICABLE).complianceStatus(ComplianceStatus.COMPLIANT)
+                        .regulationIds(Collections.singletonList("reg-1")).modelVersion("model-v1").build()));
+        when(snapshots.findById("latest")).thenReturn(Optional.of(snapshot("reg-1", "劳动合同法-经济性裁员")));
+
+        AnalysisConclusionVO conclusion = service.overview(86L, 7L).getBehaviorGroups().get(0).getConclusions().get(0);
+
+        assertEquals(Collections.singletonList("劳动合同法-经济性裁员"), conclusion.getRegulationNames());
+    }
+
+    @Test void retrievedCandidateNameTakesPrecedenceOverSnapshot() {
+        reasoningRun();
+        when(results.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.singletonList(
+                AnalysisResult.builder().id("result").behaviorId("b").indicatorId("i50")
+                        .applicable(Applicability.APPLICABLE).complianceStatus(ComplianceStatus.COMPLIANT)
+                        .regulationIds(Collections.singletonList("reg-1")).modelVersion("model-v1").build()));
+        audit(RetrievalAuditStatus.SUCCESS, AnalysisAuditStatus.SUCCESS,
+                Collections.singletonList(RetrievalCandidateSnapshot.builder().name("候选名称")
+                        .result(RetrievalResult.builder().candidateType(RetrievalCandidateType.REGULATION)
+                                .candidateId("reg-1").build()).build()));
+        when(snapshots.findById("latest")).thenReturn(Optional.of(snapshot("reg-1", "快照名称")));
+
+        AnalysisConclusionVO conclusion = service.overview(86L, 7L).getBehaviorGroups().get(0).getConclusions().get(0);
+
+        assertEquals(Collections.singletonList("候选名称"), conclusion.getRegulationNames());
+    }
+
+    @Test void regulationNameSnapshotFailureDoesNotBreakOverview() {
+        reasoningRun();
+        when(results.findByAssessmentIdAndAnalysisRunId(86L, "latest")).thenReturn(Collections.singletonList(
+                AnalysisResult.builder().id("result").behaviorId("b").indicatorId("i50")
+                        .applicable(Applicability.APPLICABLE).complianceStatus(ComplianceStatus.COMPLIANT)
+                        .regulationIds(Collections.singletonList("reg-1")).modelVersion("model-v1").build()));
+        when(snapshots.findById("latest")).thenThrow(new IllegalStateException("snapshot unavailable"));
+
+        AnalysisConclusionVO conclusion = service.overview(86L, 7L).getBehaviorGroups().get(0).getConclusions().get(0);
+
+        assertNull(conclusion.getRegulationNames().get(0));
+    }
+
+    private ScoringRunSnapshot snapshot(String regulationId, String name) {
+        ScoringSourceBundle.Source source = new ScoringSourceBundle.Source();
+        source.setRegulationId(regulationId);
+        source.setRegulation(com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode().put("name", name));
+        ScoringSourceBundle bundle = new ScoringSourceBundle();
+        bundle.setRelations(Collections.singletonList(source));
+        ScoringRunSnapshot snapshot = new ScoringRunSnapshot();
+        snapshot.setAnalysisRunId("latest");
+        snapshot.setSourceBundles(Collections.singletonMap("i50", bundle));
+        return snapshot;
+    }
+
     @Test void successCandidatesPreventNoCandidateOverride() {
         run.completeWithoutDecision(start.plusSeconds(1));
         RetrievalAudit empty = RetrievalAudit.builder().behaviorId("empty").retrievalStatus(RetrievalAuditStatus.NO_CANDIDATES).candidates(Collections.emptyList()).build();

@@ -38,8 +38,6 @@ public class BehaviorFactMapper {
                 finding.setRequirementId(requirement.getRequirementId()); finding.setJudgmentSource("FACTS_DERIVED");
                 finding.setApplicability(Applicability.UNKNOWN); finding.setConditionValues(new TreeMap<>());
                 Set<String> evidence = new TreeSet<>(); List<String> explanations = new ArrayList<>(); List<BigDecimal> confidences = new ArrayList<>();
-                List<Condition> conditions = SharedFactCatalog.leaves(requirement.getCondition());
-                if (requirement.getExceptWhen() != null) conditions.addAll(SharedFactCatalog.leaves(requirement.getExceptWhen()));
                 for (Binding binding : plan.getBindings()) if (indicator.equals(binding.getIndicatorId()) && requirement.getRequirementId().equals(binding.getRequirementId())) {
                     Question question = questions.get(binding.getFactKey()); Answer answer = answers.get(question.getId());
                     if (answer == null) { answer = new Answer(); answer.setStatus("UNCERTAIN"); }
@@ -48,16 +46,16 @@ public class BehaviorFactMapper {
                     if (answer.getConfidence() != null) confidences.add(answer.getConfidence());
                     if (binding.getConditionId() == null) {
                         if ("KNOWN".equals(answer.getStatus())) finding.setApplicability(Applicability.valueOf(answer.getApplicability()));
-                        explanations.add("适用性=" + finding.getApplicability());
+                        explanations.add("适用性：" + (finding.getApplicability() == Applicability.APPLICABLE ? "适用" : finding.getApplicability() == Applicability.NOT_APPLICABLE ? "不适用" : "待核实"));
                     } else {
                         RequirementFinding.ConditionValue value = new RequirementFinding.ConditionValue(); value.setFactStatus(answer.getStatus());
                         value.setConditionMet(answer.getBooleanValue()); value.setObservedValue(answer.getNumberValue()); value.setObservedUnit(answer.getUnit()); value.setEvidenceIds(refs);
                         finding.getConditionValues().put(binding.getConditionId(), value);
-                        String observation = "KNOWN".equals(answer.getStatus()) ? Objects.toString(answer.getBooleanValue(), Objects.toString(answer.getNumberValue(), "")) + Objects.toString(answer.getUnit(), "") : answer.getStatus();
-                        Condition condition = conditions.stream().filter(item -> binding.getConditionId().equals(item.getConditionId())).findFirst().get();
-                        explanations.add(binding.getConditionId() + "：观测=" + observation + "，登记条件=" + condition.getOperator()
-                                + (condition.getOperand() == null ? "" : " " + condition.getOperand())
-                                + (condition.getUpperOperand() == null ? "" : " 至 " + condition.getUpperOperand()) + "，证据=" + refs);
+                        String observation = !"KNOWN".equals(answer.getStatus()) ? ("NOT_STATED".equals(answer.getStatus()) ? "原文证据不足" : "事实待核实")
+                                : answer.getBooleanValue() != null ? (answer.getBooleanValue() ? "是" : "否")
+                                : answer.getNumberValue().stripTrailingZeros().toPlainString() + unit(answer.getUnit());
+                        explanations.add(question.getDefinition().getText() + "：" + observation
+                                + (answer.getReason() == null || answer.getReason().trim().isEmpty() ? "" : "（" + answer.getReason() + "）"));
                     }
                 }
                 // 对原文不足的说明仍关联本行为材料，不借用其他行为补证。
@@ -67,7 +65,7 @@ public class BehaviorFactMapper {
                 Atomic atomic = engine.judgeRequirement(requirement, behavior.getBehaviorId(), finding, new HashSet<>(behavior.getEvidenceIds()));
                 finding.setComplianceStatus(status(atomic.getJudgment()));
                 String detail = atomic.getReason();
-                finding.setReasoning(finding.getReasoning() + "；程序判定=" + atomic.getJudgment()
+                finding.setReasoning(finding.getReasoning() + "；判定：" + judgment(atomic.getJudgment())
                         + (detail == null || detail.equals(finding.getReasoning()) ? "" : "；" + detail));
                 findings.add(finding);
             }
@@ -82,7 +80,7 @@ public class BehaviorFactMapper {
                     .complianceStatus(unknown ? ComplianceStatus.NEEDS_REVIEW : violation ? ComplianceStatus.NON_COMPLIANT : pending ? ComplianceStatus.NEEDS_REVIEW : ComplianceStatus.COMPLIANT)
                     .requirement("逐要求条件由共享事实映射").enterpriseFact(behavior.getDescription()).requirementFindings(findings)
                     .confidence(findings.stream().map(RequirementFinding::getConfidence).mapToDouble(BigDecimal::doubleValue).min().orElse(0))
-                    .reasoning("FACTS_DERIVED：模型提供事实，程序执行登记条件；未进行独立模型合规结论比较")
+                    .reasoning("依据行为事实、法规适用条件和已登记要求计算。")
                     .modelVersion(settings.getModelVersion()).promptVersion(settings.getPromptVersion()).analyzedAt(LocalDateTime.now()).build());
         }
         return results;
@@ -92,5 +90,27 @@ public class BehaviorFactMapper {
         if (judgment == Judgment.VIOLATED) return ComplianceStatus.NON_COMPLIANT;
         if (judgment == Judgment.SATISFIED || judgment == Judgment.UNSATISFIED_OPTIONAL || judgment == Judgment.NOT_APPLICABLE) return ComplianceStatus.COMPLIANT;
         return judgment == Judgment.INSUFFICIENT_EVIDENCE ? ComplianceStatus.INSUFFICIENT_EVIDENCE : ComplianceStatus.NEEDS_REVIEW;
+    }
+
+    private static String unit(String unit) {
+        if ("HOURS".equals(unit)) return "小时";
+        if ("DAYS".equals(unit)) return "天";
+        if ("MONTHS".equals(unit)) return "个月";
+        if ("YEARS".equals(unit)) return "年";
+        if ("PERCENT".equals(unit)) return "%";
+        if ("CNY".equals(unit)) return "元";
+        return Objects.toString(unit, "");
+    }
+
+    private static String judgment(Judgment judgment) {
+        switch (judgment) {
+            case SATISFIED: return "满足";
+            case VIOLATED: return "违规";
+            case UNSATISFIED_OPTIONAL: return "未满足倡导要求";
+            case NOT_APPLICABLE: return "不适用";
+            case INSUFFICIENT_EVIDENCE: return "证据不足";
+            case INVALID_INPUT: return "事实待核实";
+            default: return "待审";
+        }
     }
 }

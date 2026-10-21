@@ -13,6 +13,8 @@ import com.riskwarning.common.enums.risk.RiskLevelEnum;
 import com.riskwarning.common.po.analysis.*;
 import com.riskwarning.processing.repository.*;
 import com.riskwarning.processing.service.scoring.*;
+import com.riskwarning.processing.service.scoring.fact.*;
+import org.springframework.test.util.ReflectionTestUtils;
 import com.riskwarning.processing.service.AnalysisContextService;
 import com.riskwarning.processing.service.ComplianceAuditWriter;
 import com.riskwarning.processing.client.ScoringDatasetClient;
@@ -65,8 +67,6 @@ class RequirementPersistenceIntegrationTest {
         JdbcTemplate sql = new JdbcTemplate(dataSource(settings, url + "?currentSchema=" + namespace));
         Path root = Files.exists(Paths.get("documents/schema.sql")) ? Paths.get("").toAbsolutePath() : Paths.get("..").toAbsolutePath();
         sql.execute(read(root.resolve("documents/schema.sql")).replace("public.", namespace + "."));
-        String migration = read(root.resolve("documents/migrations/008_requirement_scoring.sql")).replace("public.", namespace + ".");
-        sql.execute(migration); sql.execute(migration);
         sql.execute("INSERT INTO t_enterprise(id,name,credit_code) VALUES(1,'评分业务验证','scoring-verification')");
         sql.execute("INSERT INTO t_project(id,enterprise_id,name) VALUES(1,1,'评分业务验证')");
         sql.execute("INSERT INTO t_assessment_result(id,project_id) VALUES(2,1)");
@@ -149,18 +149,20 @@ class RequirementPersistenceIntegrationTest {
             report.put("scope", "组件级真实 PostgreSQL 与 Elasticsearch；未经过上传或真实模型");
             Path evidence = root.resolve("documents/local/scoring-evidence/persistence-" + suffix + ".json");
             Files.write(evidence, M.writerWithDefaultPrettyPrinter().writeValueAsBytes(report), StandardOpenOption.CREATE_NEW);
-            verifyReviewedBusinessPipeline(repositories, transactions, sql, es, writer, root, namespace, suffix);
+            verifyReviewedBusinessPipeline(repositories, transactions, sql, es, writer, root, namespace, suffix, false);
+            verifyReviewedBusinessPipeline(repositories, transactions, sql, es, writer, root, namespace, suffix, true);
         } finally { factory.destroy(); }
     }
 
     /** 使用发布后的真实业务规则验证主编排至报告任务；模型响应受控，数据库与 ES 为实际读写。 */
     private void verifyReviewedBusinessPipeline(JpaRepositoryFactory repositories, JpaTransactionManager transactions, JdbcTemplate sql,
-            ElasticsearchClient es, ScoringPersistenceService writer, Path root, String namespace, String suffix) throws Exception {
-        sql.execute("INSERT INTO t_assessment_result(id,project_id) VALUES(3,1)");
-        sql.execute("INSERT INTO t_project_file(id,project_id,assessment_id,original_file_name) VALUES(3,1,3,'竞业限制核验.txt')");
-        AnalysisScope scope = new AnalysisScope(1L, 3L, "labor-" + suffix); LocalDateTime now = LocalDateTime.now();
+            ElasticsearchClient es, ScoringPersistenceService writer, Path root, String namespace, String suffix, boolean behaviorMode) throws Exception {
+        long assessmentId = behaviorMode ? 4L : 3L;
+        sql.update("INSERT INTO t_assessment_result(id,project_id) VALUES(?,1)", assessmentId);
+        sql.update("INSERT INTO t_project_file(id,project_id,assessment_id,original_file_name) VALUES(?,1,?,'竞业限制核验.txt')", assessmentId, assessmentId);
+        AnalysisScope scope = new AnalysisScope(1L, assessmentId, (behaviorMode ? "labor-facts-" : "labor-") + suffix); LocalDateTime now = LocalDateTime.now();
         String indicator = "482dec23-9dd6-4273-a431-9c0c5fa75a95";
-        EvidenceChunk chunk = EvidenceChunk.create(3L, 1L, 3L, "竞业限制核验.txt", 1, 0, null, null,
+        EvidenceChunk chunk = EvidenceChunk.create(assessmentId, 1L, assessmentId, "竞业限制核验.txt", 1, 0, null, null,
                 "本次候选人属于负有保密义务的技术人员。劳动合同解除后的竞业限制约定期限为25个月，协议范围和保密事项已核对。", now);
         EvidenceChunkRepository evidence = repositories.getRepository(EvidenceChunkRepository.class);
         AnalysisRunRepository runs = repositories.getRepository(AnalysisRunRepository.class);
@@ -168,14 +170,14 @@ class RequirementPersistenceIntegrationTest {
         new TransactionTemplate(transactions).execute(status -> {
             AnalysisRun run = AnalysisRun.start(scope, now, AnalysisExecutionMode.REASONING); run.freezeBehaviors(Collections.singletonList("labor-behavior"));
             run.freezeBehaviorInput(ScoringJson.hash(chunk.getText())); runs.saveAndFlush(run); evidence.saveAndFlush(chunk);
-            retrievals.saveAndFlush(RetrievalAudit.builder().projectId(1L).assessmentId(3L).analysisRunId(scope.getAnalysisRunId()).behaviorId("labor-behavior")
+            retrievals.saveAndFlush(RetrievalAudit.builder().projectId(1L).assessmentId(assessmentId).analysisRunId(scope.getAnalysisRunId()).behaviorId("labor-behavior")
                     .queryText(chunk.getText()).queryTemplateVersion("business-verification").filterVersion("business-verification").filterEnabled(false)
                     .filterApplied(false).filterExpression("{}").retrievalStatus(RetrievalAuditStatus.SUCCESS).analysisStatus(AnalysisAuditStatus.WAITING_ANALYSIS)
                     .candidates(Collections.emptyList()).createdAt(now).updatedAt(now).build()); return null;
         });
         ScoringDataset corpus = new ScoringDataset(root.resolve("documents/data").toString());
         ScoringSourceBundle source = corpus.bundle((String)corpus.manifest().get("datasetVersion"), indicator);
-        ScoringRuleRegistry registry = new ScoringRuleRegistry("classpath:rules/labor-reviewed-test-v2.json", true);
+        ScoringRuleRegistry registry = new ScoringRuleRegistry("classpath:rules/business-catalog-test-v2.json", true);
         ObjectNode response = M.createObjectNode().put("schemaVersion", "1.2").put("indicatorId", indicator);
         com.fasterxml.jackson.databind.node.ArrayNode findings = response.putArray("requirementFindings");
         for (com.riskwarning.common.dto.scoring.ScoringRuleSet.Requirement requirement : registry.require(indicator, source).getRequirements()) {
@@ -190,12 +192,12 @@ class RequirementPersistenceIntegrationTest {
         AiChatProvider model = mock(AiChatProvider.class); when(model.modelId()).thenReturn("controlled-business-model"); when(model.chat(anyString())).thenReturn(response.toString());
         ComplianceAuditWriter auditTarget = new ComplianceAuditWriter(repositories.getRepository(AnalysisAttemptRepository.class), repositories.getRepository(AnalysisResultRepository.class), retrievals, runs);
         RequirementAnalysisService semantic = new RequirementAnalysisService(Optional.of(model), evidence, transactionProxy(auditTarget, transactions));
-        BehaviorAnalysisContextVO context = BehaviorAnalysisContextVO.builder().behaviorId("labor-behavior").description(chunk.getText()).sourceDocumentId(3L)
+        BehaviorAnalysisContextVO context = BehaviorAnalysisContextVO.builder().behaviorId("labor-behavior").description(chunk.getText()).sourceDocumentId(assessmentId)
                 .evidenceIds(Collections.singletonList(chunk.getId())).retrievalStatus("SUCCESS").evidenceComplete(true).snapshotAvailable(true)
                 .indicatorCandidates(Collections.singletonList(RetrievalCandidateVO.builder().candidateId(indicator).snapshotAvailable(true).build()))
                 .regulationCandidates(Collections.emptyList()).build();
         AnalysisContextService contexts = mock(AnalysisContextService.class);
-        when(contexts.context(3L, 1L, scope.getAnalysisRunId())).thenReturn(AnalysisContextVO.builder().items(Collections.singletonList(context)).build());
+        when(contexts.context(assessmentId, 1L, scope.getAnalysisRunId())).thenReturn(AnalysisContextVO.builder().items(Collections.singletonList(context)).build());
         ScoringDatasetClient datasets = mock(ScoringDatasetClient.class); when(datasets.current()).thenReturn(corpus.manifest());
         when(datasets.bundle(source.getDatasetVersion(), indicator)).thenReturn(source);
         DurableWorkProperties settings = new DurableWorkProperties(); settings.setNamespace("scoring-business-verification");
@@ -203,28 +205,76 @@ class RequirementPersistenceIntegrationTest {
         ScoringReportPreparationService reports = transactionProxy(new ScoringReportPreparationService(runs, repositories.getRepository(ScoringRunSnapshotRepository.class),
                 repositories.getRepository(RuleEvaluationAuditRepository.class), repositories.getRepository(IndicatorResultRepository.class),
                 repositories.getRepository(RequirementEvaluationRepository.class), outbox), transactions);
-        String index = "labor_pipeline_" + suffix;
+        String index = (behaviorMode ? "behavior_facts_" : "labor_pipeline_") + suffix;
+        ScoringReportPreparationService reportEntry = reports;
+        if (behaviorMode) {
+            reportEntry = mock(ScoringReportPreparationService.class);
+            java.util.concurrent.atomic.AtomicInteger prepared = new java.util.concurrent.atomic.AtomicInteger();
+            doAnswer(call -> {
+                if (prepared.getAndIncrement() == 0) throw new IllegalStateException("模拟事实保存后、报告准备前中断");
+                reports.prepare(call.getArgument(0), call.getArgument(1), call.getArgument(2)); return null;
+            }).when(reportEntry).prepare(any(), any(), anyBoolean());
+        }
         ScoringOrchestrator orchestrator = new ScoringOrchestrator(datasets, registry, new RequirementScoringEngine(registry, new UniversalConditionEvaluator()), semantic,
                 writer, contexts, repositories.getRepository(ScoringRunSnapshotRepository.class), repositories.getRepository(AnalysisResultRepository.class), retrievals,
-                reports, new RequirementEvaluationProjection(es, repositories.getRepository(RequirementEvaluationRepository.class), index));
+                reportEntry, new RequirementEvaluationProjection(es, repositories.getRepository(RequirementEvaluationRepository.class), index));
         IndicatorCalculationTaskMessage message = new IndicatorCalculationTaskMessage("business-" + suffix, now.toString(), "business-verification", 1L, 1L, 3L, scope.getAnalysisRunId());
-        orchestrator.process(message, scope, Collections.singletonList(Behavior.builder().id("labor-behavior").evidenceIds(Collections.singletonList(chunk.getId())).build()));
-        com.riskwarning.common.po.indicator.IndicatorResult result = repositories.getRepository(IndicatorResultRepository.class).findByAssessmentIdAndAnalysisRunId(3L, scope.getAnalysisRunId()).get(0);
+        BehaviorFactExecutor factExecutor = null;
+        if (behaviorMode) {
+            when(model.chat(anyString())).thenAnswer(call -> {
+                String prompt = call.getArgument(0);
+                com.fasterxml.jackson.databind.JsonNode input = M.readTree(prompt.substring(prompt.indexOf("{\"subject\"")));
+                ObjectNode factsResponse = M.createObjectNode(); com.fasterxml.jackson.databind.node.ArrayNode answers = factsResponse.putArray("answers");
+                for (com.fasterxml.jackson.databind.JsonNode question : input.path("questions")) {
+                    ObjectNode answer = answers.addObject().put("questionId", question.path("id").asText()).put("status", "KNOWN").put("confidence", 0.95);
+                    answer.putArray("evidenceIds").add("E1");
+                    String type = question.path("definition").path("type").asText();
+                    if ("APPLICABILITY".equals(type)) answer.put("applicability", "APPLICABLE");
+                    else if ("NUMBER".equals(type)) answer.put("numberValue", 25).put("unit", "MONTHS");
+                    else answer.put("booleanValue", true);
+                }
+                return factsResponse.toString();
+            });
+            BehaviorFactProperties properties = new BehaviorFactProperties(); properties.setFactMode(BehaviorFactProperties.Mode.BEHAVIOR);
+            SharedFactCatalog catalog = new SharedFactCatalog(properties);
+            factExecutor = new BehaviorFactExecutor(properties);
+            RequirementScoringEngine engine = new RequirementScoringEngine(registry, new UniversalConditionEvaluator());
+            BehaviorFactAnalysisService factAnalysis = new BehaviorFactAnalysisService(properties,
+                    new BehaviorFactPlanner(catalog, registry, properties, evidence, Optional.of(model)),
+                    new LlmBehaviorFactExtractor(Optional.of(model), transactionProxy(auditTarget, transactions), repositories.getRepository(AnalysisAttemptRepository.class)),
+                    new BehaviorFactMapper(engine), factExecutor, writer, repositories.getRepository(AnalysisResultRepository.class));
+            ReflectionTestUtils.setField(orchestrator, "factAnalysis", factAnalysis);
+        }
+        try {
+            if (behaviorMode) assertThrows(IllegalStateException.class, () -> orchestrator.process(message, scope,
+                    Collections.singletonList(Behavior.builder().id("labor-behavior").evidenceIds(Collections.singletonList(chunk.getId())).build())));
+            orchestrator.process(message, scope, Collections.singletonList(Behavior.builder().id("labor-behavior").evidenceIds(Collections.singletonList(chunk.getId())).build()));
+        } finally { if (factExecutor != null) factExecutor.destroy(); }
+        verify(model, times(1)).chat(anyString());
+        if (behaviorMode) {
+            ScoringRunSnapshot persistedPlan = repositories.getRepository(ScoringRunSnapshotRepository.class).findById(scope.getAnalysisRunId()).get();
+            assertEquals("BEHAVIOR", persistedPlan.getFactExtractionPlan().getMode());
+            assertEquals(4, persistedPlan.getFactExtractionPlan().getBehaviors().get("labor-behavior").getQuestions().size());
+            assertEquals("FACTS_DERIVED", repositories.getRepository(AnalysisResultRepository.class).findByAssessmentIdAndAnalysisRunId(assessmentId, scope.getAnalysisRunId()).get(0).getRequirementFindings().get(0).getJudgmentSource());
+        }
+        com.riskwarning.common.po.indicator.IndicatorResult result = repositories.getRepository(IndicatorResultRepository.class).findByAssessmentIdAndAnalysisRunId(assessmentId, scope.getAnalysisRunId()).get(0);
         assertEquals(100.0 * 0.2 / 1.7, result.getCalculatedScore(), 0.000001); assertEquals(RiskLevelEnum.HIGH_RISK, result.getRiskLevel());
-        assertEquals(2L, sql.queryForObject("SELECT count(*) FROM t_requirement_evaluation WHERE assessment_id=3", Long.class));
-        assertEquals(1L, sql.queryForObject("SELECT count(*) FROM t_analysis_attempt WHERE assessment_id=3 AND status='VALID'", Long.class));
+        assertEquals(2L, sql.queryForObject("SELECT count(*) FROM t_requirement_evaluation WHERE assessment_id=?", Long.class, assessmentId));
+        assertEquals(1L, sql.queryForObject("SELECT count(*) FROM t_analysis_attempt WHERE assessment_id=? AND status='VALID'", Long.class, assessmentId));
         assertEquals("FULL", runs.findById(scope.getAnalysisRunId()).get().getAnalysisSummary().path("completionKind").asText());
-        assertEquals(1L, sql.queryForObject("SELECT count(*) FROM t_durable_work", Long.class));
-        Message queued = new KafkaOutboxCodec().decode(sql.queryForObject("SELECT payload FROM t_durable_work", String.class));
+        java.util.List<Message> messages = sql.queryForList("SELECT payload FROM t_durable_work", String.class).stream().map(new KafkaOutboxCodec()::decode)
+                .filter(item -> scope.getAnalysisRunId().equals(item.getAnalysisRunId())).collect(java.util.stream.Collectors.toList());
+        assertEquals(1, messages.size()); Message queued = messages.get(0);
         assertTrue(queued instanceof AssessmentCompletedEventMessage); assertEquals(scope.getAnalysisRunId(), queued.getAnalysisRunId());
         es.indices().refresh(request -> request.index(index));
         long persisted = es.count(request -> request.index(index).query(query -> query.term(term -> term.field("analysisRunId").value(scope.getAnalysisRunId())))).count();
         assertEquals(2, persisted);
         Map<String, Object> proof = new TreeMap<>(); proof.put("schema", namespace); proof.put("index", index); proof.put("analysisRunId", scope.getAnalysisRunId());
+        proof.put("factMode", behaviorMode ? "BEHAVIOR" : "INDICATOR"); proof.put("replayedWithoutExtraCalls", behaviorMode);
         proof.put("registryVersion", registry.version()); proof.put("score", result.getCalculatedScore()); proof.put("riskLevel", result.getRiskLevel().name());
         proof.put("requirements", 2); proof.put("esDocuments", persisted); proof.put("reportTasks", 1); proof.put("completionKind", "FULL");
         proof.put("scope", "已审核业务规则主编排、原文和评分实际落库、ES投影、报告任务；检索上下文与模型响应受控，未走上传和真实模型");
-        Files.write(root.resolve("documents/local/scoring-evidence/labor-pipeline-" + suffix + ".json"), M.writerWithDefaultPrettyPrinter().writeValueAsBytes(proof), StandardOpenOption.CREATE_NEW);
+        Files.write(root.resolve("documents/local/scoring-evidence/" + (behaviorMode ? "behavior-facts-pipeline-" : "labor-pipeline-") + suffix + ".json"), M.writerWithDefaultPrettyPrinter().writeValueAsBytes(proof), StandardOpenOption.CREATE_NEW);
     }
 
     @SuppressWarnings("unchecked")

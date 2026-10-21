@@ -1,7 +1,11 @@
-# 首批已审核劳务规则的 TEST 入口，须由启动参数显式选择此 profile。
+# 业务要求评分，复用现有上传与评估入口。
 analysis:
   rules:
     v2-enabled: ${SCORING_V2_ENABLED:true}
-    v2-location: ${SCORING_V2_REGISTRY:classpath:rules/labor-reviewed-test-v2.json}
+    v2-location: ${SCORING_V2_REGISTRY:classpath:rules/business-catalog-test-v2.json}
     allow-test-registry: ${SCORING_ALLOW_TEST_REGISTRY:true}
     fact-mode: ${SCORING_FACT_MODE:BEHAVIOR}
+    fact-catalog: ${SCORING_FACT_CATALOG:classpath:rules/business-fact-bindings-v1.json}
+    fact-max-questions: ${SCORING_FACT_MAX_QUESTIONS:16}
+    fact-max-input-code-points: ${SCORING_FACT_MAX_INPUT_CODE_POINTS:12000}
+    fact-concurrency: ${SCORING_FACT_CONCURRENCY:3}

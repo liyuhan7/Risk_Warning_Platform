@@ -38,8 +38,8 @@ class BehaviorFactPipelineTest {
 
     @Test void catalogCoversEveryConditionAndGateAndSharesSemanticDailyObservation() throws Exception {
         Fixture f = new Fixture(OVERTIME); f.catalog.validate(f.registry);
-        assertEquals(132, f.catalog.bindings().size());
-        assertEquals(76, f.catalog.bindings().stream().filter(b -> b.getConditionId() != null).count());
+        assertEquals(2978, f.catalog.bindings().size());
+        assertEquals(1616, f.catalog.bindings().stream().filter(b -> b.getConditionId() != null).count());
         assertEquals(f.key(OT_REQ + "-daily-hours"), f.key(OT_REQ + "-ordinary-daily-hours"));
         assertNotEquals(f.key(OT_REQ + "-monthly-hours"), f.key(OT_REQ + "-daily-hours"));
         assertNotEquals(f.key("req-77a78e04789e1715632d433c-notice-days"), f.key("req-91665e5a51cf31c60b2afb14-notice-days"));
@@ -58,6 +58,19 @@ class BehaviorFactPipelineTest {
             assertEquals("FACTS_DERIVED", result.getRequirementFindings().get(0).getJudgmentSource());
             assertEquals(Collections.singletonList(f.chunk.getId()), result.getRequirementFindings().get(0).getEvidenceIds());
             assertEquals(100, f.score(result).getCalculatedScore().intValue()); assertFalse(f.score(result).isConflict());
+        }
+    }
+
+    @Test void fullBusinessCatalogUsesSharedRequestsForOriginalAndExpandedIndicators() throws Exception {
+        Fixture f = new Fixture(WAGE1, WAGE2, "dd512bb2-817e-4cab-afb5-aaf196657dd4");
+        f.prepare(); List<AnalysisResult> results = f.analyze();
+        assertEquals(3, results.size());
+        assertEquals(f.plan().getBatches().size(), f.prompts.size());
+        assertTrue(f.prompts.size() < results.size(), "调用按事实问题分组，不按指标逐个调用");
+        assertEquals(7, f.plan().getQuestions().size(), "保留既有共享事实并覆盖新增要求");
+        for (AnalysisResult result : results) {
+            assertEquals(100, f.score(result).getCalculatedScore().intValue());
+            assertFalse(f.score(result).isConflict());
         }
     }
 
@@ -151,8 +164,8 @@ class BehaviorFactPipelineTest {
     static class Fixture {
         final AnalysisScope scope = new AnalysisScope(1L, 2L, "fact-test");
         final BehaviorFactProperties properties = new BehaviorFactProperties();
-        final SharedFactCatalog catalog = new SharedFactCatalog(properties);
-        ScoringRuleRegistry registry = new ScoringRuleRegistry("classpath:rules/labor-reviewed-test-v2.json", true);
+        final SharedFactCatalog catalog;
+        ScoringRuleRegistry registry;
         final ScoringDataset dataset;
         final ScoringRunSnapshot snapshot = new ScoringRunSnapshot();
         final EvidenceChunk chunk = EvidenceChunk.create(3L, 1L, 2L, "材料.txt", 1, 0, null, null, "秦某采用标准工时，正常每日8小时每周40小时，月加班37小时；公司已协商并采取措施。", LocalDateTime.now());
@@ -169,6 +182,8 @@ class BehaviorFactPipelineTest {
         String rawOverride;
 
         Fixture(String... indicators) throws Exception {
+            catalog = new SharedFactCatalog(properties);
+            registry = new ScoringRuleRegistry("classpath:rules/business-catalog-test-v2.json", true);
             properties.setFactMode(BehaviorFactProperties.Mode.BEHAVIOR);
             dataset = new ScoringDataset((Files.exists(Paths.get("documents/data")) ? Paths.get("documents/data") : Paths.get("../documents/data")).toString());
             snapshot.setAnalysisRunId(scope.getAnalysisRunId()); snapshot.setProjectId(1L); snapshot.setAssessmentId(2L);

@@ -6,6 +6,7 @@ import com.riskwarning.common.po.indicator.IndicatorResultDetail;
 import com.riskwarning.common.po.report.Assessment;
 import com.riskwarning.common.dto.retrieval.*;
 import com.riskwarning.common.dto.scoring.ScoringDecision;
+import com.riskwarning.common.dto.scoring.ScoringSourceBundle;
 import com.riskwarning.processing.dto.analysis.*;
 import com.riskwarning.processing.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class AnalysisOverviewService {
     private final RetrievalAuditRepository audits;
     private final BehaviorDocumentRepository behaviors;
     private final RuleEvaluationAuditRepository ruleAudits;
+    private final ScoringRunSnapshotRepository snapshots;
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /**
@@ -63,6 +65,7 @@ public class AnalysisOverviewService {
                 .fallbackToUsableRun(selection.isFallbackToUsableRun()).build());
         List<RetrievalAudit> auditRows = audits.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId());
         List<AnalysisResult> resultRows = results.findByAssessmentIdAndAnalysisRunId(assessmentId, run.getAnalysisRunId());
+        Map<String, String> regulationNameFallbacks = loadRegulationNames(run);
         vo.getRun().setAnalysisMode("REASONING_RULES_V1");
         if (run.getAnalysisSummary() != null && "1.2".equals(run.getAnalysisSummary().path("schemaVersion").asText()))
             vo.getRun().setAnalysisMode("REASONING_RULES_V2");
@@ -96,7 +99,12 @@ public class AnalysisOverviewService {
             c.setAnalyzedAt(time(result.getAnalyzedAt())); c.setMock(false);
             c.setEvidenceIds(safe(result.getEvidenceIds())); c.setRegulationIds(safe(result.getRegulationIds()));
             c.setIndicatorName(names.get("INDICATOR:"+result.getIndicatorId()));
-            c.setRegulationNames(safe(result.getRegulationIds()).stream().map(id -> names.get("REGULATION:"+id)).collect(Collectors.toList()));
+            // 检索候选只覆盖 Top-N；来源包中的法规名称用于补齐未召回候选的展示名称。
+            c.setRegulationNames(safe(result.getRegulationIds()).stream()
+                    .map(id -> {
+                        String name = names.get("REGULATION:" + id);
+                        return name != null ? name : regulationNameFallbacks.get(id);
+                    }).collect(Collectors.toList()));
             group.getConclusions().add(c);
         }
         groups.values().forEach(g -> g.getConclusions().sort(Comparator.comparing(AnalysisConclusionVO::getResultId)));
@@ -174,6 +182,33 @@ public class AnalysisOverviewService {
                     == com.riskwarning.common.enums.analysis.RetrievalAuditStatus.NO_CANDIDATES)) { status = "NO_CANDIDATES"; }
         vo.setDisplayStatus(status);
         return vo;
+    }
+
+    /** 名称只用于展示；快照读取失败时不影响概览，仍保留检索候选名称。 */
+    private Map<String, String> loadRegulationNames(AnalysisRun run) {
+        try {
+            return snapshots.findById(run.getAnalysisRunId())
+                    .map(ScoringRunSnapshot::getSourceBundles)
+                    .map(this::collectRegulationNames)
+                    .orElse(Collections.emptyMap());
+        } catch (RuntimeException e) {
+            log.warn("法规名称快照不可用: assessmentId={}, run={}", run.getAssessmentId(), run.getAnalysisRunId(), e);
+            return Collections.emptyMap();
+        }
+    }
+
+    private Map<String, String> collectRegulationNames(Map<String, ScoringSourceBundle> bundles) {
+        if (bundles == null || bundles.isEmpty()) return Collections.emptyMap();
+        Map<String, String> names = new HashMap<>();
+        for (ScoringSourceBundle bundle : bundles.values()) {
+            if (bundle == null || bundle.getRelations() == null) continue;
+            for (ScoringSourceBundle.Source source : bundle.getRelations()) {
+                if (source == null || source.getRegulationId() == null || source.getRegulation() == null) continue;
+                String name = source.getRegulation().path("name").asText(null);
+                if (name != null && !name.trim().isEmpty()) names.putIfAbsent(source.getRegulationId(), name);
+            }
+        }
+        return names;
     }
 
     private BehaviorAnalysisGroupVO group(String id, Behavior b) {
